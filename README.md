@@ -154,6 +154,25 @@ This website is **not hosted yet**. It is only a local static HTML file for now.
 
 The page still uses **fake sample data only**. It is not live broadband pricing, it is not scraped from provider websites, and it should not be used to make a buying decision.
 
+
+## Publishing the static site with GitHub Pages
+
+This repository includes a GitHub Actions workflow that can publish the generated static website from the `site` folder to GitHub Pages.
+
+When code is pushed to the `main` branch, or when you run the workflow manually from the GitHub Actions tab, the workflow:
+
+1. checks out the repository
+2. sets up Node.js
+3. runs `npm test` first, so the pricing calculator tests must pass before publishing
+4. runs `npm run export` to export the calculated pricing data from the fake sample deals
+5. runs `npm run build-site` to build `site/index.html`
+6. uploads the `site` folder as a GitHub Pages artifact
+7. deploys that uploaded artifact to GitHub Pages
+
+To use it, enable GitHub Pages in your repository settings and choose **GitHub Actions** as the Pages source. After that, the workflow named **Deploy static broadband price tracker site** can publish the static site for you.
+
+This is still based on **fake sample data only**. It is not live broadband pricing, it is not scraped from provider websites, and it is not the final production hosting setup.
+
 ## What will be added later
 
 Later versions may add:
