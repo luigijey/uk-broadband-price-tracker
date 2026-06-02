@@ -94,3 +94,41 @@ test('every fake sample deal has a unique readable deal ID', () => {
     assert.match(dealId, /^[A-Z]+-[A-Z]+-[0-9]+$/);
   });
 });
+
+test('builds export rows with the required calculated pricing fields', () => {
+  const sampleDeals = require('./sample-deals');
+  const { calculateDeal } = require('./export-pricing-data');
+
+  const calculatedDeal = calculateDeal(sampleDeals[0]);
+
+  const requiredFields = [
+    'dealId',
+    'postcodeArea',
+    'provider',
+    'packageName',
+    'source',
+    'speedMbps',
+    'speedTier',
+    'advertisedMonthlyPrice',
+    'effectiveMonthlyPrice',
+    'contractLengthMonths',
+    'annualAprilPriceRise',
+    'voucherValue',
+    'rewardCardValue',
+    'cashbackValue',
+    'billCreditValue',
+    'freeMonthsDiscountValue',
+    'totalFees',
+    'totalRewardsAndDiscounts',
+    'totalContractCostBeforeRewards',
+    'totalContractCostAfterRewards',
+    'lastCheckedDate',
+  ];
+
+  requiredFields.forEach((fieldName) => {
+    assert.ok(Object.hasOwn(calculatedDeal, fieldName));
+  });
+
+  assert.equal(typeof calculatedDeal.effectiveMonthlyPrice, 'number');
+  assert.equal(typeof calculatedDeal.totalContractCostAfterRewards, 'number');
+});

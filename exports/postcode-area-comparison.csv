@@ -1,0 +1,13 @@
+dealId,postcodeArea,provider,packageName,source,speedMbps,speedTier,advertisedMonthlyPrice,effectiveMonthlyPrice,contractLengthMonths,annualAprilPriceRise,voucherValue,rewardCardValue,cashbackValue,billCreditValue,freeMonthsDiscountValue,totalFees,totalRewardsAndDiscounts,totalContractCostBeforeRewards,totalContractCostAfterRewards,lastCheckedDate
+M-TALKTALK-67,M,TalkTalk,Fibre 65 Sample,Provider Direct,67,35-75 Mbps,25,24.39,18,3,0,0,35,0,0,0,35,474,439,2026-06-01
+M-VIRGIN-132,M,Virgin Media,M125 Sample,Provider Direct,132,100-300 Mbps,28.99,29.16,18,3.5,0,0,60,0,0,35,60,584.82,524.82,2026-06-01
+M-BT-500,M,BT,Full Fibre 500 Sample,Voucher Sample,500,500-900 Mbps,39.99,38.03,24,3,100,0,0,0,0,4.99,100,1012.75,912.75,2026-06-01
+M-SKY-900,M,Sky,Gigafast Sample,Comparison Site Sample,900,900 Mbps+,44,41,24,3,120,0,0,0,0,0,120,1104,984,2026-06-01
+OX-SKY-61,OX,Sky,Superfast Sample,Comparison Site Sample,61,35-75 Mbps,26,26.54,24,3,40,0,0,0,0,5,40,677,637,2026-06-01
+OX-BT-36,OX,BT,Fibre Essential Sample,Provider Direct,36,35-75 Mbps,27.99,27.7,24,3,0,60,0,0,0,4.99,60,724.75,664.75,2026-06-01
+OX-VODAFONE-150,OX,Vodafone,Full Fibre 150 Sample,Voucher Sample,150,100-300 Mbps,29,26.83,24,3,75,0,25,0,0,0,100,744,644,2026-06-01
+OX-TALKTALK-500,OX,TalkTalk,Full Fibre 500 Sample,Provider Direct,500,500-900 Mbps,35,33.56,18,3,0,0,50,0,0,0,50,654,604,2026-06-01
+SW-BT-150,SW,BT,Full Fibre 100 Sample,Comparison Site Sample,150,100-300 Mbps,30.99,31.11,24,3,50,0,0,0,0,4.99,50,796.75,746.75,2026-06-01
+SW-SKY-500,SW,Sky,Full Fibre 500 Sample,Provider Direct,500,500-900 Mbps,38,36.88,24,3,0,75,0,0,0,0,75,960,885,2026-06-01
+SW-VODAFONE-910,SW,Vodafone,Full Fibre 910 Sample,Provider Direct,910,900 Mbps+,42,39.83,24,3,0,100,0,0,0,0,100,1056,956,2026-06-01
+SW-VIRGIN-1130,SW,Virgin Media,Gig1 Sample,Voucher Sample,1130,900 Mbps+,45,40.17,18,3.5,150,0,0,0,0,35,150,873,723,2026-06-01
