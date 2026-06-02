@@ -111,6 +111,49 @@ These export files are generated from fake sample data for now. They are not liv
 
 Later, the website will read from calculated or exported data instead of recalculating everything directly in the page code.
 
+## How to build the first static website page
+
+The repository can generate a very simple static website from the calculated export files. This page is plain HTML with a little CSS and browser JavaScript. It does not use Next.js, React, TypeScript, Supabase, Vercel, scraping, or external packages.
+
+First, create or refresh the calculated export files:
+
+```bash
+npm run export
+```
+
+This runs:
+
+```bash
+node export-pricing-data.js
+```
+
+Then build the static website page:
+
+```bash
+npm run build-site
+```
+
+This runs:
+
+```bash
+node build-static-site.js
+```
+
+The build script refreshes the export files again, reads:
+
+- `exports/national-cheapest-by-speed-tier.json`
+- `exports/postcode-area-comparison.json`
+
+Then it creates:
+
+- `site/index.html`
+
+To view the page, open `site/index.html` directly in your web browser. For example, you can double-click the file in your file browser, or use your browser's **File > Open File** menu.
+
+This website is **not hosted yet**. It is only a local static HTML file for now.
+
+The page still uses **fake sample data only**. It is not live broadband pricing, it is not scraped from provider websites, and it should not be used to make a buying decision.
+
 ## What will be added later
 
 Later versions may add:

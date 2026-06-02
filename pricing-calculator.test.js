@@ -132,3 +132,38 @@ test('builds export rows with the required calculated pricing fields', () => {
   assert.equal(typeof calculatedDeal.effectiveMonthlyPrice, 'number');
   assert.equal(typeof calculatedDeal.totalContractCostAfterRewards, 'number');
 });
+
+test('builds static site HTML with both tables and the postcode filter', () => {
+  const { buildHtml } = require('./build-static-site');
+
+  const nationalDeals = [{
+    postcodeArea: 'OX',
+    provider: 'Example Fibre',
+    packageName: 'Example 150',
+    source: 'Sample Source',
+    speedMbps: 150,
+    speedTier: '100-300 Mbps',
+    advertisedMonthlyPrice: 29,
+    effectiveMonthlyPrice: 26.83,
+    contractLengthMonths: 24,
+    annualAprilPriceRise: 3,
+    voucherValue: 75,
+    rewardCardValue: 0,
+    cashbackValue: 0,
+    billCreditValue: 0,
+    freeMonthsDiscountValue: 0,
+    totalFees: 0,
+    totalContractCostAfterRewards: 644,
+    lastCheckedDate: '2026-06-01',
+  }];
+
+  const html = buildHtml(nationalDeals, nationalDeals);
+
+  assert.match(html, /id="national-cheapest-table"/);
+  assert.match(html, /id="postcode-area-table"/);
+  assert.match(html, /id="postcode-filter"/);
+  assert.match(html, /<option value="OX">OX<\/option>/);
+  assert.match(html, /<option value="M">M<\/option>/);
+  assert.match(html, /<option value="SW">SW<\/option>/);
+  assert.match(html, /Sample data only/);
+});

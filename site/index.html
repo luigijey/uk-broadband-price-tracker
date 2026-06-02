@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UK Broadband Price Tracker</title>
+  <style>
+    body {
+      margin: 0;
+      background: #f3f6fb;
+      color: #172033;
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.5;
+    }
+
+    header,
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    header {
+      padding-top: 40px;
+    }
+
+    h1,
+    h2 {
+      margin-top: 0;
+      line-height: 1.2;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-bottom: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #fff3cd;
+      color: #7a4f01;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .card {
+      margin-bottom: 24px;
+      padding: 20px;
+      border: 1px solid #dde5f2;
+      border-radius: 14px;
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(23, 32, 51, 0.06);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e6ecf5;
+      text-align: left;
+      vertical-align: top;
+      white-space: nowrap;
+    }
+
+    th {
+      background: #eef4ff;
+      color: #102a56;
+      font-size: 0.9rem;
+    }
+
+    tr:nth-child(even) td {
+      background: #fbfdff;
+    }
+
+    .effective-price {
+      color: #0b6b3a;
+      font-weight: 700;
+    }
+
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    select {
+      padding: 8px 10px;
+      border: 1px solid #b8c6d9;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #172033;
+      font: inherit;
+    }
+
+    .small-note {
+      color: #53627a;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="badge">Sample data only</span>
+    <h1>UK Broadband Price Tracker</h1>
+    <p>This first static page uses fake sample broadband deals only. It is not live provider data and should not be used to make a buying decision.</p>
+    <p>The advertised monthly price is the headline monthly cost. The effective monthly price estimates the real monthly cost across the contract after April price rises, fees, vouchers, rewards, cashback, bill credits, and discounts.</p>
+  </header>
+
+  <main>
+    <section class="card" aria-labelledby="national-heading">
+      <h2 id="national-heading">National cheapest by speed tier</h2>
+      <p class="small-note">Cheapest means the lowest effective monthly price in the fake sample data for each speed tier.</p>
+      <div class="table-wrap">
+        <table id="national-cheapest-table">
+          <thead>
+            <tr>
+              <th>Speed Tier</th>
+              <th>Cheapest Provider</th>
+              <th>Postcode Area</th>
+              <th>Advertised Monthly Price</th>
+              <th>Effective Monthly Price</th>
+              <th>Contract Length</th>
+              <th>Main Reward or Voucher</th>
+              <th>April Price Rise</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>35-75 Mbps</td>
+              <td>TalkTalk</td>
+              <td>M</td>
+              <td>£25.00</td>
+              <td class="effective-price">£24.39</td>
+              <td>18 months</td>
+              <td>Cashback: £35.00</td>
+              <td>£3.00 per April</td>
+              <td>Provider Direct</td>
+            </tr>
+            <tr>
+              <td>100-300 Mbps</td>
+              <td>Vodafone</td>
+              <td>OX</td>
+              <td>£29.00</td>
+              <td class="effective-price">£26.83</td>
+              <td>24 months</td>
+              <td>Voucher: £75.00, Cashback: £25.00</td>
+              <td>£3.00 per April</td>
+              <td>Voucher Sample</td>
+            </tr>
+            <tr>
+              <td>500-900 Mbps</td>
+              <td>TalkTalk</td>
+              <td>OX</td>
+              <td>£35.00</td>
+              <td class="effective-price">£33.56</td>
+              <td>18 months</td>
+              <td>Cashback: £50.00</td>
+              <td>£3.00 per April</td>
+              <td>Provider Direct</td>
+            </tr>
+            <tr>
+              <td>900 Mbps+</td>
+              <td>Vodafone</td>
+              <td>SW</td>
+              <td>£42.00</td>
+              <td class="effective-price">£39.83</td>
+              <td>24 months</td>
+              <td>Reward card: £100.00</td>
+              <td>£3.00 per April</td>
+              <td>Provider Direct</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="postcode-heading">
+      <h2 id="postcode-heading">Postcode area comparison</h2>
+      <div class="filter-row">
+        <label for="postcode-filter">Postcode area:</label>
+        <select id="postcode-filter">
+          <option value="all">All postcode areas</option>
+          <option value="OX">OX</option>
+          <option value="M">M</option>
+          <option value="SW">SW</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table id="postcode-area-table">
+          <thead>
+            <tr>
+              <th>Postcode Area</th>
+              <th>Speed Tier</th>
+              <th>Provider</th>
+              <th>Package</th>
+              <th>Speed Mbps</th>
+              <th>Advertised Monthly Price</th>
+              <th>Effective Monthly Price</th>
+              <th>Voucher/Rewards</th>
+              <th>Fees</th>
+              <th>April Price Rise</th>
+              <th>Contract Length</th>
+              <th>Total Contract Cost After Rewards</th>
+              <th>Source</th>
+              <th>Last Checked</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-postcode-area="M">
+              <td>M</td>
+              <td>35-75 Mbps</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65 Sample</td>
+              <td>67</td>
+              <td>£25.00</td>
+              <td class="effective-price">£24.39</td>
+              <td>Cashback: £35.00</td>
+              <td>None</td>
+              <td>£3.00 per April</td>
+              <td>18 months</td>
+              <td>£439.00</td>
+              <td>Provider Direct</td>
+              <td>2026-06-01</td>
+            </tr>
+            <tr data-postcode-area="M">
+              <td>M</td>
+              <td>100-300 Mbps</td>
+              <td>Virgin Media</td>
+              <td>M125 Sample</td>
+              <td>132</td>
+              <td>£28.99</td>
+              <td class="effective-price">£29.16</td>
+              <td>Cashback: £60.00</td>
+              <td>£35.00</td>
+              <td>£3.50 per April</td>
+              <td>18 months</td>
+              <td>£524.82</td>
+              <td>Provider Direct</td>
+              <td>2026-06-01</td>
+            </tr>
+            <tr data-postcode-area="M">
+              <td>M</td>
+              <td>500-900 Mbps</td>
+              <td>BT</td>
+              <td>Full Fibre 500 Sample</td>
+              <td>500</td>
+              <td>£39.99</td>
+              <td class="effective-price">£38.03</td>
+              <td>Voucher: £100.00</td>
+              <td>£4.99</td>
+              <td>£3.00 per April</td>
+              <td>24 months</td>
+              <td>£912.75</td>
+              <td>Voucher Sample</td>
+              <td>2026-06-01</td>
+            </tr>
+            <tr data-postcode-area="M">
+              <td>M</td>
+              <td>900 Mbps+</td>
+              <td>Sky</td>
+              <td>Gigafast Sample</td>
+              <td>900</td>
+              <td>£44.00</td>
+              <td class="effective-price">£41.00</td>
+              <td>Voucher: £120.00</td>
+              <td>None</td>
+              <td>£3.00 per April</td>
+              <td>24 months</td>
+              <td>£984.00</td>
+              <td>Comparison Site Sample</td>
+              <td>2026-06-01</td>
+            </tr>
+            <tr data-postcode-area="OX">
+              <td>OX</td>
+              <td>35-75 Mbps</td>
+              <td>Sky</td>
+              <td>Superfast Sample</td>
+              <td>61</td>
+              <td>£26.00</td>
+              <td class="effective-price">£26.54</td>
+              <td>Voucher: £40.00</td>
+              <td>£5.00</td>
+              <td>£3.00 per April</td>
+              <td>24 months</td>
+              <td>£637.00</td>
+              <td>Comparison Site Sample</td>
+              <td>2026-06-01</td>
+            </tr>
+            <tr data-postcode-area="OX">
+              <td>OX</td>
+              <td>35-75 Mbps</td>
+              <td>BT</td>
+              <td>Fibre Essential Sample</td>
+              <td>36</td>
+              <td>£27.99</td>
+              <td class="effective-price">£27.70</td>
+              <td>Reward card: £60.00</td>
+              <td>£4.99</td>
+              <td>£3.00 per April</td>
+              <td>24 months</td>
+              <td>£664.75</td>
+              <td>Provider Direct</td>
+              <td>2026-06-01</td>
+            </tr>
+            <tr data-postcode-area="OX">
+              <td>OX</td>
+              <td>100-300 Mbps</td>
+              <td>Vodafone</td>
+              <td>Full Fibre 150 Sample</td>
+              <td>150</td>
+              <td>£29.00</td>
+              <td class="effective-price">£26.83</td>
+              <td>Voucher: £75.00, Cashback: £25.00</td>
+              <td>None</td>
+              <td>£3.00 per April</td>
+              <td>24 months</td>
+              <td>£644.00</td>
+              <td>Voucher Sample</td>
+              <td>2026-06-01</td>
+            </tr>
+            <tr data-postcode-area="OX">
+              <td>OX</td>
+              <td>500-900 Mbps</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500 Sample</td>
+              <td>500</td>
+              <td>£35.00</td>
+              <td class="effective-price">£33.56</td>
+              <td>Cashback: £50.00</td>
+              <td>None</td>
+              <td>£3.00 per April</td>
+              <td>18 months</td>
+              <td>£604.00</td>
+              <td>Provider Direct</td>
+              <td>2026-06-01</td>
+            </tr>
+            <tr data-postcode-area="SW">
+              <td>SW</td>
+              <td>100-300 Mbps</td>
+              <td>BT</td>
+              <td>Full Fibre 100 Sample</td>
+              <td>150</td>
+              <td>£30.99</td>
+              <td class="effective-price">£31.11</td>
+              <td>Voucher: £50.00</td>
+              <td>£4.99</td>
+              <td>£3.00 per April</td>
+              <td>24 months</td>
+              <td>£746.75</td>
+              <td>Comparison Site Sample</td>
+              <td>2026-06-01</td>
+            </tr>
+            <tr data-postcode-area="SW">
+              <td>SW</td>
+              <td>500-900 Mbps</td>
+              <td>Sky</td>
+              <td>Full Fibre 500 Sample</td>
+              <td>500</td>
+              <td>£38.00</td>
+              <td class="effective-price">£36.88</td>
+              <td>Reward card: £75.00</td>
+              <td>None</td>
+              <td>£3.00 per April</td>
+              <td>24 months</td>
+              <td>£885.00</td>
+              <td>Provider Direct</td>
+              <td>2026-06-01</td>
+            </tr>
+            <tr data-postcode-area="SW">
+              <td>SW</td>
+              <td>900 Mbps+</td>
+              <td>Vodafone</td>
+              <td>Full Fibre 910 Sample</td>
+              <td>910</td>
+              <td>£42.00</td>
+              <td class="effective-price">£39.83</td>
+              <td>Reward card: £100.00</td>
+              <td>None</td>
+              <td>£3.00 per April</td>
+              <td>24 months</td>
+              <td>£956.00</td>
+              <td>Provider Direct</td>
+              <td>2026-06-01</td>
+            </tr>
+            <tr data-postcode-area="SW">
+              <td>SW</td>
+              <td>900 Mbps+</td>
+              <td>Virgin Media</td>
+              <td>Gig1 Sample</td>
+              <td>1130</td>
+              <td>£45.00</td>
+              <td class="effective-price">£40.17</td>
+              <td>Voucher: £150.00</td>
+              <td>£35.00</td>
+              <td>£3.50 per April</td>
+              <td>18 months</td>
+              <td>£723.00</td>
+              <td>Voucher Sample</td>
+              <td>2026-06-01</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const postcodeFilter = document.getElementById('postcode-filter');
+    const postcodeRows = document.querySelectorAll('#postcode-area-table tbody tr');
+
+    postcodeFilter.addEventListener('change', () => {
+      const selectedPostcodeArea = postcodeFilter.value;
+
+      postcodeRows.forEach((row) => {
+        const rowPostcodeArea = row.dataset.postcodeArea;
+        row.hidden = selectedPostcodeArea !== 'all' && rowPostcodeArea !== selectedPostcodeArea;
+      });
+    });
+  </script>
+</body>
+</html>
