@@ -6,6 +6,7 @@
 
 const sampleDeals = [
   {
+    dealId: 'OX-BT-36',
     postcodeArea: 'OX',
     provider: 'BT',
     packageName: 'Fibre Essential Sample',
@@ -30,6 +31,7 @@ const sampleDeals = [
     lastCheckedDate: '2026-06-01',
   },
   {
+    dealId: 'OX-SKY-61',
     postcodeArea: 'OX',
     provider: 'Sky',
     packageName: 'Superfast Sample',
@@ -54,6 +56,7 @@ const sampleDeals = [
     lastCheckedDate: '2026-06-01',
   },
   {
+    dealId: 'OX-VODAFONE-150',
     postcodeArea: 'OX',
     provider: 'Vodafone',
     packageName: 'Full Fibre 150 Sample',
@@ -78,6 +81,7 @@ const sampleDeals = [
     lastCheckedDate: '2026-06-01',
   },
   {
+    dealId: 'OX-TALKTALK-500',
     postcodeArea: 'OX',
     provider: 'TalkTalk',
     packageName: 'Full Fibre 500 Sample',
@@ -102,6 +106,7 @@ const sampleDeals = [
     lastCheckedDate: '2026-06-01',
   },
   {
+    dealId: 'M-VIRGIN-132',
     postcodeArea: 'M',
     provider: 'Virgin Media',
     packageName: 'M125 Sample',
@@ -126,6 +131,7 @@ const sampleDeals = [
     lastCheckedDate: '2026-06-01',
   },
   {
+    dealId: 'M-BT-500',
     postcodeArea: 'M',
     provider: 'BT',
     packageName: 'Full Fibre 500 Sample',
@@ -150,6 +156,7 @@ const sampleDeals = [
     lastCheckedDate: '2026-06-01',
   },
   {
+    dealId: 'M-SKY-900',
     postcodeArea: 'M',
     provider: 'Sky',
     packageName: 'Gigafast Sample',
@@ -174,6 +181,7 @@ const sampleDeals = [
     lastCheckedDate: '2026-06-01',
   },
   {
+    dealId: 'M-TALKTALK-67',
     postcodeArea: 'M',
     provider: 'TalkTalk',
     packageName: 'Fibre 65 Sample',
@@ -198,6 +206,7 @@ const sampleDeals = [
     lastCheckedDate: '2026-06-01',
   },
   {
+    dealId: 'SW-VODAFONE-910',
     postcodeArea: 'SW',
     provider: 'Vodafone',
     packageName: 'Full Fibre 910 Sample',
@@ -222,6 +231,7 @@ const sampleDeals = [
     lastCheckedDate: '2026-06-01',
   },
   {
+    dealId: 'SW-VIRGIN-1130',
     postcodeArea: 'SW',
     provider: 'Virgin Media',
     packageName: 'Gig1 Sample',
@@ -246,6 +256,7 @@ const sampleDeals = [
     lastCheckedDate: '2026-06-01',
   },
   {
+    dealId: 'SW-SKY-500',
     postcodeArea: 'SW',
     provider: 'Sky',
     packageName: 'Full Fibre 500 Sample',
@@ -270,6 +281,7 @@ const sampleDeals = [
     lastCheckedDate: '2026-06-01',
   },
   {
+    dealId: 'SW-BT-150',
     postcodeArea: 'SW',
     provider: 'BT',
     packageName: 'Full Fibre 100 Sample',

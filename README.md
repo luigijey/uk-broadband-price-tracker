@@ -53,6 +53,36 @@ The table script imports the fake sample deals and the existing pricing calculat
 
 Real scraping or data collection is intentionally not included yet. It may be added later after the calculator and simple comparison output are easy to understand and test.
 
+## How to print a deal breakdown
+
+The repository also includes a simple terminal breakdown script in `generate-deal-breakdown.js`. It uses the fake sample deals and the pricing calculator to show how one deal's effective monthly price is calculated.
+
+To list the available sample deal IDs, run:
+
+```bash
+npm run breakdown
+```
+
+This runs:
+
+```bash
+node generate-deal-breakdown.js
+```
+
+To print a detailed breakdown for one sample deal, add the deal ID after `--`:
+
+```bash
+npm run breakdown -- OX-BT-36
+```
+
+The breakdown shows:
+
+- the deal details, such as postcode area, provider, package name, speed, source, and last checked date
+- the main price summary, including monthly payments, fees, rewards, discounts, total contract cost, and effective monthly price
+- a simple month-by-month table showing when April price rises change the monthly price
+
+The breakdown assumes the contract starts today, using the date when you run the command. The sample deals are still fake example records only, not live broadband prices.
+
 ## What will be added later
 
 Later versions may add:
