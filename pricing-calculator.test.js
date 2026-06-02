@@ -81,3 +81,16 @@ test('calculates every fake sample deal without throwing', () => {
     assert.ok(result.effectiveMonthlyPrice > 0);
   });
 });
+
+
+test('every fake sample deal has a unique readable deal ID', () => {
+  const sampleDeals = require('./sample-deals');
+  const dealIds = sampleDeals.map((deal) => deal.dealId);
+  const uniqueDealIds = new Set(dealIds);
+
+  assert.equal(uniqueDealIds.size, sampleDeals.length);
+
+  dealIds.forEach((dealId) => {
+    assert.match(dealId, /^[A-Z]+-[A-Z]+-[0-9]+$/);
+  });
+});
