@@ -67,3 +67,17 @@ test('throws when contractLengthMonths is a string', () => {
     contractLengthMonths: '24',
   }), /contractLengthMonths must be a positive whole number of months/);
 });
+
+test('calculates every fake sample deal without throwing', () => {
+  const sampleDeals = require('./sample-deals');
+
+  sampleDeals.forEach((deal) => {
+    const result = calculateBroadbandPrice({
+      ...deal,
+      contractStartDate: deal.lastCheckedDate,
+    });
+
+    assert.equal(typeof result.effectiveMonthlyPrice, 'number');
+    assert.ok(result.effectiveMonthlyPrice > 0);
+  });
+});

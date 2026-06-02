@@ -29,6 +29,30 @@ The main result is the **effective monthly price**.
 
 The effective monthly price is the total cost of the contract after fees, rewards, cashback, vouchers and discounts, divided by the contract length.
 
+
+## Sample comparison tables
+
+The repository now includes fake sample residential broadband deals in `sample-deals.js`. These records are example data only. They are not live provider prices, they are not scraped from provider websites, and they should not be used to make a buying decision.
+
+To print the sample comparison tables in your terminal, run:
+
+```bash
+npm run table
+```
+
+This runs:
+
+```bash
+node generate-pricing-tables.js
+```
+
+The table script imports the fake sample deals and the existing pricing calculator, then prints:
+
+- a national cheapest-by-speed-tier table
+- a postcode area comparison table sorted by postcode area, speed tier, and effective monthly price
+
+Real scraping or data collection is intentionally not included yet. It may be added later after the calculator and simple comparison output are easy to understand and test.
+
 ## What will be added later
 
 Later versions may add:
@@ -58,3 +82,15 @@ Install Node.js, then run:
 ```bash
 npm test
 ```
+
+The tests use Node.js's built-in test runner, so no extra test package is needed.
+
+## How to print the sample tables
+
+Run:
+
+```bash
+npm run table
+```
+
+Remember: the table output is based on fake example deals only. Live provider prices and real data collection will be added later.
