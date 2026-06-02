@@ -58,18 +58,22 @@ function formatFees(deal) {
   return Number(deal.totalFees) > 0 ? formatMoney(deal.totalFees) : 'None';
 }
 
+function countUniqueValues(deals, fieldName) {
+  return new Set(deals.map((deal) => deal[fieldName]).filter(Boolean)).size;
+}
+
 function buildNationalRows(deals) {
   return deals.map((deal) => `
             <tr>
               <td>${escapeHtml(deal.speedTier)}</td>
               <td>${escapeHtml(deal.provider)}</td>
               <td>${escapeHtml(deal.postcodeArea)}</td>
-              <td>${formatMoney(deal.advertisedMonthlyPrice)}</td>
-              <td class="effective-price">${formatMoney(deal.effectiveMonthlyPrice)}</td>
-              <td>${escapeHtml(deal.contractLengthMonths)} months</td>
-              <td>${escapeHtml(formatRewardSummary(deal))}</td>
-              <td>${formatMoney(deal.annualAprilPriceRise)} per April</td>
-              <td>${escapeHtml(deal.source)}</td>
+              <td class="money">${formatMoney(deal.advertisedMonthlyPrice)}</td>
+              <td class="money effective-price">${formatMoney(deal.effectiveMonthlyPrice)}</td>
+              <td class="number">${escapeHtml(deal.contractLengthMonths)} months</td>
+              <td class="wrap-text">${escapeHtml(formatRewardSummary(deal))}</td>
+              <td class="money">${formatMoney(deal.annualAprilPriceRise)} per April</td>
+              <td class="wrap-text">${escapeHtml(deal.source)}</td>
             </tr>`).join('');
 }
 
@@ -80,20 +84,27 @@ function buildPostcodeRows(deals) {
               <td>${escapeHtml(deal.speedTier)}</td>
               <td>${escapeHtml(deal.provider)}</td>
               <td>${escapeHtml(deal.packageName)}</td>
-              <td>${escapeHtml(deal.speedMbps)}</td>
-              <td>${formatMoney(deal.advertisedMonthlyPrice)}</td>
-              <td class="effective-price">${formatMoney(deal.effectiveMonthlyPrice)}</td>
-              <td>${escapeHtml(formatRewardSummary(deal))}</td>
-              <td>${escapeHtml(formatFees(deal))}</td>
-              <td>${formatMoney(deal.annualAprilPriceRise)} per April</td>
-              <td>${escapeHtml(deal.contractLengthMonths)} months</td>
-              <td>${formatMoney(deal.totalContractCostAfterRewards)}</td>
-              <td>${escapeHtml(deal.source)}</td>
-              <td>${escapeHtml(deal.lastCheckedDate)}</td>
+              <td class="number">${escapeHtml(deal.speedMbps)}</td>
+              <td class="money">${formatMoney(deal.advertisedMonthlyPrice)}</td>
+              <td class="money effective-price">${formatMoney(deal.effectiveMonthlyPrice)}</td>
+              <td class="wrap-text">${escapeHtml(formatRewardSummary(deal))}</td>
+              <td class="money">${escapeHtml(formatFees(deal))}</td>
+              <td class="money">${formatMoney(deal.annualAprilPriceRise)} per April</td>
+              <td class="number">${escapeHtml(deal.contractLengthMonths)} months</td>
+              <td class="money">${formatMoney(deal.totalContractCostAfterRewards)}</td>
+              <td class="wrap-text">${escapeHtml(deal.source)}</td>
+              <td class="number">${escapeHtml(deal.lastCheckedDate)}</td>
             </tr>`).join('');
 }
 
 function buildHtml(nationalDeals, postcodeDeals) {
+  const summaryCards = [
+    ['Sample deals', postcodeDeals.length],
+    ['Postcode areas', countUniqueValues(postcodeDeals, 'postcodeArea')],
+    ['Providers', countUniqueValues(postcodeDeals, 'provider')],
+    ['Speed tiers', countUniqueValues(postcodeDeals, 'speedTier')],
+  ];
+
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -101,83 +112,213 @@ function buildHtml(nationalDeals, postcodeDeals) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>UK Broadband Price Tracker</title>
   <style>
+    :root {
+      color-scheme: light;
+      --page-bg: #f4f7fb;
+      --card-bg: #ffffff;
+      --text: #172033;
+      --muted: #53627a;
+      --border: #d8e2ef;
+      --blue: #174ea6;
+      --blue-dark: #102a56;
+      --blue-soft: #eaf2ff;
+      --green: #087443;
+      --green-soft: #e8f7ef;
+      --yellow: #fff3cd;
+      --yellow-text: #7a4f01;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      background: #f3f6fb;
-      color: #172033;
+      background: var(--page-bg);
+      color: var(--text);
       font-family: Arial, Helvetica, sans-serif;
-      line-height: 1.5;
+      font-size: 16px;
+      line-height: 1.55;
     }
 
     header,
     main {
-      max-width: 1200px;
+      width: min(1200px, 100%);
       margin: 0 auto;
       padding: 24px;
     }
 
     header {
       padding-top: 40px;
+      padding-bottom: 10px;
+    }
+
+    .hero {
+      padding: 28px;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background: linear-gradient(135deg, #ffffff 0%, #eef5ff 100%);
+      box-shadow: 0 10px 30px rgba(23, 32, 51, 0.08);
+    }
+
+    .title-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
     }
 
     h1,
-    h2 {
+    h2,
+    h3,
+    p {
+      overflow-wrap: normal;
+      word-break: normal;
+    }
+
+    h1,
+    h2,
+    h3 {
       margin-top: 0;
       line-height: 1.2;
     }
 
+    h1 {
+      margin-bottom: 0;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      letter-spacing: -0.04em;
+    }
+
+    h2 {
+      margin-bottom: 8px;
+      font-size: clamp(1.35rem, 3vw, 1.75rem);
+    }
+
+    p {
+      max-width: 860px;
+      margin: 0 0 12px;
+    }
+
     .badge {
-      display: inline-block;
-      margin-bottom: 12px;
-      padding: 6px 10px;
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      padding: 7px 12px;
+      border: 1px solid #f0d88a;
       border-radius: 999px;
-      background: #fff3cd;
-      color: #7a4f01;
-      font-size: 0.9rem;
+      background: var(--yellow);
+      color: var(--yellow-text);
+      font-size: 0.88rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin: 22px 0 26px;
+    }
+
+    .summary-card {
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--card-bg);
+      box-shadow: 0 2px 10px rgba(23, 32, 51, 0.05);
+    }
+
+    .summary-number {
+      display: block;
+      color: var(--blue);
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .summary-label {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.95rem;
       font-weight: 700;
     }
 
     .card {
       margin-bottom: 24px;
-      padding: 20px;
-      border: 1px solid #dde5f2;
-      border-radius: 14px;
-      background: #ffffff;
-      box-shadow: 0 2px 8px rgba(23, 32, 51, 0.06);
+      padding: 22px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--card-bg);
+      box-shadow: 0 2px 12px rgba(23, 32, 51, 0.06);
     }
 
     .table-wrap {
+      width: 100%;
       overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #ffffff;
+      -webkit-overflow-scrolling: touch;
     }
 
     table {
       width: 100%;
+      min-width: 980px;
       border-collapse: collapse;
-      min-width: 900px;
+      font-size: 0.94rem;
+    }
+
+    #postcode-area-table {
+      min-width: 1380px;
     }
 
     th,
     td {
-      padding: 10px 12px;
+      padding: 10px 11px;
       border-bottom: 1px solid #e6ecf5;
       text-align: left;
       vertical-align: top;
-      white-space: nowrap;
     }
 
     th {
-      background: #eef4ff;
-      color: #102a56;
-      font-size: 0.9rem;
+      background: var(--blue-soft);
+      color: var(--blue-dark);
+      font-size: 0.82rem;
+      font-weight: 800;
+      line-height: 1.25;
+      position: sticky;
+      top: 0;
+      white-space: normal;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
     }
 
     tr:nth-child(even) td {
       background: #fbfdff;
     }
 
+    .money,
+    .number {
+      white-space: nowrap;
+    }
+
+    .wrap-text {
+      min-width: 150px;
+      max-width: 240px;
+      white-space: normal;
+    }
+
     .effective-price {
-      color: #0b6b3a;
-      font-weight: 700;
+      color: var(--green);
+      font-weight: 800;
+    }
+
+    td.effective-price {
+      background: var(--green-soft);
     }
 
     .filter-row {
@@ -185,37 +326,108 @@ function buildHtml(nationalDeals, postcodeDeals) {
       flex-wrap: wrap;
       gap: 10px;
       align-items: center;
-      margin-bottom: 14px;
+      margin: 18px 0 10px;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #f8fbff;
+    }
+
+    label {
+      font-weight: 700;
     }
 
     select {
-      padding: 8px 10px;
-      border: 1px solid #b8c6d9;
-      border-radius: 8px;
+      min-width: 220px;
+      padding: 9px 12px;
+      border: 1px solid #aebed3;
+      border-radius: 10px;
       background: #ffffff;
-      color: #172033;
+      color: var(--text);
       font: inherit;
     }
 
     .small-note {
-      color: #53627a;
+      color: var(--muted);
       font-size: 0.95rem;
+    }
+
+    .scroll-tip {
+      margin-top: 0;
+      font-weight: 700;
+    }
+
+    @media (max-width: 760px) {
+      header,
+      main {
+        padding: 16px;
+      }
+
+      header {
+        padding-top: 18px;
+      }
+
+      .hero,
+      .card {
+        padding: 18px;
+        border-radius: 16px;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      table {
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-width: 460px) {
+      header,
+      main {
+        padding: 12px;
+      }
+
+      .hero,
+      .card {
+        padding: 16px;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      select {
+        width: 100%;
+        min-width: 0;
+      }
     }
   </style>
 </head>
 <body>
   <header>
-    <span class="badge">Sample data only</span>
-    <h1>UK Broadband Price Tracker</h1>
-    <p>This first static page uses fake sample broadband deals only. It is not live provider data and should not be used to make a buying decision.</p>
-    <p>The advertised monthly price is the headline monthly cost. The effective monthly price estimates the real monthly cost across the contract after April price rises, fees, vouchers, rewards, cashback, bill credits, and discounts.</p>
+    <div class="hero">
+      <div class="title-row">
+        <h1>UK Broadband Price Tracker</h1>
+        <span class="badge">Sample data only</span>
+      </div>
+      <p>This static page uses fake sample broadband deals only. It is not live provider data and should not be used to make a buying decision.</p>
+      <p><strong>Advertised monthly price</strong> is the headline monthly cost. <strong>Effective monthly price</strong> estimates the real monthly cost across the contract after April price rises, fees, vouchers, rewards, cashback, bill credits, and discounts.</p>
+    </div>
   </header>
 
   <main>
+    <section class="summary-grid" aria-label="Sample data summary">
+${summaryCards.map(([label, value]) => `      <article class="summary-card">
+        <span class="summary-number">${escapeHtml(value)}</span>
+        <span class="summary-label">${escapeHtml(label)}</span>
+      </article>`).join('\n')}
+    </section>
+
     <section class="card" aria-labelledby="national-heading">
       <h2 id="national-heading">National cheapest by speed tier</h2>
       <p class="small-note">Cheapest means the lowest effective monthly price in the fake sample data for each speed tier.</p>
-      <div class="table-wrap">
+      <div class="table-wrap" tabindex="0" aria-label="National cheapest by speed tier table with horizontal scrolling">
         <table id="national-cheapest-table">
           <thead>
             <tr>
@@ -238,8 +450,9 @@ function buildHtml(nationalDeals, postcodeDeals) {
 
     <section class="card" aria-labelledby="postcode-heading">
       <h2 id="postcode-heading">Postcode area comparison</h2>
+      <p class="small-note">Compare every fake sample deal by postcode area, speed tier, and effective monthly price.</p>
       <div class="filter-row">
-        <label for="postcode-filter">Postcode area:</label>
+        <label for="postcode-filter">Filter by postcode area:</label>
         <select id="postcode-filter">
           <option value="all">All postcode areas</option>
           <option value="OX">OX</option>
@@ -247,7 +460,8 @@ function buildHtml(nationalDeals, postcodeDeals) {
           <option value="SW">SW</option>
         </select>
       </div>
-      <div class="table-wrap">
+      <p class="small-note scroll-tip">Tip: scroll sideways on smaller screens to see all columns.</p>
+      <div class="table-wrap" tabindex="0" aria-label="Postcode area comparison table with horizontal scrolling">
         <table id="postcode-area-table">
           <thead>
             <tr>
