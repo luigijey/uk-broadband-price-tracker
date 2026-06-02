@@ -14,6 +14,19 @@ function numberOrZero(value) {
 }
 
 /**
+ * Validate a broadband contract length.
+ *
+ * Broadband contract lengths must be positive whole numbers of months.
+ */
+function validateContractLengthMonths(value) {
+  if (typeof value !== 'number' || !Number.isInteger(value) || value <= 0) {
+    throw new Error('contractLengthMonths must be a positive whole number of months');
+  }
+
+  return value;
+}
+
+/**
  * Add a number of months to a date.
  *
  * This lets us look at each month in the broadband contract one by one.
@@ -63,7 +76,7 @@ function countAprilsCrossed(contractStartDate, monthDate) {
  */
 function calculateBroadbandPrice(input) {
   const advertisedMonthlyPrice = numberOrZero(input.advertisedMonthlyPrice);
-  const contractLengthMonths = Number(input.contractLengthMonths);
+  const contractLengthMonths = validateContractLengthMonths(input.contractLengthMonths);
   const contractStartDate = new Date(input.contractStartDate);
   const annualAprilPriceRise = numberOrZero(input.annualAprilPriceRise);
 
