@@ -1,5 +1,6 @@
 {
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "table": "node generate-pricing-tables.js"
   }
 }
