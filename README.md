@@ -83,6 +83,34 @@ The breakdown shows:
 
 The breakdown assumes the contract starts today, using the date when you run the command. The sample deals are still fake example records only, not live broadband prices.
 
+
+## How to export calculated pricing data
+
+The repository can also save the calculated fake sample pricing results as JSON and CSV files.
+
+To create the export files, run:
+
+```bash
+npm run export
+```
+
+This runs:
+
+```bash
+node export-pricing-data.js
+```
+
+The export script creates the `exports` folder if it does not already exist, then writes these generated files:
+
+- `exports/all-deals-calculated.json` - every fake sample deal with the calculated pricing fields added, including effective monthly price, total fees, rewards, discounts, and total contract costs.
+- `exports/national-cheapest-by-speed-tier.json` - the cheapest calculated effective monthly price for each speed tier nationally.
+- `exports/postcode-area-comparison.json` - every calculated deal sorted by postcode area, speed tier, and effective monthly price, cheapest first.
+- `exports/postcode-area-comparison.csv` - the same postcode area comparison data in CSV format so it can be opened in a spreadsheet.
+
+These export files are generated from fake sample data for now. They are not live broadband prices and should not be used to make a buying decision.
+
+Later, the website will read from calculated or exported data instead of recalculating everything directly in the page code.
+
 ## What will be added later
 
 Later versions may add:
