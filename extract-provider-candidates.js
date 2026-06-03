@@ -15,6 +15,7 @@ const {
   getSpeedTier,
   parsePoundPrice,
 } = require('./extract-talktalk-deals');
+const { classifyProductModel } = require('./product-classification');
 
 const INPUT_PATH = path.join(__dirname, 'exports', 'online-price-snippets.json');
 const JSON_OUTPUT_PATH = path.join(__dirname, 'exports', 'provider-deal-candidates.json');
@@ -22,6 +23,7 @@ const CSV_OUTPUT_PATH = path.join(__dirname, 'exports', 'provider-deal-candidate
 const USABLE_OUTPUT_PATH = path.join(__dirname, 'exports', 'provider-deal-candidates-usable.json');
 const REVIEW_ONLY_OUTPUT_PATH = path.join(__dirname, 'exports', 'provider-deal-candidates-review-only.json');
 const DISCARDED_OUTPUT_PATH = path.join(__dirname, 'exports', 'provider-deal-candidates-discarded.json');
+const PROVIDER_DIRECT_EXPANSION_SUMMARY_PATH = path.join(__dirname, 'exports', 'provider-direct-expansion-summary.json');
 
 const COMPARISON_SOURCES_REQUIRING_SAME_PROVIDER_BLOCK = new Set(['uswitch', 'broadband-genie']);
 const MAX_USABLE_ANNUAL_APRIL_PRICE_RISE = 6;
@@ -697,6 +699,53 @@ function buildProviderCandidates(snippetReport, extractedAt = new Date().toISOSt
   };
 }
 
+function buildProductCategorySummary(candidates) {
+  const summary = {
+    fixedBroadbandCandidates: 0,
+    landlineCandidates: 0,
+    callsPackageCandidates: 0,
+    fiveGHomeBroadbandCandidates: 0,
+    tvBundleCandidates: 0,
+    mobileBundleCandidates: 0,
+    unknownProductCandidates: 0,
+  };
+
+  candidates.forEach((candidate) => {
+    const productModel = classifyProductModel(candidate);
+    if (productModel.connectionTechnology === 'fixed-line-broadband' && productModel.serviceCategory === 'broadband-only') {
+      summary.fixedBroadbandCandidates += 1;
+    }
+    if (productModel.serviceCategory === 'broadband-with-landline' || productModel.serviceCategory === 'broadband-with-landline-and-calls') {
+      summary.landlineCandidates += 1;
+    }
+    if (productModel.serviceCategory === 'broadband-with-landline-and-calls' || productModel.callsPackageStatus === 'pay-as-you-talk') {
+      summary.callsPackageCandidates += 1;
+    }
+    if (productModel.connectionTechnology === '5g-home-broadband') {
+      summary.fiveGHomeBroadbandCandidates += 1;
+    }
+    if (productModel.serviceCategory === 'broadband-tv-bundle') {
+      summary.tvBundleCandidates += 1;
+    }
+    if (productModel.serviceCategory === 'broadband-mobile-bundle') {
+      summary.mobileBundleCandidates += 1;
+    }
+    if (productModel.serviceCategory === 'unknown' || productModel.homepageCategory === 'Unknown review-only') {
+      summary.unknownProductCandidates += 1;
+    }
+  });
+
+  return summary;
+}
+
+function buildProviderDirectExpansionSummary(candidates, generatedAt) {
+  return {
+    generatedAt,
+    totalCandidates: candidates.length,
+    ...buildProductCategorySummary(candidates),
+  };
+}
+
 function readSnippetReport(inputPath = INPUT_PATH) {
   if (!fs.existsSync(inputPath)) {
     return null;
@@ -770,6 +819,7 @@ function extractProviderCandidates() {
   writeJsonFile(REVIEW_ONLY_OUTPUT_PATH, candidateOutput(reviewOnlyCandidates, result, extractedAt));
   writeJsonFile(DISCARDED_OUTPUT_PATH, candidateOutput(discardedCandidates, result, extractedAt));
   writeCsvFile(CSV_OUTPUT_PATH, output.candidates);
+  writeJsonFile(PROVIDER_DIRECT_EXPANSION_SUMMARY_PATH, buildProviderDirectExpansionSummary(output.candidates, extractedAt));
 
   return output;
 }
@@ -785,6 +835,7 @@ function main() {
   console.log(`Usable JSON created: ${path.relative(__dirname, USABLE_OUTPUT_PATH)}`);
   console.log(`Review-only JSON created: ${path.relative(__dirname, REVIEW_ONLY_OUTPUT_PATH)}`);
   console.log(`Discarded JSON created: ${path.relative(__dirname, DISCARDED_OUTPUT_PATH)}`);
+  console.log(`Provider direct expansion summary created: ${path.relative(__dirname, PROVIDER_DIRECT_EXPANSION_SUMMARY_PATH)}`);
 
   if (output.warningMessages.length > 0) {
     console.log('Warnings:');
@@ -797,6 +848,8 @@ if (require.main === module) {
 }
 
 module.exports = {
+  buildProductCategorySummary,
+  buildProviderDirectExpansionSummary,
   buildProviderCandidates,
   createCandidateId,
   extractAnnualRiseFromText,

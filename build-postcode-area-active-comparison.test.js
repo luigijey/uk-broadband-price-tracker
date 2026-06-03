@@ -19,6 +19,11 @@ const activeDeal = {
   contractLengthMonths: 24,
   annualAprilPriceRise: 4,
   productType: 'broadband-only',
+  connectionTechnology: 'fixed-line-broadband',
+  serviceCategory: 'broadband-only',
+  landlineStatus: 'not-included',
+  callsPackageStatus: 'not-included',
+  homepageCategory: 'Fixed broadband',
   showOnHomepage: true,
 };
 
@@ -44,10 +49,15 @@ test('postcode-area comparison output has the expected shape and review-only war
   assert.equal(output.rows[0].availabilityStatus, 'not-postcode-checked');
   assert.equal(output.rows[0].availabilityConfidence, 'national-candidate-only');
   assert.equal(output.rows[0].publishStatus, 'postcode-area-v1-review-only');
+  assert.equal(output.rows[0].connectionTechnology, 'fixed-line-broadband');
+  assert.equal(output.rows[0].serviceCategory, 'broadband-only');
+  assert.equal(output.rows[0].landlineStatus, 'not-included');
+  assert.equal(output.rows[0].callsPackageStatus, 'not-included');
+  assert.equal(output.rows[0].homepageCategory, 'Fixed broadband');
   assert.equal(output.rows[0].warningMessage, ROW_WARNING);
 });
 
-test('postcode-area comparison creates valid empty rows when no homepage broadband-only deals exist', () => {
+test('postcode-area comparison creates valid empty rows when no homepage-visible deals exist', () => {
   const output = buildPostcodeAreaActiveComparisonOutput({
     activeDeals: [{ ...activeDeal, showOnHomepage: false }],
   }, postcodeAreas, '2026-06-03T00:00:00.000Z');
@@ -56,5 +66,26 @@ test('postcode-area comparison creates valid empty rows when no homepage broadba
   assert.equal(output.summary.activeDealsIncluded, 0);
   assert.equal(output.summary.rowsCreated, 0);
   assert.deepEqual(output.rows, []);
-  assert.match(output.summary.warningMessages.join(' '), /No active homepage broadband-only deals/);
+  assert.match(output.summary.warningMessages.join(' '), /No active homepage-visible deals/);
+});
+
+
+test('postcode-area comparison includes homepage-visible 5G home broadband rows as not postcode checked', () => {
+  const output = buildPostcodeAreaActiveComparisonOutput({
+    activeDeals: [{
+      ...activeDeal,
+      activeDealId: 'active-vodafone-5g-broadband-50',
+      provider: 'Vodafone',
+      packageName: 'Vodafone 5G Broadband 50',
+      connectionTechnology: '5g-home-broadband',
+      homepageCategory: '5G home broadband',
+    }],
+  }, postcodeAreas, '2026-06-03T00:00:00.000Z');
+
+  assert.equal(output.summary.activeDealsIncluded, 1);
+  assert.equal(output.rows[0].connectionTechnology, '5g-home-broadband');
+  assert.equal(output.rows[0].homepageCategory, '5G home broadband');
+  assert.equal(output.rows[0].availabilityStatus, 'not-postcode-checked');
+  assert.equal(output.rows[0].availabilityConfidence, 'national-candidate-only');
+  assert.equal(output.rows[0].publishStatus, 'postcode-area-v1-review-only');
 });

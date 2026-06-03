@@ -31,6 +31,11 @@ const candidate = {
   extractionQuality: 'usable-calculated',
   activeFeedTrustLevel: 'provider-direct-calculated',
   productType: 'broadband-only',
+  connectionTechnology: 'fixed-line-broadband',
+  serviceCategory: 'broadband-only',
+  landlineStatus: 'not-included',
+  callsPackageStatus: 'not-included',
+  homepageCategory: 'Fixed broadband',
   showOnHomepage: true,
   publishStatus: 'active-review-only',
   availabilityScope: 'provider-landing-page-not-postcode-checked',
@@ -56,6 +61,8 @@ test('candidate section renders active deal table with review-only markings', ()
   assert.match(html, /Full Fibre 150/);
   assert.match(html, /Advertised Monthly Price/);
   assert.match(html, /Effective Monthly Price/);
+  assert.match(html, /Homepage Category/);
+  assert.match(html, /Fixed broadband/);
   assert.match(html, /active-review-only/);
   assert.match(html, /Lower-confidence extracted rows are kept in review artifacts and are not shown in this main table\./);
   assert.match(html, /not postcode checked/);
@@ -87,6 +94,11 @@ test('full generated homepage includes active online candidate and Postcode Area
       contractLengthMonths: candidate.contractLengthMonths,
       annualAprilPriceRise: candidate.annualAprilPriceRise,
       productType: 'broadband-only',
+      connectionTechnology: 'fixed-line-broadband',
+      serviceCategory: 'broadband-only',
+      landlineStatus: 'not-included',
+      callsPackageStatus: 'not-included',
+      homepageCategory: 'Fixed broadband',
       availabilityStatus: 'not-postcode-checked',
       availabilityConfidence: 'national-candidate-only',
       publishStatus: 'postcode-area-v1-review-only',
@@ -100,6 +112,7 @@ test('full generated homepage includes active online candidate and Postcode Area
   assert.match(html, /id="postcode-area-v1-filter"/);
   assert.match(html, /These rows are not true postcode-checked availability results yet/);
   assert.match(html, /not-postcode-checked/);
+  assert.match(html, /Homepage Category/);
   assert.match(html, /active-deals\/active-talktalk-full-fibre-150-provider-page\.html/);
   assert.match(html, /Sample data prototype tables/);
 });
@@ -118,11 +131,18 @@ test('active deal detail page is generated as a review evidence page', () => {
   assert.match(html, /Active review evidence page/);
   assert.match(html, /not postcode checked and requires human review/);
   assert.match(html, /TalkTalk Full Fibre 150 evidence snippet/);
+  assert.match(html, /Connection technology/);
+  assert.match(html, /Service category/);
+  assert.match(html, /Landline status/);
+  assert.match(html, /Calls package status/);
+  assert.match(html, /Homepage category/);
+  assert.match(html, /Homepage visible/);
+  assert.match(html, /Hidden reason/);
   assert.match(html, /← Back to homepage/);
 });
 
 
-test('homepage active feed only renders showOnHomepage true broadband-only rows', () => {
+test('homepage active feed only renders homepage-visible rows', () => {
   const hiddenCandidate = {
     ...candidate,
     activeDealId: 'active-uswitch-plusnet-fibre-66',
@@ -142,8 +162,10 @@ test('homepage active feed only renders showOnHomepage true broadband-only rows'
     packageName: 'Virgin Media M500 Sport HD + Cinema + Netflix',
     activeFeedTrustLevel: 'comparison-clean-calculated',
     productType: 'broadband-tv-bundle',
+    serviceCategory: 'broadband-tv-bundle',
+    homepageCategory: 'Bundles and review-only',
     showOnHomepage: false,
-    extractionWarnings: ['Active feed product gate: hidden from homepage because productType is broadband-tv-bundle, not broadband-only.'],
+    extractionWarnings: ['Active feed product gate: hidden from homepage because homepageCategory is Bundles and review-only.'],
   };
 
   const html = buildHtml([], [], {
@@ -175,5 +197,5 @@ test('active deal detail pages are generated for hidden evidence rows', () => {
   assert.equal(createdFiles.length, 1);
   assert.equal(path.basename(createdFiles[0]), 'active-uswitch-plusnet-fibre-66.html');
   assert.match(fs.readFileSync(createdFiles[0], 'utf8'), /Fibre 66/);
-  assert.match(fs.readFileSync(createdFiles[0], 'utf8'), /Show on homepage/);
+  assert.match(fs.readFileSync(createdFiles[0], 'utf8'), /Homepage visible/);
 });

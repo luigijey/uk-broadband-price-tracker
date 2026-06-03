@@ -12,6 +12,7 @@ const path = require('node:path');
 const sampleDeals = require('./sample-deals');
 const { calculateBroadbandPrice } = require('./pricing-calculator');
 const { exportPricingData } = require('./export-pricing-data');
+const { isHomepageVisibleCategory } = require('./product-classification');
 
 const exportsFolder = path.join(__dirname, 'exports');
 const siteFolder = path.join(__dirname, 'site');
@@ -142,6 +143,7 @@ function buildPostcodeAreaActiveRows(rows) {
               <td class="number">${escapeHtml(row.speedMbps || '')} Mbps</td>
               <td class="money">${formatOptionalMoney(row.advertisedMonthlyPrice)}</td>
               <td class="money effective-price">${formatOptionalMoney(row.effectiveMonthlyPrice)}</td>
+              <td>${escapeHtml(row.homepageCategory || '')}</td>
               <td>${escapeHtml(row.availabilityStatus)}</td>
               <td><a class="details-button" href="${escapeHtml(activeDealDetailHref(row))}">View evidence</a></td>
             </tr>`).join('');
@@ -164,7 +166,7 @@ function buildPostcodeAreaV1Section(postcodeAreaActiveComparison = { rows: [], s
       <div class="warning-box">These rows are not true postcode-checked availability results yet. They show active national candidate deals grouped by postcode area for the first postcode-area prototype.</div>
       <div class="status-box" aria-label="Postcode Area V1 status">
         <p><strong>Postcode areas included:</strong> ${escapeHtml(summary.postcodeAreasIncluded || 0)}</p>
-        <p><strong>Active broadband-only deals included:</strong> ${escapeHtml(summary.activeDealsIncluded || 0)}</p>
+        <p><strong>Active homepage-visible deals included:</strong> ${escapeHtml(summary.activeDealsIncluded || 0)}</p>
         <p><strong>Rows created:</strong> ${escapeHtml(summary.rowsCreated || rows.length)}</p>
       </div>
       <div class="filter-row" aria-label="Postcode Area V1 filters">
@@ -177,7 +179,7 @@ ${optionHtml}
         </div>
       </div>
       <p id="postcode-area-v1-result-count" class="result-count" aria-live="polite"></p>
-      ${rows.length === 0 ? '<p class="no-results-message">No active homepage broadband-only deals are available for Postcode Area V1 yet.</p>' : `
+      ${rows.length === 0 ? '<p class="no-results-message">No active homepage-visible deals are available for Postcode Area V1 yet.</p>' : `
       <p class="small-note scroll-tip">Tip: if needed, scroll sideways to see all columns.</p>
       <div class="table-wrap" tabindex="0" aria-label="Postcode Area V1 active comparison table with horizontal scrolling">
         <table id="postcode-area-v1-table">
@@ -190,6 +192,7 @@ ${optionHtml}
               <th>Speed</th>
               <th>Advertised Monthly Price</th>
               <th>Effective Monthly Price</th>
+              <th>Homepage Category</th>
               <th>Availability Status</th>
               <th>Details</th>
             </tr>
@@ -273,6 +276,7 @@ function buildCandidateRows(candidates) {
               <td class="money">${escapeHtml(formatCandidateSetupFee(candidate))}</td>
               <td>${escapeHtml(candidate.extractionConfidence)}</td>
               <td>${escapeHtml(candidate.extractionQuality)}</td>
+              <td>${escapeHtml(candidate.homepageCategory || '')}</td>
               <td><a class="details-button" href="${escapeHtml(activeDealDetailHref(candidate))}">View evidence</a></td>
             </tr>`).join('');
 }
@@ -339,6 +343,7 @@ function buildCandidateSection(candidates, generatedAt = null, summary = {}) {
               <th>Setup Fee</th>
               <th>Confidence</th>
               <th>Quality</th>
+              <th>Homepage Category</th>
               <th>Details</th>
             </tr>
           </thead>
@@ -366,7 +371,7 @@ function normalizeProviderCandidateOutput(providerCandidateOutput) {
 
 function buildHtml(nationalDeals, postcodeDeals, activeDealOutput = { activeDeals: [] }, postcodeAreaActiveComparison = { rows: [], summary: {} }) {
   const activeDealData = normalizeActiveDealOutput(activeDealOutput);
-  const providerCandidates = activeDealData.activeDeals.filter((deal) => deal.showOnHomepage === true && deal.productType === 'broadband-only');
+  const providerCandidates = activeDealData.activeDeals.filter((deal) => deal.showOnHomepage === true && isHomepageVisibleCategory(deal.homepageCategory));
   const summaryCards = [
     ['Sample deals', postcodeDeals.length],
     ['Postcode areas', countUniqueValues(postcodeDeals, 'postcodeArea')],
@@ -1347,6 +1352,11 @@ function formatWarnings(warnings) {
   return warnings.join(' | ');
 }
 
+function formatHiddenReason(deal) {
+  const warnings = Array.isArray(deal.extractionWarnings) ? deal.extractionWarnings.filter(Boolean) : [];
+  return warnings.length > 0 ? warnings.join(' | ') : 'No hidden reason recorded';
+}
+
 function buildActiveDealDetailHtml(deal) {
   const detailRows = [
     ['Provider', deal.provider || 'Unknown'],
@@ -1369,7 +1379,13 @@ function buildActiveDealDetailHtml(deal) {
     ['Extraction quality', deal.extractionQuality || 'Unknown'],
     ['Active feed trust level', deal.activeFeedTrustLevel || 'Unknown'],
     ['Product type', deal.productType || 'Unknown'],
-    ['Show on homepage', deal.showOnHomepage === true ? 'Yes' : 'No'],
+    ['Connection technology', deal.connectionTechnology || 'Unknown'],
+    ['Service category', deal.serviceCategory || 'Unknown'],
+    ['Landline status', deal.landlineStatus || 'Unknown'],
+    ['Calls package status', deal.callsPackageStatus || 'Unknown'],
+    ['Homepage category', deal.homepageCategory || 'Unknown'],
+    ['Homepage visible', deal.showOnHomepage === true ? 'Yes' : 'No'],
+    ['Hidden reason', deal.showOnHomepage === true ? 'Not hidden' : formatHiddenReason(deal)],
     ['Availability scope', deal.availabilityScope || 'Unknown'],
     ['Publish status', deal.publishStatus || 'active-review-only'],
     ['Requires human review', deal.requiresHumanReview ? 'Yes' : 'Unknown'],

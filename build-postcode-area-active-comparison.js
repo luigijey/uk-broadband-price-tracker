@@ -13,6 +13,7 @@ const ACTIVE_DEALS_PATH = path.join(__dirname, 'exports', 'active-online-deals.j
 const JSON_OUTPUT_PATH = path.join(__dirname, 'exports', 'postcode-area-active-comparison.json');
 const CSV_OUTPUT_PATH = path.join(__dirname, 'exports', 'postcode-area-active-comparison.csv');
 const ROW_WARNING = 'This active deal is shown for postcode-area comparison only and has not been checked against this postcode area.';
+const { isHomepageVisibleCategory } = require('./product-classification');
 
 const POSTCODE_AREA_COLUMNS = [
   'postcodeArea',
@@ -30,6 +31,11 @@ const POSTCODE_AREA_COLUMNS = [
   'contractLengthMonths',
   'annualAprilPriceRise',
   'productType',
+  'connectionTechnology',
+  'serviceCategory',
+  'landlineStatus',
+  'callsPackageStatus',
+  'homepageCategory',
   'availabilityStatus',
   'availabilityConfidence',
   'publishStatus',
@@ -61,7 +67,7 @@ function enabledPostcodeAreas(areas = postcodeAreas) {
 }
 
 function activeHomepageBroadbandOnlyDeals(activeDeals) {
-  return activeDeals.filter((deal) => deal && deal.showOnHomepage === true && deal.productType === 'broadband-only');
+  return activeDeals.filter((deal) => deal && deal.showOnHomepage === true && isHomepageVisibleCategory(deal.homepageCategory));
 }
 
 function buildPostcodeAreaRows(activeDeals, areas = postcodeAreas) {
@@ -84,6 +90,11 @@ function buildPostcodeAreaRows(activeDeals, areas = postcodeAreas) {
     contractLengthMonths: deal.contractLengthMonths,
     annualAprilPriceRise: deal.annualAprilPriceRise,
     productType: deal.productType,
+    connectionTechnology: deal.connectionTechnology,
+    serviceCategory: deal.serviceCategory,
+    landlineStatus: deal.landlineStatus,
+    callsPackageStatus: deal.callsPackageStatus,
+    homepageCategory: deal.homepageCategory,
     availabilityStatus: 'not-postcode-checked',
     availabilityConfidence: 'national-candidate-only',
     publishStatus: 'postcode-area-v1-review-only',
@@ -101,7 +112,7 @@ function buildPostcodeAreaActiveComparisonOutput(activeDealOutput, areas = postc
   ];
 
   if (homepageDeals.length === 0) {
-    warningMessages.push('No active homepage broadband-only deals were available, so postcode-area comparison rows are empty.');
+    warningMessages.push('No active homepage-visible deals were available, so postcode-area comparison rows are empty.');
   }
 
   return {
@@ -158,7 +169,7 @@ function main() {
   console.log('Postcode Area V1 comparison build complete');
   console.log('==========================================');
   console.log(`Postcode areas included: ${output.summary.postcodeAreasIncluded}`);
-  console.log(`Active homepage broadband-only deals included: ${output.summary.activeDealsIncluded}`);
+  console.log(`Active homepage-visible deals included: ${output.summary.activeDealsIncluded}`);
   console.log(`Rows created: ${output.summary.rowsCreated}`);
   console.log(`JSON created: ${path.relative(__dirname, JSON_OUTPUT_PATH)}`);
   console.log(`CSV created: ${path.relative(__dirname, CSV_OUTPUT_PATH)}`);

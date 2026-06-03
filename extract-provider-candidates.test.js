@@ -4,6 +4,8 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 
 const {
+  buildProductCategorySummary,
+  buildProviderDirectExpansionSummary,
   buildProviderCandidates,
   createCandidateId,
   extractAnnualRiseFromText,
@@ -348,4 +350,39 @@ test('annualAprilPriceRise 3.50 is usable', () => {
 
   assert.equal(candidate.annualAprilPriceRise, 3.5);
   assert.equal(candidate.extractionQuality, 'usable-calculated');
+});
+
+
+test('provider-direct expansion summary includes product category counts', () => {
+  const candidates = [
+    { packageName: 'Full Fibre 150', sourceSnippet: 'Full Fibre 150 £29 a month.' },
+    { packageName: 'Full Fibre 150', sourceSnippet: 'Full Fibre 150 landline included £31 a month.' },
+    { packageName: 'Full Fibre 150', sourceSnippet: 'Full Fibre 150 calls included £33 a month.' },
+    { packageName: 'Vodafone 5G Broadband 50', sourceSnippet: 'Vodafone 5G Broadband 50 £30 a month.' },
+    { packageName: 'Full Fibre 150 with Netflix', sourceSnippet: 'Full Fibre 150 with Netflix £39 a month.' },
+    { packageName: 'Full Fibre 150 with SIM', sourceSnippet: 'Full Fibre 150 with SIM £35 a month.' },
+    { packageName: 'Starter plan', sourceSnippet: 'Starter plan £20 a month.' },
+  ];
+
+  assert.deepEqual(buildProductCategorySummary(candidates), {
+    fixedBroadbandCandidates: 1,
+    landlineCandidates: 2,
+    callsPackageCandidates: 1,
+    fiveGHomeBroadbandCandidates: 1,
+    tvBundleCandidates: 1,
+    mobileBundleCandidates: 1,
+    unknownProductCandidates: 1,
+  });
+
+  assert.deepEqual(buildProviderDirectExpansionSummary(candidates, extractedAt), {
+    generatedAt: extractedAt,
+    totalCandidates: 7,
+    fixedBroadbandCandidates: 1,
+    landlineCandidates: 2,
+    callsPackageCandidates: 1,
+    fiveGHomeBroadbandCandidates: 1,
+    tvBundleCandidates: 1,
+    mobileBundleCandidates: 1,
+    unknownProductCandidates: 1,
+  });
 });

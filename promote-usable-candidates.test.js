@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 
 const { ACTIVE_COLUMNS, buildActiveOnlineDealsOutput, classifyProductType, isPromotableCandidate } = require('./promote-usable-candidates');
+const { classifyProductModel } = require('./product-classification');
 
 const baseCandidate = {
   candidateId: 'talktalk-full-fibre-150-provider-page',
@@ -208,6 +209,10 @@ test('required active feed examples are classified into homepage and hidden evid
   assert.equal(byId(output, 'broadband-genie-bt-full-fibre-150').showOnHomepage, false);
   assert.equal(byId(output, 'broadband-genie-plusnet-fibre-66').showOnHomepage, false);
   assert.equal(byId(output, 'uswitch-virgin-media-gig1-fibre-broadband').productType, 'broadband-only');
+  assert.equal(byId(output, 'uswitch-virgin-media-gig1-fibre-broadband').connectionTechnology, 'fixed-line-broadband');
+  assert.equal(byId(output, 'uswitch-virgin-media-gig1-fibre-broadband').serviceCategory, 'broadband-only');
+  assert.equal(byId(output, 'uswitch-virgin-media-gig1-fibre-broadband').homepageCategory, 'Fixed broadband');
+  assert.equal(byId(output, 'uswitch-virgin-media-broadband-132').homepageCategory, 'Fixed broadband');
   assert.equal(byId(output, 'bt-full-fibre-150-provider-page').productType, 'broadband-only');
   assert.equal(byId(output, 'talktalk-full-fibre-150-provider-page').productType, 'broadband-only');
   assert.equal(byId(output, 'uswitch-virgin-media-gig1-fibre-broadband').activeFeedTrustLevel, 'comparison-clean-calculated');
@@ -280,4 +285,76 @@ test('empty active deal output remains valid and includes warning message', () =
   assert.equal(output.summary.hiddenReviewDeals, 0);
   assert.deepEqual(output.activeDeals, []);
   assert.match(output.summary.warningMessages.join(' '), /No usable active online deals were created/);
+});
+
+
+test('sales phone CTA does not create broadband-with-landline', () => {
+  const model = classifyProductModel(candidate({
+    packageName: 'Full Fibre 150',
+    sourceSnippet: 'Full Fibre 150 £29 a month. Get deal or call 0800 123456. Call us on the sales line for customer support.',
+  }));
+
+  assert.equal(model.serviceCategory, 'broadband-only');
+  assert.equal(model.landlineStatus, 'not-included');
+  assert.equal(model.homepageCategory, 'Fixed broadband');
+});
+
+test('explicit landline wording creates broadband-with-landline', () => {
+  assert.equal(classifyProductModel(candidate({ sourceSnippet: 'Full Fibre 150 landline included £29 a month.' })).serviceCategory, 'broadband-with-landline');
+  assert.equal(classifyProductModel(candidate({ sourceSnippet: 'Full Fibre 150 line rental included £29 a month.' })).serviceCategory, 'broadband-with-landline');
+});
+
+test('explicit calls wording creates broadband-with-landline-and-calls', () => {
+  const callsIncluded = classifyProductModel(candidate({ sourceSnippet: 'Full Fibre 150 calls included £29 a month.' }));
+  const payAsYouTalk = classifyProductModel(candidate({ sourceSnippet: 'Full Fibre 150 pay as you talk £29 a month.' }));
+
+  assert.equal(callsIncluded.serviceCategory, 'broadband-with-landline-and-calls');
+  assert.equal(callsIncluded.callsPackageStatus, 'included');
+  assert.equal(payAsYouTalk.serviceCategory, 'broadband-with-landline-and-calls');
+  assert.equal(payAsYouTalk.callsPackageStatus, 'pay-as-you-talk');
+});
+
+test('Vodafone 5G Broadband 50 becomes 5G home broadband category when clean', () => {
+  const output = buildActiveOnlineDealsOutput({ candidates: [candidate({
+    candidateId: 'vodafone-5g-broadband-50',
+    provider: 'Vodafone',
+    packageName: 'Vodafone 5G Broadband 50',
+    sourceName: 'Vodafone',
+    sourceType: 'provider-direct',
+    speedMbps: 50,
+    sourceSnippet: 'Vodafone 5G Broadband 50 50 Mbps £30 a month. Price rises by £4 each April. 24 month contract.',
+  })] }, '2026-06-03T00:00:00.000Z');
+
+  assert.equal(output.activeDeals[0].connectionTechnology, '5g-home-broadband');
+  assert.equal(output.activeDeals[0].homepageCategory, '5G home broadband');
+  assert.equal(output.activeDeals[0].showOnHomepage, true);
+});
+
+test('mixed 5G row with TV bundle text remains hidden', () => {
+  const output = buildActiveOnlineDealsOutput({ candidates: [candidate({
+    candidateId: 'vodafone-5g-broadband-tv',
+    provider: 'Vodafone',
+    packageName: 'Vodafone 5G Broadband 50 with Apple TV',
+    sourceName: 'Vodafone',
+    sourceType: 'provider-direct',
+    speedMbps: 50,
+    sourceSnippet: 'Vodafone 5G Broadband 50 with Apple TV channels 50 Mbps £30 a month. Price rises by £4 each April. 24 month contract.',
+  })] }, '2026-06-03T00:00:00.000Z');
+
+  assert.equal(output.activeDeals[0].connectionTechnology, '5g-home-broadband');
+  assert.equal(output.activeDeals[0].homepageCategory, 'Bundles and review-only');
+  assert.equal(output.activeDeals[0].showOnHomepage, false);
+  assert.match(output.activeDeals[0].extractionWarnings.join(' '), /homepageCategory is Bundles and review-only/);
+});
+
+test('TV Sport Cinema and Netflix rows remain hidden', () => {
+  ['TV', 'Sport', 'Cinema', 'Netflix'].forEach((term) => {
+    const output = buildActiveOnlineDealsOutput({ candidates: [candidate({
+      candidateId: `bundle-${term.toLowerCase()}`,
+      packageName: `Full Fibre 150 with ${term}`,
+      sourceSnippet: `Full Fibre 150 with ${term} £29 a month. Price rises by £4 each April. 24 month contract.`,
+    })] }, '2026-06-03T00:00:00.000Z');
+    assert.equal(output.activeDeals[0].homepageCategory, 'Bundles and review-only');
+    assert.equal(output.activeDeals[0].showOnHomepage, false);
+  });
 });
