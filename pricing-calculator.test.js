@@ -133,7 +133,7 @@ test('builds export rows with the required calculated pricing fields', () => {
   assert.equal(typeof calculatedDeal.totalContractCostAfterRewards, 'number');
 });
 
-test('builds static site HTML with both tables and the postcode filter', () => {
+test('builds static site HTML with tables and combined homepage filters', () => {
   const { buildHtml } = require('./build-static-site');
 
   const nationalDeals = [{
@@ -163,11 +163,27 @@ test('builds static site HTML with both tables and the postcode filter', () => {
   assert.match(html, /id="national-cheapest-table"/);
   assert.match(html, /id="postcode-area-table"/);
   assert.match(html, /id="postcode-filter"/);
+  assert.match(html, /id="provider-filter"/);
+  assert.match(html, /id="speed-tier-filter"/);
+  assert.match(html, /id="reset-filters"/);
+  assert.match(html, /id="postcode-result-count"/);
+  assert.match(html, /No deals match these filters\./);
+  assert.match(html, /postcodeMatches && providerMatches && speedTierMatches/);
+  assert.match(html, /data-provider="Example Fibre"/);
+  assert.match(html, /data-speed-tier="100-300 Mbps"/);
   assert.match(html, /<th>Details<\/th>/);
   assert.match(html, /href="deals\/OX-EXAMPLE-150.html">View breakdown<\/a>/);
   assert.match(html, /<option value="OX">OX<\/option>/);
   assert.match(html, /<option value="M">M<\/option>/);
   assert.match(html, /<option value="SW">SW<\/option>/);
+  assert.match(html, /<option value="BT">BT<\/option>/);
+  assert.match(html, /<option value="Sky">Sky<\/option>/);
+  assert.match(html, /<option value="Virgin Media">Virgin Media<\/option>/);
+  assert.match(html, /<option value="Vodafone">Vodafone<\/option>/);
+  assert.match(html, /<option value="TalkTalk">TalkTalk<\/option>/);
+  assert.match(html, /<option value="35-75 Mbps">35-75 Mbps<\/option>/);
+  assert.match(html, /<option value="500-900 Mbps">500-900 Mbps<\/option>/);
+  assert.match(html, /<option value="900 Mbps\+">900 Mbps\+<\/option>/);
   assert.match(html, /Sample data only/);
 });
 
