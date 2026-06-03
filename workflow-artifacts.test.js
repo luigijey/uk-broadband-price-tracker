@@ -10,3 +10,12 @@ test('deploy workflow uploads provider-direct and postcode check review artifact
   assert.match(workflow, /exports\/provider-direct-expansion-summary\.json/);
   assert.match(workflow, /exports\/postcode-check-v1-summary\.json/);
 });
+
+
+test('deploy workflow runs active-summary and uploads active cheapest artifacts', () => {
+  assert.match(workflow, /npm run postcode-area-build[\s\S]*npm run active-summary[\s\S]*npm run build-site/);
+  assert.match(workflow, /test -f exports\/active-cheapest-by-speed-tier\.json/);
+  assert.match(workflow, /test -f exports\/active-cheapest-by-speed-tier\.csv/);
+  assert.match(workflow, /exports\/active-cheapest-by-speed-tier\.json/);
+  assert.match(workflow, /exports\/active-cheapest-by-speed-tier\.csv/);
+});

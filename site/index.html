@@ -172,7 +172,11 @@
     }
 
     #active-candidate-table {
-      min-width: 1560px;
+      min-width: 1180px;
+    }
+
+    #active-cheapest-speed-tier-table {
+      min-width: 1080px;
     }
 
     #postcode-area-v1-table {
@@ -335,6 +339,11 @@
       display: none;
     }
 
+    .caveat-text {
+      color: var(--yellow-text);
+      font-weight: 800;
+    }
+
     .small-note {
       color: var(--muted);
       font-size: 0.95rem;
@@ -449,10 +458,43 @@
       <script type="application/json" id="postcode-area-starter-data">[{&quot;postcodeArea&quot;:&quot;SW&quot;,&quot;regionName&quot;:&quot;London&quot;,&quot;country&quot;:&quot;England&quot;,&quot;enabled&quot;:true},{&quot;postcodeArea&quot;:&quot;SE&quot;,&quot;regionName&quot;:&quot;London&quot;,&quot;country&quot;:&quot;England&quot;,&quot;enabled&quot;:true},{&quot;postcodeArea&quot;:&quot;NW&quot;,&quot;regionName&quot;:&quot;London&quot;,&quot;country&quot;:&quot;England&quot;,&quot;enabled&quot;:true},{&quot;postcodeArea&quot;:&quot;N&quot;,&quot;regionName&quot;:&quot;London&quot;,&quot;country&quot;:&quot;England&quot;,&quot;enabled&quot;:true},{&quot;postcodeArea&quot;:&quot;E&quot;,&quot;regionName&quot;:&quot;London&quot;,&quot;country&quot;:&quot;England&quot;,&quot;enabled&quot;:true},{&quot;postcodeArea&quot;:&quot;W&quot;,&quot;regionName&quot;:&quot;London&quot;,&quot;country&quot;:&quot;England&quot;,&quot;enabled&quot;:true},{&quot;postcodeArea&quot;:&quot;EC&quot;,&quot;regionName&quot;:&quot;London&quot;,&quot;country&quot;:&quot;England&quot;,&quot;enabled&quot;:true},{&quot;postcodeArea&quot;:&quot;WC&quot;,&quot;regionName&quot;:&quot;London&quot;,&quot;country&quot;:&quot;England&quot;,&quot;enabled&quot;:true},{&quot;postcodeArea&quot;:&quot;OX&quot;,&quot;regionName&quot;:&quot;South East England&quot;,&quot;country&quot;:&quot;England&quot;,&quot;enabled&quot;:true},{&quot;postcodeArea&quot;:&quot;SO&quot;,&quot;regionName&quot;:&quot;South East England&quot;,&quot;country&quot;:&quot;England&quot;,&quot;enabled&quot;:true},{&quot;postcodeArea&quot;:&quot;BN&quot;,&quot;regionName&quot;:&quot;South East England&quot;,&quot;country&quot;:&quot;England&quot;,&quot;enabled&quot;:true},{&quot;postcodeArea&quot;:&quot;MK&quot;,&quot;regionName&quot;:&quot;South East England&quot;,&quot;country&quot;:&quot;England&quot;,&quot;enabled&quot;:true},{&quot;postcodeArea&quot;:&quot;RG&quot;,&quot;regionName&quot;:&quot;South East England&quot;,&quot;country&quot;:&quot;England&quot;,&quot;enabled&quot;:true},{&quot;postcodeArea&quot;:&quot;CB&quot;,&quot;regionName&quot;:&quot;East of England&quot;,&quot;country&quot;:&quot;England&quot;,&quot;enabled&quot;:true},{&quot;postcodeArea&quot;:&quot;B&quot;,&quot;regionName&quot;:&quot;West Midlands&quot;,&quot;country&quot;:&quot;England&quot;,&quot;enabled&quot;:true},{&quot;postcodeArea&quot;:&quot;NG&quot;,&quot;regionName&quot;:&quot;East Midlands&quot;,&quot;country&quot;:&quot;England&quot;,&quot;enabled&quot;:true},{&quot;postcodeArea&quot;:&quot;BS&quot;,&quot;regionName&quot;:&quot;South West England&quot;,&quot;country&quot;:&quot;England&quot;,&quot;enabled&quot;:true},{&quot;postcodeArea&quot;:&quot;CF&quot;,&quot;regionName&quot;:&quot;South Wales&quot;,&quot;country&quot;:&quot;Wales&quot;,&quot;enabled&quot;:true},{&quot;postcodeArea&quot;:&quot;G&quot;,&quot;regionName&quot;:&quot;Scotland&quot;,&quot;country&quot;:&quot;Scotland&quot;,&quot;enabled&quot;:true},{&quot;postcodeArea&quot;:&quot;EH&quot;,&quot;regionName&quot;:&quot;Scotland&quot;,&quot;country&quot;:&quot;Scotland&quot;,&quot;enabled&quot;:true},{&quot;postcodeArea&quot;:&quot;M&quot;,&quot;regionName&quot;:&quot;North West England&quot;,&quot;country&quot;:&quot;England&quot;,&quot;enabled&quot;:true},{&quot;postcodeArea&quot;:&quot;L&quot;,&quot;regionName&quot;:&quot;North West England&quot;,&quot;country&quot;:&quot;England&quot;,&quot;enabled&quot;:true},{&quot;postcodeArea&quot;:&quot;LS&quot;,&quot;regionName&quot;:&quot;Yorkshire and the Humber&quot;,&quot;country&quot;:&quot;England&quot;,&quot;enabled&quot;:true},{&quot;postcodeArea&quot;:&quot;NE&quot;,&quot;regionName&quot;:&quot;North East England&quot;,&quot;country&quot;:&quot;England&quot;,&quot;enabled&quot;:true},{&quot;postcodeArea&quot;:&quot;S&quot;,&quot;regionName&quot;:&quot;Yorkshire and the Humber&quot;,&quot;country&quot;:&quot;England&quot;,&quot;enabled&quot;:true}]</script>
     </section>
 
+    <section class="card" aria-labelledby="active-cheapest-speed-tier-heading">
+      <h2 id="active-cheapest-speed-tier-heading">Cheapest active deals by speed tier</h2>
+      <p class="small-note">These are active review deals only and are not provider-level postcode availability checks.</p>
+      <p class="no-results-message">No active homepage-visible deals are available for this summary yet.</p>
+    </section>
+
     <section class="card" aria-labelledby="active-candidates-heading">
       <h2 id="active-candidates-heading">Active online deal feed</h2>
       <div class="warning-box">These are automatically extracted active review deals. They are not postcode checked, not manually approved, and may be incomplete.</div>
       <p class="small-note">Lower-confidence extracted rows are kept in review artifacts and are not shown in this main table.</p>
+
+      <section class="summary-grid active-summary-grid" aria-label="Active homepage deal summary">
+        <article class="summary-card">
+          <span class="summary-number">0</span>
+          <span class="summary-label">Homepage active deals</span>
+        </article>
+        <article class="summary-card">
+          <span class="summary-number">0</span>
+          <span class="summary-label">Provider-direct deals</span>
+        </article>
+        <article class="summary-card">
+          <span class="summary-number">0</span>
+          <span class="summary-label">Comparison-site deals</span>
+        </article>
+        <article class="summary-card">
+          <span class="summary-number">Not available</span>
+          <span class="summary-label">Lowest effective monthly price</span>
+        </article>
+        <article class="summary-card">
+          <span class="summary-number">Not available</span>
+          <span class="summary-label">Fastest speed</span>
+        </article>
+        <article class="summary-card">
+          <span class="summary-number">0</span>
+          <span class="summary-label">Deals with unknown setup fee</span>
+        </article>
+      </section>
       <div class="status-box" aria-label="Active candidate data freshness">
         <p><strong>Active deal data generated:</strong> 2026-06-03T17:03:15.184Z</p>
         <p><strong>Active deals shown on homepage:</strong> 0</p>
@@ -925,6 +967,10 @@
       });
     }
 
+    function countPostcodeAreaV1Rows(postcodeArea) {
+      return Array.from(postcodeAreaV1Rows).filter((row) => postcodeArea === 'all' || row.dataset.postcodeArea === postcodeArea).length;
+    }
+
     function filterPostcodeAreaV1Rows() {
       if (!postcodeAreaV1Filter || !postcodeAreaV1ResultCount) {
         return;
@@ -1028,7 +1074,8 @@
 
       postcodeAreaV1Filter.value = postcodeArea;
       filterPostcodeAreaV1Rows();
-      postcodeCheckResult.textContent = 'Postcode area detected: ' + postcodeArea + ' — showing active national candidate deals for ' + match.regionName + '. These results are not provider-level availability checks yet. They are active national candidate deals grouped by postcode area.';
+      const activeCandidateRowCount = countPostcodeAreaV1Rows(postcodeArea);
+      postcodeCheckResult.textContent = 'Postcode area detected: ' + postcodeArea + ' — ' + match.regionName + '. Showing ' + activeCandidateRowCount + ' active national candidate deals for this postcode area. These results are not provider-level availability checks yet. They are active national candidate deals grouped by postcode area.';
     }
 
     function showAllPostcodeAreas() {

@@ -14,6 +14,7 @@ const commands = [
   ['npm', ['run', 'extract-providers']],
   ['npm', ['run', 'promote-active']],
   ['npm', ['run', 'postcode-area-build']],
+  ['npm', ['run', 'active-summary']],
   ['npm', ['run', 'export']],
   ['npm', ['run', 'build-site']],
 ];
@@ -28,6 +29,7 @@ const summaryFiles = {
   activeOnlineDeals: path.join(rootFolder, 'exports', 'active-online-deals.json'),
   postcodeAreaActiveComparison: path.join(rootFolder, 'exports', 'postcode-area-active-comparison.json'),
   postcodeCheckV1Summary: path.join(rootFolder, 'exports', 'postcode-check-v1-summary.json'),
+  activeCheapestBySpeedTier: path.join(rootFolder, 'exports', 'active-cheapest-by-speed-tier.json'),
   activeDealsFolder: path.join(rootFolder, 'site', 'active-deals'),
   siteIndex: path.join(rootFolder, 'site', 'index.html'),
 };
@@ -70,6 +72,10 @@ function readPostcodeAreaActiveRowCount(postcodeAreaActiveComparisonPath = summa
   return readJsonCount(postcodeAreaActiveComparisonPath, 'rows');
 }
 
+function readActiveCheapestSpeedTierRowCount(activeCheapestBySpeedTierPath = summaryFiles.activeCheapestBySpeedTier) {
+  return readJsonCount(activeCheapestBySpeedTierPath, 'rows');
+}
+
 function buildActiveBuildSummary(files = summaryFiles) {
   return {
     snippetsFileExists: fs.existsSync(files.snippets),
@@ -81,10 +87,12 @@ function buildActiveBuildSummary(files = summaryFiles) {
     activeOnlineDealsFileExists: fs.existsSync(files.activeOnlineDeals),
     postcodeAreaActiveComparisonFileExists: fs.existsSync(files.postcodeAreaActiveComparison),
     postcodeCheckV1SummaryFileExists: fs.existsSync(files.postcodeCheckV1Summary),
+    activeCheapestBySpeedTierFileExists: fs.existsSync(files.activeCheapestBySpeedTier),
     candidateCount: readCandidateCount(files.providerCandidates),
     activeOnlineDealCount: readActiveDealCount(files.activeOnlineDeals),
     postcodeAreaActiveRowCount: readPostcodeAreaActiveRowCount(files.postcodeAreaActiveComparison),
     supportedPostcodeAreaCount: readSupportedPostcodeAreaCount(files.postcodeCheckV1Summary),
+    activeCheapestSpeedTierRowCount: readActiveCheapestSpeedTierRowCount(files.activeCheapestBySpeedTier),
     activeDealPagesGenerated: countActiveDealPages(files.activeDealsFolder),
     siteIndexCreated: fs.existsSync(files.siteIndex),
   };
@@ -105,7 +113,9 @@ function printActiveBuildSummary(summary) {
   console.log(`postcode-area-active-comparison.json exists: ${summary.postcodeAreaActiveComparisonFileExists ? 'yes' : 'no'}`);
   console.log(`Postcode-area row count: ${summary.postcodeAreaActiveRowCount === null ? 'unknown' : summary.postcodeAreaActiveRowCount}`);
   console.log(`postcode-check-v1-summary.json exists: ${summary.postcodeCheckV1SummaryFileExists ? 'yes' : 'no'}`);
+  console.log(`active-cheapest-by-speed-tier.json exists: ${summary.activeCheapestBySpeedTierFileExists ? 'yes' : 'no'}`);
   console.log(`Supported postcode area count: ${summary.supportedPostcodeAreaCount === null ? 'unknown' : summary.supportedPostcodeAreaCount}`);
+  console.log(`Active cheapest speed-tier summary rows: ${summary.activeCheapestSpeedTierRowCount === null ? 'unknown' : summary.activeCheapestSpeedTierRowCount}`);
   console.log(`Active deal pages generated: ${summary.activeDealPagesGenerated}`);
   console.log(`site/index.html created: ${summary.siteIndexCreated ? 'yes' : 'no'}`);
 }
@@ -138,5 +148,6 @@ module.exports = {
   readCandidateCount,
   readPostcodeAreaActiveRowCount,
   readSupportedPostcodeAreaCount,
+  readActiveCheapestSpeedTierRowCount,
   runActiveBuild,
 };

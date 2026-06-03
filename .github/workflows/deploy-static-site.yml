@@ -51,6 +51,9 @@ jobs:
       - name: Build Postcode Area V1 active comparison
         run: npm run postcode-area-build
 
+      - name: Build active summary tables
+        run: npm run active-summary
+
       - name: Export sample pricing data
         run: npm run export
 
@@ -69,6 +72,8 @@ jobs:
           test -f exports/provider-deal-candidates-discarded.json
           test -f exports/provider-direct-expansion-summary.json
           test -f exports/postcode-check-v1-summary.json
+          test -f exports/active-cheapest-by-speed-tier.json
+          test -f exports/active-cheapest-by-speed-tier.csv
 
       - name: Upload active pricing review data
         uses: actions/upload-artifact@v4
@@ -80,6 +85,8 @@ jobs:
             exports/active-online-deals.csv
             exports/postcode-area-active-comparison.json
             exports/postcode-area-active-comparison.csv
+            exports/active-cheapest-by-speed-tier.json
+            exports/active-cheapest-by-speed-tier.csv
             exports/provider-deal-candidates.json
             exports/provider-deal-candidates-usable.json
             exports/provider-deal-candidates-review-only.json
