@@ -240,6 +240,41 @@ The downloaded file is only a source access report. It shows whether source page
 
 Blocked, unknown, unclear, failed, or non-200 source results are expected sometimes. They should be recorded in the report, not bypassed. Do not add scraping bypasses, browser automation, proxies, hidden fetch methods, or aggressive retries to work around blocked or unclear sources.
 
+## Online price snippet extraction
+
+The repository also includes a safe online price snippet extraction step for early price discovery. This is a **human-review discovery step only**. It does not create final broadband deals, does not update the sample deal values, and does not change the pricing calculator or static website.
+
+To run the extraction, use:
+
+```bash
+npm run extract-snippets
+```
+
+This runs:
+
+```bash
+node extract-price-snippets.js
+```
+
+The snippet extraction script:
+
+- reads enabled source definitions from `broadband-sources.js`
+- fetches each source's `robots.txt` before any candidate broadband page
+- checks whether the candidate broadband page path appears allowed for `UKBroadbandPriceTrackerBot/0.1`
+- skips sources where `robots.txt` is unavailable, unclear, or disallows the candidate path
+- records blocked, security-check, CAPTCHA, anti-bot, failed, and HTTP 403 pages instead of bypassing them
+- uses a small delay between requests and does not retry aggressively
+- extracts simple price-like `£` snippets from allowed HTTP 200 pages for human review
+- looks near each price-like snippet for possible speed, contract, reward, voucher, cashback, or bill-credit text
+
+The output is saved to:
+
+- `exports/online-price-snippets.json`
+
+Each source result includes the source ID, source name, source type, candidate broadband URL, robots permission result, page fetch status, HTTP status code, page title, snippet count, extracted snippets, warnings, and the time checked. Each snippet includes the matched price-like text, nearby surrounding text, and any possible speed, contract, or reward text found nearby.
+
+The output is **not live pricing data** and should not be used as buying advice. It is only a structured report to help a human decide what, if anything, may be safe and useful to model later.
+
 ## What will be added later
 
 Later versions may add:

@@ -5,6 +5,7 @@
     "breakdown": "node generate-deal-breakdown.js",
     "export": "node export-pricing-data.js",
     "build-site": "node build-static-site.js",
-    "check-sources": "node check-source-access.js"
+    "check-sources": "node check-source-access.js",
+    "extract-snippets": "node extract-price-snippets.js"
   }
 }

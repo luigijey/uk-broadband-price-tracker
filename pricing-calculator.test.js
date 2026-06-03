@@ -248,3 +248,47 @@ test('every broadband source has the required source definition fields', () => {
     assert.equal(typeof source.enabled, 'boolean');
   });
 });
+
+test('price snippet helper extracts simple pound price-like text', () => {
+  const { findPriceLikeText } = require('./extract-price-snippets');
+
+  const prices = findPriceLikeText('Plans from £24, premium at £24.99, and annual value £1,000.');
+
+  assert.deepEqual(prices, ['£24', '£24.99', '£1,000']);
+});
+
+test('price snippet helper detects speed-like text near snippets', () => {
+  const { findSpeedLikeText } = require('./extract-price-snippets');
+
+  const speeds = findSpeedLikeText('Full Fibre 150 Mbps and Gig1 packages can also show 500Mb text.');
+
+  assert.deepEqual(speeds, ['150 Mbps', 'Gig1', '500Mb']);
+});
+
+test('price snippet helper detects contract-like text near snippets', () => {
+  const { findContractLikeText } = require('./extract-price-snippets');
+
+  const contracts = findContractLikeText('£29 per month on a 24 months plan or 12 month plan.');
+
+  assert.deepEqual(contracts, ['24 months', '12 month']);
+});
+
+test('price snippet helper detects reward, voucher, and cashback text near snippets', () => {
+  const { findRewardLikeText } = require('./extract-price-snippets');
+
+  const rewards = findRewardLikeText('Includes a voucher, cashback, reward card, and bill credit.');
+
+  assert.deepEqual(rewards, ['voucher', 'cashback', 'reward', 'bill credit']);
+});
+
+test('price snippet helper extracts nearby speed, contract, and reward context', () => {
+  const { extractPriceSnippetsFromText } = require('./extract-price-snippets');
+
+  const snippets = extractPriceSnippetsFromText('Full Fibre 150 Mbps costs £29.99 per month for 24 months with a voucher.', 5);
+
+  assert.equal(snippets.length, 1);
+  assert.equal(snippets[0].priceText, '£29.99');
+  assert.deepEqual(snippets[0].possibleSpeedText, ['150 Mbps']);
+  assert.deepEqual(snippets[0].possibleContractText, ['24 months']);
+  assert.deepEqual(snippets[0].possibleRewardText, ['voucher']);
+});
