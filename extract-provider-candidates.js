@@ -19,6 +19,9 @@ const {
 const INPUT_PATH = path.join(__dirname, 'exports', 'online-price-snippets.json');
 const JSON_OUTPUT_PATH = path.join(__dirname, 'exports', 'provider-deal-candidates.json');
 const CSV_OUTPUT_PATH = path.join(__dirname, 'exports', 'provider-deal-candidates.csv');
+const USABLE_OUTPUT_PATH = path.join(__dirname, 'exports', 'provider-deal-candidates-usable.json');
+const REVIEW_ONLY_OUTPUT_PATH = path.join(__dirname, 'exports', 'provider-deal-candidates-review-only.json');
+const DISCARDED_OUTPUT_PATH = path.join(__dirname, 'exports', 'provider-deal-candidates-discarded.json');
 
 const TARGET_SOURCE_IDS = new Set([
   'talktalk',
@@ -66,6 +69,7 @@ const CANDIDATE_COLUMNS = [
   'sourceUrl',
   'advertisedMonthlyPrice',
   'effectiveMonthlyPrice',
+  'sourceEffectiveMonthlyPrice',
   'contractLengthMonths',
   'annualAprilPriceRise',
   'firstAprilPrice',
@@ -90,6 +94,7 @@ const CANDIDATE_COLUMNS = [
   'totalContractCostBeforeRewards',
   'totalContractCostAfterRewards',
   'sourceSnippet',
+  'extractionQuality',
   'extractionConfidence',
   'requiresHumanReview',
   'availabilityScope',
@@ -143,6 +148,30 @@ function getSnippetText(snippet) {
   return normalizeWhitespace(snippet && (snippet.surroundingText || snippet.text || snippet.snippet || snippet.priceText));
 }
 
+function splitSnippetIntoCandidateBlocks(snippet, source) {
+  const sourceSnippet = getSnippetText(snippet);
+  if (!sourceSnippet || source.sourceId !== 'uswitch') {
+    return [snippet];
+  }
+
+  const providerPattern = PROVIDER_NAMES.map(escapeRegex).join('|');
+  const blockStartRegex = new RegExp(`\\b(?:${providerPattern})\\b(?=[^£]{0,120}(?:Full\\s+Fibre|Fibre|Gig1|Superfast|5G|Broadband|Mbps|£))`, 'gi');
+  const starts = [];
+  let match = blockStartRegex.exec(sourceSnippet);
+  while (match) {
+    starts.push(match.index);
+    match = blockStartRegex.exec(sourceSnippet);
+  }
+
+  if (starts.length <= 1) {
+    return [snippet];
+  }
+
+  return starts.map((start, index) => ({
+    surroundingText: normalizeWhitespace(sourceSnippet.slice(start, starts[index + 1] || sourceSnippet.length)),
+  }));
+}
+
 function extractProvider(source, sourceSnippet) {
   if (source.sourceType === 'provider-direct') {
     return source.name;
@@ -178,17 +207,26 @@ function extractSpeedMbps(sourceSnippet) {
 function extractPackageName(sourceSnippet, provider) {
   const providerPrefix = provider ? `(?:${escapeRegex(provider)}\\s+)?` : '';
   const packagePatterns = [
+    new RegExp(`${providerPrefix}(Full\\s+Fibre\\s+deals)`, 'i'),
     new RegExp(`${providerPrefix}(Full\\s+Fibre\\s+\\d{2,4})`, 'i'),
     new RegExp(`${providerPrefix}(Fibre\\s+\\d{1,4})`, 'i'),
     new RegExp(`${providerPrefix}(Gigafast\\s+\\d{2,4})`, 'i'),
     new RegExp(`${providerPrefix}(Pro\\s+\\d{2,4})`, 'i'),
+    /\b(Gig1\s+Fibre\s+broadband)\b/i,
+    /\b(Superfast\s+Broadband)\b/i,
+    /\b(5G\s+Broadband\s+\d{1,4})\b/i,
     /\b(Broadband\s+\d{2,4})\b/i,
   ];
 
   for (const pattern of packagePatterns) {
     const match = sourceSnippet.match(pattern);
     if (match) {
-      return normalizeWhitespace(match[1]).replace(/\bfull\b/gi, 'Full').replace(/\bfibre\b/gi, 'Fibre');
+      return normalizeWhitespace(match[1])
+        .replace(/\bfull\b/gi, 'Full')
+        .replace(/\bfibre\b/gi, 'Fibre')
+        .replace(/\bdeals\b/gi, 'deals')
+        .replace(/\bbroadband\b/gi, 'Broadband')
+        .replace(/\bsuperfast\b/gi, 'Superfast');
     }
   }
 
@@ -201,8 +239,20 @@ function extractPackageName(sourceSnippet, provider) {
 }
 
 function extractContractLengthMonths(sourceSnippet) {
-  const match = sourceSnippet.match(/\b(12|18|24|36)\s*(?:month|months|mth|mths)\b/i);
-  return match ? Number(match[1]) : null;
+  const contractPatterns = [
+    /\b(12|18|24|36)\s*-?\s*(?:month|months|mth|mths)\s*(?:contract|plan|minimum\s+term|term)\b/i,
+    /\bon\s+a\s+(12|18|24|36)\s*-?\s*(?:month|months|mth|mths)\s+plan\b/i,
+    /\bfor\s+(12|18|24|36)\s*-?\s*(?:month|months|mth|mths)\b/i,
+  ];
+
+  for (const pattern of contractPatterns) {
+    const match = sourceSnippet.match(pattern);
+    if (match) {
+      return Number(match[1]);
+    }
+  }
+
+  return null;
 }
 
 function textWindow(text, index, length, context = 60) {
@@ -210,11 +260,25 @@ function textWindow(text, index, length, context = 60) {
 }
 
 function priceLooksLikeRewardOrFee(sourceSnippet, price) {
-  const nearbyText = textWindow(sourceSnippet, price.index, price.text.length, 35).toLowerCase();
-  return /voucher|reward|cashback|gift\s*card|prepaid|mastercard|visa|credit|setup|set\s*up|activation|installation|delivery|router|fee|upfront/.test(nearbyText);
+  const tightText = textWindow(sourceSnippet, price.index, price.text.length, 24).toLowerCase();
+  if (/per\s+month|a\s+month|monthly|\/\s*month|pm\b|increase|increases|from\s+(?:april|march)|(?:1|31)(?:st)?\s+(?:april|march)/.test(tightText)) {
+    return false;
+  }
+
+  const nearbyText = textWindow(sourceSnippet, price.index, price.text.length, 45).toLowerCase();
+  if (/voucher|reward\s*card|cashback|gift\s*card|prepaid|mastercard|visa|bill\s*credit|account\s*credit/.test(nearbyText)) {
+    return true;
+  }
+
+  return /setup|set\s*-?\s*up|activation|installation|delivery|router\s*(?:fee|delivery)|fee|upfront\s*cost/.test(tightText) && !/per\s+month|a\s+month|monthly|\/\s*month|pm\b/.test(tightText);
 }
 
 function extractAdvertisedMonthlyPrice(sourceSnippet) {
+  const explicitMonthlyCost = /monthly\s+cost[^£]{0,40}(£\s*(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{1,2}|\s+\.\s*\d{1,2})?)/i.exec(sourceSnippet);
+  if (explicitMonthlyCost) {
+    return parsePoundPrice(explicitMonthlyCost[1]);
+  }
+
   const prices = findPoundPrices(sourceSnippet);
   const monthlyPrice = prices.find((price) => {
     if (price.value === null || price.value > 200) {
@@ -222,7 +286,7 @@ function extractAdvertisedMonthlyPrice(sourceSnippet) {
     }
 
     const nearbyText = textWindow(sourceSnippet, price.index, price.text.length).toLowerCase();
-    return /per\s+month|a\s+month|monthly|\/\s*month|pm\b|month/.test(nearbyText) && !priceLooksLikeRewardOrFee(sourceSnippet, price);
+    return /per\s+month|a\s+month|monthly|\/\s*month|pm\b|month/.test(nearbyText);
   }) || prices.find((price) => price.value !== null && price.value <= 200 && !priceLooksLikeRewardOrFee(sourceSnippet, price));
 
   return monthlyPrice ? monthlyPrice.value : null;
@@ -236,9 +300,11 @@ function extractMonthlyPriceSequence(sourceSnippet) {
 
 function extractAnnualRiseFromText(sourceSnippet) {
   const explicitRisePatterns = [
-    /(?:increase|rise|rises|rising|go(?:es)?\s+up|add(?:ed)?)\s*(?:by)?\s*£\s?(\d+(?:\.\d{1,2})?)\s*(?:each|every)?\s*April/i,
-    /£\s?(\d+(?:\.\d{1,2})?)\s*(?:increase|rise)\s*(?:each|every)?\s*April/i,
-    /£\s?(\d+(?:\.\d{1,2})?)\s*(?:a\s+month\s*)?(?:each|every)\s*April/i,
+    /(?:price|plan|monthly\s+plan|monthly\s+price)[^.]{0,90}(?:annually|annual|each|every)[^.]{0,60}by\s*(£\s*(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{1,2}|\s+\.\s*\d{1,2})?)/i,
+    /(?:price|plan|monthly\s+plan|monthly\s+price)[^£]{0,80}(?:increase|increases|rise|rises|rising)[^£]{0,40}by\s*(£\s*(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{1,2}|\s+\.\s*\d{1,2})?)/i,
+    /(?:increase|increases|rise|rises|rising|go(?:es)?\s+up|add(?:ed)?)[^£]{0,40}by\s*(£\s*(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{1,2}|\s+\.\s*\d{1,2})?)[^.]*(?:April|March|annually|annual|contract)/i,
+    /(£\s*(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{1,2}|\s+\.\s*\d{1,2})?)[^.]*(?:increase|rise)[^.]*(?:each|every|annually|annual)[^.]*(?:April|March|contract)/i,
+    /(£\s*(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{1,2}|\s+\.\s*\d{1,2})?)[^.]*(?:a\s+month\s*)?(?:each|every)\s*April/i,
   ];
 
   for (const pattern of explicitRisePatterns) {
@@ -252,6 +318,16 @@ function extractAnnualRiseFromText(sourceSnippet) {
 }
 
 function extractAprilPrices(sourceSnippet, advertisedMonthlyPrice) {
+  const annualRiseFromText = extractAnnualRiseFromText(sourceSnippet);
+  if (annualRiseFromText !== null) {
+    return {
+      annualAprilPriceRise: annualRiseFromText,
+      firstAprilPrice: advertisedMonthlyPrice === null ? null : roundMoney(advertisedMonthlyPrice + annualRiseFromText),
+      secondAprilPrice: advertisedMonthlyPrice === null ? null : roundMoney(advertisedMonthlyPrice + (annualRiseFromText * 2)),
+      warning: null,
+    };
+  }
+
   const sequence = extractMonthlyPriceSequence(sourceSnippet);
 
   if (sequence.length >= 3) {
@@ -265,16 +341,6 @@ function extractAprilPrices(sourceSnippet, advertisedMonthlyPrice) {
     };
   }
 
-  const annualRiseFromText = extractAnnualRiseFromText(sourceSnippet);
-  if (annualRiseFromText !== null) {
-    return {
-      annualAprilPriceRise: annualRiseFromText,
-      firstAprilPrice: advertisedMonthlyPrice === null ? null : roundMoney(advertisedMonthlyPrice + annualRiseFromText),
-      secondAprilPrice: advertisedMonthlyPrice === null ? null : roundMoney(advertisedMonthlyPrice + (annualRiseFromText * 2)),
-      warning: null,
-    };
-  }
-
   return {
     annualAprilPriceRise: null,
     firstAprilPrice: null,
@@ -283,17 +349,19 @@ function extractAprilPrices(sourceSnippet, advertisedMonthlyPrice) {
   };
 }
 
+const POUND_PRICE_PATTERN = '£\\s*(?:\\d{1,3}(?:,\\d{3})+|\\d+)(?:\\s*\\.\\s*\\d{1,2})?';
+
 function extractFee(sourceSnippet, feeLabelPattern) {
   if (new RegExp(`(?:no|free)\\s+(?:${feeLabelPattern})`, 'i').test(sourceSnippet)) {
     return 0;
   }
 
-  const afterLabel = new RegExp(`(?:${feeLabelPattern})[^£]{0,30}(£\\s?\\d+(?:\\.\\d{1,2})?)`, 'i').exec(sourceSnippet);
+  const afterLabel = new RegExp(`(?:${feeLabelPattern})[^£.]{0,40}(${POUND_PRICE_PATTERN})`, 'i').exec(sourceSnippet);
   if (afterLabel) {
     return parsePoundPrice(afterLabel[1]);
   }
 
-  const beforeLabel = new RegExp(`(£\\s?\\d+(?:\\.\\d{1,2})?)[^£]{0,30}(?:${feeLabelPattern})`, 'i').exec(sourceSnippet);
+  const beforeLabel = new RegExp(`(${POUND_PRICE_PATTERN})[^£.]{0,40}(?:${feeLabelPattern})`, 'i').exec(sourceSnippet);
   if (beforeLabel) {
     return parsePoundPrice(beforeLabel[1]);
   }
@@ -303,10 +371,10 @@ function extractFee(sourceSnippet, feeLabelPattern) {
 
 function extractDiscountsAndFees(sourceSnippet) {
   const values = { ...EMPTY_MONEY_FIELDS };
-  values.setupFee = extractFee(sourceSnippet, 'set\\s*up|setup|upfront');
+  values.setupFee = extractFee(sourceSnippet, 'set\\s*-?\\s*up\\s*(?:cost|fee)?|setup\\s*(?:cost|fee)?|upfront\\s*cost');
   values.installationFee = extractFee(sourceSnippet, 'installation|install');
   values.deliveryFee = extractFee(sourceSnippet, 'delivery');
-  values.routerFee = extractFee(sourceSnippet, 'router');
+  values.routerFee = extractFee(sourceSnippet, 'router\\s*(?:fee|delivery|postage|shipping)');
   values.activationFee = extractFee(sourceSnippet, 'activation');
 
   const prices = findPoundPrices(sourceSnippet);
@@ -316,13 +384,31 @@ function extractDiscountsAndFees(sourceSnippet) {
     }
 
     const nearbyText = textWindow(sourceSnippet, price.index, price.text.length, 70).toLowerCase();
-    if (/reward\s*card|prepaid\s*card|mastercard|visa/.test(nearbyText)) {
+    const tightText = textWindow(sourceSnippet, price.index, price.text.length, 28).toLowerCase();
+    const afterText = sourceSnippet.slice(price.index + price.text.length, price.index + price.text.length + 35).toLowerCase();
+    if (/reward\s*card|prepaid\s*card|mastercard|visa/.test(afterText)) {
       values.rewardCardValue = Math.max(values.rewardCardValue || 0, price.value);
-    } else if (/voucher|gift\s*card/.test(nearbyText)) {
+    } else if (/voucher|gift\s*card/.test(afterText)) {
+      values.voucherValue = Math.max(values.voucherValue || 0, price.value);
+    } else if (/cashback/.test(afterText)) {
+      values.cashbackValue = Math.max(values.cashbackValue || 0, price.value);
+    } else if (/bill\s*credit|account\s*credit|early\s*switch\s*credit|credit/.test(afterText)) {
+      values.billCreditValue = Math.max(values.billCreditValue || 0, price.value);
+    } else if (/reward\s*card|prepaid\s*card|mastercard|visa/.test(tightText)) {
+      values.rewardCardValue = Math.max(values.rewardCardValue || 0, price.value);
+    } else if (/voucher|gift\s*card/.test(tightText) && price.value < 150) {
+      values.voucherValue = Math.max(values.voucherValue || 0, price.value);
+    } else if (/cashback/.test(tightText)) {
+      values.cashbackValue = Math.max(values.cashbackValue || 0, price.value);
+    } else if (/bill\s*credit|account\s*credit|early\s*switch\s*credit|credit/.test(tightText)) {
+      values.billCreditValue = Math.max(values.billCreditValue || 0, price.value);
+    } else if (/reward\s*card|prepaid\s*card|mastercard|visa/.test(nearbyText)) {
+      values.rewardCardValue = Math.max(values.rewardCardValue || 0, price.value);
+    } else if (/voucher|gift\s*card/.test(nearbyText) && price.value < 150) {
       values.voucherValue = Math.max(values.voucherValue || 0, price.value);
     } else if (/cashback/.test(nearbyText)) {
       values.cashbackValue = Math.max(values.cashbackValue || 0, price.value);
-    } else if (/bill\s*credit|account\s*credit|credit/.test(nearbyText)) {
+    } else if (/bill\s*credit|account\s*credit|early\s*switch\s*credit|credit/.test(nearbyText)) {
       values.billCreditValue = Math.max(values.billCreditValue || 0, price.value);
     }
   });
@@ -341,8 +427,28 @@ function extractDiscountsAndFees(sourceSnippet) {
 function canCalculateReliablePrice(candidate) {
   return candidate.advertisedMonthlyPrice !== null &&
     candidate.contractLengthMonths !== null &&
-    candidate.annualAprilPriceRise !== null &&
-    candidate.setupFee !== null;
+    candidate.annualAprilPriceRise !== null;
+}
+
+function extractSourceEffectiveMonthlyPrice(sourceSnippet) {
+  const match = /effective\s+monthly\s+cost[^£]{0,40}(£\s*(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{1,2}|\s+\.\s*\d{1,2})?)/i.exec(sourceSnippet);
+  return match ? parsePoundPrice(match[1]) : null;
+}
+
+function getExtractionQuality(candidate) {
+  if (!candidate.provider || !candidate.packageName || candidate.advertisedMonthlyPrice === null) {
+    return 'discarded-noisy';
+  }
+
+  if (candidate.effectiveMonthlyPrice !== null && candidate.provider && candidate.packageName && candidate.advertisedMonthlyPrice !== null && candidate.contractLengthMonths !== null && candidate.annualAprilPriceRise !== null) {
+    return 'usable-calculated';
+  }
+
+  if (candidate.sourceEffectiveMonthlyPrice !== null) {
+    return 'usable-source-effective-only';
+  }
+
+  return 'review-only-missing-fields';
 }
 
 function addCalculatedFields(candidate, extractedAt) {
@@ -426,6 +532,7 @@ function extractProviderCandidateFromSnippet(snippet, source, extractedAt = new 
     sourceUrl: source.finalUrl || source.candidateBroadbandUrl || source.sourceUrl || '',
     advertisedMonthlyPrice,
     effectiveMonthlyPrice: null,
+    sourceEffectiveMonthlyPrice: extractSourceEffectiveMonthlyPrice(sourceSnippet),
     contractLengthMonths,
     annualAprilPriceRise: priceRise.annualAprilPriceRise,
     firstAprilPrice: priceRise.firstAprilPrice,
@@ -453,12 +560,14 @@ function extractProviderCandidateFromSnippet(snippet, source, extractedAt = new 
   }
   baseCandidate.extractionConfidence = getExtractionConfidence(baseCandidate);
 
-  if (!baseCandidate.provider || !baseCandidate.packageName || baseCandidate.advertisedMonthlyPrice === null || baseCandidate.speedMbps === null) {
+  if (!baseCandidate.provider || !baseCandidate.packageName || baseCandidate.advertisedMonthlyPrice === null) {
     return null;
   }
 
   baseCandidate.candidateId = createCandidateId(baseCandidate);
   const calculatedCandidate = addCalculatedFields(baseCandidate, extractedAt);
+
+  calculatedCandidate.extractionQuality = getExtractionQuality(calculatedCandidate);
 
   if (calculatedCandidate.effectiveMonthlyPrice === null) {
     calculatedCandidate.extractionConfidence = 'low';
@@ -468,6 +577,7 @@ function extractProviderCandidateFromSnippet(snippet, source, extractedAt = new 
     ])];
   }
 
+  calculatedCandidate.extractionQuality = getExtractionQuality(calculatedCandidate);
   return calculatedCandidate;
 }
 
@@ -503,18 +613,20 @@ function buildProviderCandidates(snippetReport, extractedAt = new Date().toISOSt
       });
 
       snippets.forEach((snippet) => {
-        const candidate = extractProviderCandidateFromSnippet(snippet, source, extractedAt);
-        if (!candidate) {
-          return;
-        }
+        splitSnippetIntoCandidateBlocks(snippet, source).forEach((candidateBlock) => {
+          const candidate = extractProviderCandidateFromSnippet(candidateBlock, source, extractedAt);
+          if (!candidate) {
+            return;
+          }
 
-        if (seenIds.has(candidate.candidateId)) {
-          return;
-        }
+          if (seenIds.has(candidate.candidateId)) {
+            return;
+          }
 
-        seenIds.add(candidate.candidateId);
-        candidates.push(candidate);
-        candidatesCreated += 1;
+          seenIds.add(candidate.candidateId);
+          candidates.push(candidate);
+          candidatesCreated += 1;
+        });
       });
 
       sourceSummary.push({
@@ -560,6 +672,24 @@ function csvEscape(value) {
   return stringValue;
 }
 
+function splitCandidatesByQuality(candidates) {
+  const usableQualities = new Set(['usable-calculated', 'usable-source-effective-only']);
+  return {
+    usableCandidates: candidates.filter((candidate) => usableQualities.has(candidate.extractionQuality)),
+    reviewOnlyCandidates: candidates.filter((candidate) => candidate.extractionQuality === 'review-only-missing-fields'),
+    discardedCandidates: candidates.filter((candidate) => candidate.extractionQuality === 'discarded-noisy'),
+  };
+}
+
+function candidateOutput(candidates, result, generatedAt) {
+  return {
+    candidates,
+    sourceSummary: result.sourceSummary,
+    warningMessages: result.warningMessages,
+    generatedAt,
+  };
+}
+
 function writeCsvFile(filePath, candidates) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   const rows = [
@@ -581,14 +711,13 @@ function extractProviderCandidates() {
     }
     : buildProviderCandidates(snippetReport, extractedAt);
 
-  const output = {
-    candidates: result.candidates,
-    sourceSummary: result.sourceSummary,
-    warningMessages: result.warningMessages,
-    generatedAt: extractedAt,
-  };
+  const output = candidateOutput(result.candidates, result, extractedAt);
+  const { usableCandidates, reviewOnlyCandidates, discardedCandidates } = splitCandidatesByQuality(output.candidates);
 
   writeJsonFile(JSON_OUTPUT_PATH, output);
+  writeJsonFile(USABLE_OUTPUT_PATH, candidateOutput(usableCandidates, result, extractedAt));
+  writeJsonFile(REVIEW_ONLY_OUTPUT_PATH, candidateOutput(reviewOnlyCandidates, result, extractedAt));
+  writeJsonFile(DISCARDED_OUTPUT_PATH, candidateOutput(discardedCandidates, result, extractedAt));
   writeCsvFile(CSV_OUTPUT_PATH, output.candidates);
 
   return output;
@@ -602,6 +731,9 @@ function main() {
   console.log(`Candidates created: ${output.candidates.length}`);
   console.log(`JSON created: ${path.relative(__dirname, JSON_OUTPUT_PATH)}`);
   console.log(`CSV created: ${path.relative(__dirname, CSV_OUTPUT_PATH)}`);
+  console.log(`Usable JSON created: ${path.relative(__dirname, USABLE_OUTPUT_PATH)}`);
+  console.log(`Review-only JSON created: ${path.relative(__dirname, REVIEW_ONLY_OUTPUT_PATH)}`);
+  console.log(`Discarded JSON created: ${path.relative(__dirname, DISCARDED_OUTPUT_PATH)}`);
 
   if (output.warningMessages.length > 0) {
     console.log('Warnings:');
@@ -619,6 +751,8 @@ module.exports = {
   extractAnnualRiseFromText,
   extractProviderCandidateFromSnippet,
   extractProviderCandidates,
+  splitCandidatesByQuality,
   getSnippetText,
+  splitSnippetIntoCandidateBlocks,
   slugify,
 };

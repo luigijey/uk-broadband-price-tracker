@@ -19,6 +19,9 @@ const commands = [
 const summaryFiles = {
   snippets: path.join(rootFolder, 'exports', 'online-price-snippets.json'),
   providerCandidates: path.join(rootFolder, 'exports', 'provider-deal-candidates.json'),
+  usableProviderCandidates: path.join(rootFolder, 'exports', 'provider-deal-candidates-usable.json'),
+  reviewOnlyProviderCandidates: path.join(rootFolder, 'exports', 'provider-deal-candidates-review-only.json'),
+  discardedProviderCandidates: path.join(rootFolder, 'exports', 'provider-deal-candidates-discarded.json'),
   siteIndex: path.join(rootFolder, 'site', 'index.html'),
 };
 
@@ -35,6 +38,9 @@ function buildActiveBuildSummary(files = summaryFiles) {
   return {
     snippetsFileExists: fs.existsSync(files.snippets),
     providerCandidatesFileExists: fs.existsSync(files.providerCandidates),
+    usableProviderCandidatesFileExists: fs.existsSync(files.usableProviderCandidates),
+    reviewOnlyProviderCandidatesFileExists: fs.existsSync(files.reviewOnlyProviderCandidates),
+    discardedProviderCandidatesFileExists: fs.existsSync(files.discardedProviderCandidates),
     candidateCount: readCandidateCount(files.providerCandidates),
     siteIndexCreated: fs.existsSync(files.siteIndex),
   };
@@ -45,6 +51,9 @@ function printActiveBuildSummary(summary) {
   console.log('====================');
   console.log(`Snippets file exists: ${summary.snippetsFileExists ? 'yes' : 'no'}`);
   console.log(`Provider candidates file exists: ${summary.providerCandidatesFileExists ? 'yes' : 'no'}`);
+  console.log(`Usable provider candidates file exists: ${summary.usableProviderCandidatesFileExists ? 'yes' : 'no'}`);
+  console.log(`Review-only provider candidates file exists: ${summary.reviewOnlyProviderCandidatesFileExists ? 'yes' : 'no'}`);
+  console.log(`Discarded provider candidates file exists: ${summary.discardedProviderCandidatesFileExists ? 'yes' : 'no'}`);
   console.log(`Provider candidate count: ${summary.candidateCount === null ? 'unknown' : summary.candidateCount}`);
   console.log(`site/index.html created: ${summary.siteIndexCreated ? 'yes' : 'no'}`);
 }
