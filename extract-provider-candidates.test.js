@@ -185,7 +185,30 @@ test('extracts conservative Plusnet landing-page candidate when contract text is
   assert.equal(candidate.annualAprilPriceRise, 4);
   assert.equal(candidate.rewardCardValue, 100);
   assert.equal(candidate.contractLengthMonths, 24);
-  assert.equal(candidate.effectiveMonthlyPrice, 21.49);
+  assert.equal(candidate.effectiveMonthlyPrice, null);
+  assert.equal(candidate.extractionQuality, 'review-only-missing-fields');
+});
+
+
+test('Sky standard prices are review-first and not promoted as advertised new-customer prices', () => {
+  const skySource = { sourceId: 'sky', name: 'Sky', sourceType: 'provider-direct', candidateBroadbandUrl: 'https://www.sky.com/broadband' };
+  const candidate = extractProviderCandidateFromSnippet({ surroundingText: 'Sky Superfast Broadband 67 Mbps standard price £43 a month after contract. Price rises by £4 each April. No setup fee. 24 month contract.' }, skySource, extractedAt);
+
+  assert.equal(candidate.provider, 'Sky');
+  assert.equal(candidate.extractionQuality, 'review-only-quality-gate');
+  assert.match(candidate.extractionWarnings.join(' '), /standard or out-of-contract price/);
+});
+
+test('Plusnet reward card and price-rise values are preserved while missing speed remains review-only', () => {
+  const candidate = extractProviderCandidateFromSnippet({ surroundingText: 'Plusnet Full Fibre deals from £22.99 a month £26.99 from 31 March 2027 £30.99 from 31 March 2028 £100 Plusnet Reward Card. annual plan price increase by £4. 24 month contract.' }, plusnetSource, extractedAt);
+
+  assert.equal(candidate.rewardCardValue, 100);
+  assert.equal(candidate.advertisedMonthlyPrice, 22.99);
+  assert.equal(candidate.firstAprilPrice, 26.99);
+  assert.equal(candidate.secondAprilPrice, 30.99);
+  assert.equal(candidate.annualAprilPriceRise, 4);
+  assert.equal(candidate.speedMbps, null);
+  assert.equal(candidate.extractionQuality, 'review-only-missing-fields');
 });
 
 test('splits Uswitch snippets into provider-safe blocks and extracts representative deals', () => {
@@ -374,15 +397,20 @@ test('provider-direct expansion summary includes product category counts', () =>
     unknownProductCandidates: 1,
   });
 
-  assert.deepEqual(buildProviderDirectExpansionSummary(candidates, extractedAt), {
-    generatedAt: extractedAt,
-    totalCandidates: 7,
-    fixedBroadbandCandidates: 1,
-    landlineCandidates: 2,
-    callsPackageCandidates: 1,
-    fiveGHomeBroadbandCandidates: 1,
-    tvBundleCandidates: 1,
-    mobileBundleCandidates: 1,
-    unknownProductCandidates: 1,
+  const expansionSummary = buildProviderDirectExpansionSummary(candidates, extractedAt);
+  assert.equal(expansionSummary.generatedAt, extractedAt);
+  assert.equal(expansionSummary.totalCandidates, 7);
+  assert.equal(expansionSummary.fixedBroadbandCandidates, 1);
+  assert.equal(expansionSummary.landlineCandidates, 2);
+  assert.equal(expansionSummary.callsPackageCandidates, 1);
+  assert.equal(expansionSummary.fiveGHomeBroadbandCandidates, 1);
+  assert.equal(expansionSummary.tvBundleCandidates, 1);
+  assert.equal(expansionSummary.mobileBundleCandidates, 1);
+  assert.equal(expansionSummary.unknownProductCandidates, 1);
+  assert.equal(expansionSummary.providers.length, 5);
+  expansionSummary.providers.forEach((row) => {
+    ['provider', 'snippetsAvailable', 'candidatesCreated', 'usableCandidates', 'reviewOnlyCandidates', 'fixedBroadbandCandidates', 'landlineCandidates', 'callsPackageCandidates', 'fiveGHomeBroadbandCandidates', 'tvBundleCandidates', 'mobileBundleCandidates', 'unknownProductCandidates', 'reasonNotUsable'].forEach((field) => {
+      assert.ok(Object.hasOwn(row, field), field);
+    });
   });
 });

@@ -1,0 +1,136 @@
+{
+  "generatedAt": "2026-06-03T17:03:15.584Z",
+  "supportedPostcodeAreas": [
+    {
+      "postcodeArea": "SW",
+      "regionName": "London",
+      "country": "England"
+    },
+    {
+      "postcodeArea": "SE",
+      "regionName": "London",
+      "country": "England"
+    },
+    {
+      "postcodeArea": "NW",
+      "regionName": "London",
+      "country": "England"
+    },
+    {
+      "postcodeArea": "N",
+      "regionName": "London",
+      "country": "England"
+    },
+    {
+      "postcodeArea": "E",
+      "regionName": "London",
+      "country": "England"
+    },
+    {
+      "postcodeArea": "W",
+      "regionName": "London",
+      "country": "England"
+    },
+    {
+      "postcodeArea": "EC",
+      "regionName": "London",
+      "country": "England"
+    },
+    {
+      "postcodeArea": "WC",
+      "regionName": "London",
+      "country": "England"
+    },
+    {
+      "postcodeArea": "OX",
+      "regionName": "South East England",
+      "country": "England"
+    },
+    {
+      "postcodeArea": "SO",
+      "regionName": "South East England",
+      "country": "England"
+    },
+    {
+      "postcodeArea": "BN",
+      "regionName": "South East England",
+      "country": "England"
+    },
+    {
+      "postcodeArea": "MK",
+      "regionName": "South East England",
+      "country": "England"
+    },
+    {
+      "postcodeArea": "RG",
+      "regionName": "South East England",
+      "country": "England"
+    },
+    {
+      "postcodeArea": "CB",
+      "regionName": "East of England",
+      "country": "England"
+    },
+    {
+      "postcodeArea": "B",
+      "regionName": "West Midlands",
+      "country": "England"
+    },
+    {
+      "postcodeArea": "NG",
+      "regionName": "East Midlands",
+      "country": "England"
+    },
+    {
+      "postcodeArea": "BS",
+      "regionName": "South West England",
+      "country": "England"
+    },
+    {
+      "postcodeArea": "CF",
+      "regionName": "South Wales",
+      "country": "Wales"
+    },
+    {
+      "postcodeArea": "G",
+      "regionName": "Scotland",
+      "country": "Scotland"
+    },
+    {
+      "postcodeArea": "EH",
+      "regionName": "Scotland",
+      "country": "Scotland"
+    },
+    {
+      "postcodeArea": "M",
+      "regionName": "North West England",
+      "country": "England"
+    },
+    {
+      "postcodeArea": "L",
+      "regionName": "North West England",
+      "country": "England"
+    },
+    {
+      "postcodeArea": "LS",
+      "regionName": "Yorkshire and the Humber",
+      "country": "England"
+    },
+    {
+      "postcodeArea": "NE",
+      "regionName": "North East England",
+      "country": "England"
+    },
+    {
+      "postcodeArea": "S",
+      "regionName": "Yorkshire and the Humber",
+      "country": "England"
+    }
+  ],
+  "supportedPostcodeAreaCount": 25,
+  "rowsAvailable": 0,
+  "warningMessages": [
+    "Postcode Check V1 extracts postcode area locally in the browser only.",
+    "These results are not provider-level availability checks yet. They are active national candidate deals grouped by postcode area."
+  ]
+}

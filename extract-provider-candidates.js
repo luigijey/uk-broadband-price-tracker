@@ -26,6 +26,7 @@ const DISCARDED_OUTPUT_PATH = path.join(__dirname, 'exports', 'provider-deal-can
 const PROVIDER_DIRECT_EXPANSION_SUMMARY_PATH = path.join(__dirname, 'exports', 'provider-direct-expansion-summary.json');
 
 const COMPARISON_SOURCES_REQUIRING_SAME_PROVIDER_BLOCK = new Set(['uswitch', 'broadband-genie']);
+const PROVIDER_DIRECT_EXPANSION_PROVIDERS = ['Sky', 'Plusnet', 'EE', 'Hyperoptic', 'Community Fibre'];
 const MAX_USABLE_ANNUAL_APRIL_PRICE_RISE = 6;
 const QUALITY_GATE_WARNING_PREFIX = 'Quality gate:';
 
@@ -34,6 +35,10 @@ const TARGET_SOURCE_IDS = new Set([
   'vodafone',
   'bt',
   'plusnet',
+  'sky',
+  'ee',
+  'hyperoptic',
+  'community-fibre',
   'broadband-genie',
   'uswitch',
 ]);
@@ -223,6 +228,7 @@ function extractPackageName(sourceSnippet, provider) {
     /\b(Gig1\s+Fibre\s+broadband)\b/i,
     /\b(Superfast\s+Broadband)\b/i,
     /\b(5G\s+Broadband\s+\d{1,4})\b/i,
+    /\b(M\d{2,4})\b/i,
     /\b(Broadband\s+\d{2,4})\b/i,
   ];
 
@@ -441,6 +447,8 @@ function canCalculateReliablePrice(candidate) {
   return candidate.advertisedMonthlyPrice !== null &&
     candidate.contractLengthMonths !== null &&
     candidate.annualAprilPriceRise !== null &&
+    candidate.speedMbps !== null &&
+    candidate.setupFee !== null &&
     !hasQualityGateWarning(candidate);
 }
 
@@ -515,11 +523,34 @@ function buildQualityGateWarnings(candidate) {
     warnings.push(`${QUALITY_GATE_WARNING_PREFIX} April price sequence was ambiguous: ${candidate.priceRiseWarning}`);
   }
 
+  if (candidate.sourceId === 'sky' && /out\s*-?\s*of\s*-?\s*contract|standard\s+price|standard\s+monthly|after\s+contract/i.test(candidate.sourceSnippet)) {
+    warnings.push(`${QUALITY_GATE_WARNING_PREFIX} Sky standard or out-of-contract price wording is review-only and is not treated as an advertised new-customer price.`);
+  }
+
   if (COMPARISON_SOURCES_REQUIRING_SAME_PROVIDER_BLOCK.has(candidate.sourceId)) {
     const providersInSnippet = detectProviderNames(candidate.sourceSnippet);
     const otherProviders = providersInSnippet.filter((providerName) => providerName !== candidate.provider);
     if (otherProviders.length > 0) {
       warnings.push(`${QUALITY_GATE_WARNING_PREFIX} comparison-site snippet mentions multiple providers (${providersInSnippet.join(', ')}), so price/package/reward details cannot be tied to one clean ${candidate.provider} deal block.`);
+    }
+  }
+
+  if (candidate.sourceId === 'uswitch') {
+    const normalizedSnippet = normalizeWhitespace(candidate.sourceSnippet).toLowerCase();
+    const normalizedStart = normalizedSnippet.slice(0, 120);
+    const normalizedProvider = String(candidate.provider || '').toLowerCase();
+    const normalizedPackage = String(candidate.packageName || '').toLowerCase();
+    const startsWithDeal = normalizedStart.startsWith(normalizedProvider) || normalizedStart.startsWith(`${normalizedProvider} ${normalizedPackage}`) || normalizedStart.startsWith(normalizedPackage);
+    if (!startsWithDeal && /tv|premium|channels|hbo|netflix|voucher|bundle|sport|cinema/.test(normalizedStart)) {
+      warnings.push(`${QUALITY_GATE_WARNING_PREFIX} Uswitch block starts with bundle, TV, voucher, or unrelated text before the extracted deal.`);
+    }
+    if (/vodafone/i.test(candidate.provider || '') && /5g\s+broadband\s+50/i.test(candidate.packageName || '') && !/^vodafone\s+5g\s+broadband\s+50\b/i.test(normalizeWhitespace(candidate.sourceSnippet))) {
+      warnings.push(`${QUALITY_GATE_WARNING_PREFIX} Vodafone 5G Broadband 50 block is not cleanly isolated at the start of the snippet.`);
+    }
+    if (/virgin\s+media/i.test(candidate.provider || '') && /(m125|broadband\s+132)/i.test(`${candidate.packageName || ''} ${candidate.sourceSnippet || ''}`)) {
+      if (!/(virgin\s+media).{0,80}(m125|broadband\s+132)|(m125|broadband\s+132).{0,80}(virgin\s+media)/i.test(candidate.sourceSnippet || '') || !/132\s*mbps/i.test(candidate.sourceSnippet || '')) {
+        warnings.push(`${QUALITY_GATE_WARNING_PREFIX} Virgin Media Broadband 132/M125 block is incomplete and remains review-only.`);
+      }
     }
   }
 
@@ -738,11 +769,45 @@ function buildProductCategorySummary(candidates) {
   return summary;
 }
 
-function buildProviderDirectExpansionSummary(candidates, generatedAt) {
+function reasonNotUsableForProvider(providerCandidates, snippetsAvailable) {
+  if (snippetsAvailable === 0) {
+    return 'No snippets available from the polite source-access step.';
+  }
+
+  if (providerCandidates.length === 0) {
+    return 'Snippets were available, but no candidate with provider, package, and advertised monthly price could be extracted.';
+  }
+
+  if (providerCandidates.some((candidate) => candidate.extractionQuality === 'usable-calculated')) {
+    return '';
+  }
+
+  const warnings = [...new Set(providerCandidates.flatMap((candidate) => Array.isArray(candidate.extractionWarnings) ? candidate.extractionWarnings : []))];
+  return warnings.find((warning) => /Sky standard|out-of-contract|contract length|speed|annual April|setup fee|Quality gate/i.test(warning)) || 'Core fields were not reliable enough for usable-calculated promotion.';
+}
+
+function buildProviderDirectExpansionSummary(candidates, generatedAt, sourceSummary = []) {
+  const rows = PROVIDER_DIRECT_EXPANSION_PROVIDERS.map((provider) => {
+    const providerCandidates = candidates.filter((candidate) => candidate.provider === provider && candidate.sourceType === 'provider-direct');
+    const matchingSource = sourceSummary.find((source) => source.sourceName === provider || source.sourceId === slugify(provider));
+    const categorySummary = buildProductCategorySummary(providerCandidates);
+
+    return {
+      provider,
+      snippetsAvailable: matchingSource ? matchingSource.snippetsAvailable : 0,
+      candidatesCreated: providerCandidates.length,
+      usableCandidates: providerCandidates.filter((candidate) => candidate.extractionQuality === 'usable-calculated').length,
+      reviewOnlyCandidates: providerCandidates.filter((candidate) => String(candidate.extractionQuality || '').startsWith('review-only')).length,
+      ...categorySummary,
+      reasonNotUsable: reasonNotUsableForProvider(providerCandidates, matchingSource ? matchingSource.snippetsAvailable : 0),
+    };
+  });
+
   return {
     generatedAt,
     totalCandidates: candidates.length,
     ...buildProductCategorySummary(candidates),
+    providers: rows,
   };
 }
 
@@ -819,7 +884,7 @@ function extractProviderCandidates() {
   writeJsonFile(REVIEW_ONLY_OUTPUT_PATH, candidateOutput(reviewOnlyCandidates, result, extractedAt));
   writeJsonFile(DISCARDED_OUTPUT_PATH, candidateOutput(discardedCandidates, result, extractedAt));
   writeCsvFile(CSV_OUTPUT_PATH, output.candidates);
-  writeJsonFile(PROVIDER_DIRECT_EXPANSION_SUMMARY_PATH, buildProviderDirectExpansionSummary(output.candidates, extractedAt));
+  writeJsonFile(PROVIDER_DIRECT_EXPANSION_SUMMARY_PATH, buildProviderDirectExpansionSummary(output.candidates, extractedAt, result.sourceSummary));
 
   return output;
 }

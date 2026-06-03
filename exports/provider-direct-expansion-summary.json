@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-03T15:59:59.621Z",
+  "generatedAt": "2026-06-03T17:03:14.732Z",
   "totalCandidates": 0,
   "fixedBroadbandCandidates": 0,
   "landlineCandidates": 0,
@@ -7,5 +7,82 @@
   "fiveGHomeBroadbandCandidates": 0,
   "tvBundleCandidates": 0,
   "mobileBundleCandidates": 0,
-  "unknownProductCandidates": 0
+  "unknownProductCandidates": 0,
+  "providers": [
+    {
+      "provider": "Sky",
+      "snippetsAvailable": 0,
+      "candidatesCreated": 0,
+      "usableCandidates": 0,
+      "reviewOnlyCandidates": 0,
+      "fixedBroadbandCandidates": 0,
+      "landlineCandidates": 0,
+      "callsPackageCandidates": 0,
+      "fiveGHomeBroadbandCandidates": 0,
+      "tvBundleCandidates": 0,
+      "mobileBundleCandidates": 0,
+      "unknownProductCandidates": 0,
+      "reasonNotUsable": "No snippets available from the polite source-access step."
+    },
+    {
+      "provider": "Plusnet",
+      "snippetsAvailable": 0,
+      "candidatesCreated": 0,
+      "usableCandidates": 0,
+      "reviewOnlyCandidates": 0,
+      "fixedBroadbandCandidates": 0,
+      "landlineCandidates": 0,
+      "callsPackageCandidates": 0,
+      "fiveGHomeBroadbandCandidates": 0,
+      "tvBundleCandidates": 0,
+      "mobileBundleCandidates": 0,
+      "unknownProductCandidates": 0,
+      "reasonNotUsable": "No snippets available from the polite source-access step."
+    },
+    {
+      "provider": "EE",
+      "snippetsAvailable": 0,
+      "candidatesCreated": 0,
+      "usableCandidates": 0,
+      "reviewOnlyCandidates": 0,
+      "fixedBroadbandCandidates": 0,
+      "landlineCandidates": 0,
+      "callsPackageCandidates": 0,
+      "fiveGHomeBroadbandCandidates": 0,
+      "tvBundleCandidates": 0,
+      "mobileBundleCandidates": 0,
+      "unknownProductCandidates": 0,
+      "reasonNotUsable": "No snippets available from the polite source-access step."
+    },
+    {
+      "provider": "Hyperoptic",
+      "snippetsAvailable": 0,
+      "candidatesCreated": 0,
+      "usableCandidates": 0,
+      "reviewOnlyCandidates": 0,
+      "fixedBroadbandCandidates": 0,
+      "landlineCandidates": 0,
+      "callsPackageCandidates": 0,
+      "fiveGHomeBroadbandCandidates": 0,
+      "tvBundleCandidates": 0,
+      "mobileBundleCandidates": 0,
+      "unknownProductCandidates": 0,
+      "reasonNotUsable": "No snippets available from the polite source-access step."
+    },
+    {
+      "provider": "Community Fibre",
+      "snippetsAvailable": 0,
+      "candidatesCreated": 0,
+      "usableCandidates": 0,
+      "reviewOnlyCandidates": 0,
+      "fixedBroadbandCandidates": 0,
+      "landlineCandidates": 0,
+      "callsPackageCandidates": 0,
+      "fiveGHomeBroadbandCandidates": 0,
+      "tvBundleCandidates": 0,
+      "mobileBundleCandidates": 0,
+      "unknownProductCandidates": 0,
+      "reasonNotUsable": "No snippets available from the polite source-access step."
+    }
+  ]
 }
