@@ -300,6 +300,55 @@ This artifact is only a human-review discovery report. It is **not final pricing
 
 Blocked, unknown, unclear, HTTP 403, CAPTCHA, anti-bot, security-check, failed, or non-200 source results are expected sometimes. They must be recorded and skipped, not bypassed. Do not scrape MoneySuperMarket or Compare the Market if they return HTTP 403 or security checks, and do not add proxies, browser automation, hidden fetch methods, CAPTCHA bypasses, login-wall bypasses, security-check bypasses, or aggressive retries to work around website restrictions.
 
+## Active online candidate deal pipeline
+
+The repository now includes a larger active candidate pipeline for early online deal review. This pipeline is still a working prototype, not final live pricing ingestion. It keeps active online candidates separate from the fake sample data tables.
+
+To collect conservative online price-like snippets, run:
+
+```bash
+npm run extract-snippets
+```
+
+This runs `node extract-price-snippets.js` and writes `exports/online-price-snippets.json`. It checks `robots.txt`, skips blocked or unclear sources, records HTTP 403/security-check/CAPTCHA-style responses as warnings, and does not bypass website restrictions.
+
+To turn available snippets into structured candidate deals, run:
+
+```bash
+npm run extract-providers
+```
+
+This runs `node extract-provider-candidates.js`, reads `exports/online-price-snippets.json`, and writes:
+
+- `exports/provider-deal-candidates.json` - structured provider and comparison-site candidate deal output.
+- `exports/provider-deal-candidates.csv` - a flat CSV version for spreadsheet review.
+
+The provider candidate extractor currently looks for conservative candidates from TalkTalk, Vodafone, BT, Plusnet, Broadband Genie, and Uswitch where useful snippets are available. Each candidate is marked `candidate-review-only`, requires human review, and uses a not-postcode-checked availability scope such as `provider-landing-page-not-postcode-checked` or `comparison-page-not-postcode-checked`.
+
+To refresh snippets, extract provider candidates, export the fake sample data, and rebuild the static site in one command, run:
+
+```bash
+npm run active-build
+```
+
+This runs:
+
+```bash
+npm run extract-snippets
+npm run extract-providers
+npm run export
+npm run build-site
+```
+
+Important limits:
+
+- Candidate deals are not postcode checked.
+- Candidate deals are not manually approved.
+- Candidate deals may be incomplete or wrong and are for review only.
+- Blocked, HTTP 403, CAPTCHA, anti-bot, login-wall, security-check, robots-disallowed, or unclear sources are skipped and recorded, not bypassed.
+- MoneySuperMarket and Compare the Market must not be used if they return HTTP 403 or security checks.
+- The static site displays active candidate deals in an **Active online candidate deals** section, clearly separated from the **Sample data prototype tables** section that still uses fake sample data.
+
 ## What will be added later
 
 Later versions may add:

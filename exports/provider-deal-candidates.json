@@ -1,21 +1,92 @@
 {
-  "generatedAt": "2026-06-03T12:22:44.867Z",
-  "providers": [
+  "candidates": [],
+  "sourceSummary": [
+    {
+      "sourceId": "bt",
+      "sourceName": "BT",
+      "sourceType": "provider-direct",
+      "snippetsAvailable": 0,
+      "candidatesCreated": 0,
+      "warningMessages": [
+        "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.bt.com",
+        "Candidate page was not fetched because robots.txt access was unclear."
+      ]
+    },
+    {
+      "sourceId": "vodafone",
+      "sourceName": "Vodafone",
+      "sourceType": "provider-direct",
+      "snippetsAvailable": 0,
+      "candidatesCreated": 0,
+      "warningMessages": [
+        "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.vodafone.co.uk",
+        "Candidate page was not fetched because robots.txt access was unclear."
+      ]
+    },
     {
       "sourceId": "talktalk",
       "sourceName": "TalkTalk",
-      "candidates": [],
+      "sourceType": "provider-direct",
+      "snippetsAvailable": 0,
+      "candidatesCreated": 0,
       "warningMessages": [
-        "TalkTalk source result was found, but it did not contain any snippets to inspect.",
         "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.talktalk.co.uk",
+        "Candidate page was not fetched because robots.txt access was unclear."
+      ]
+    },
+    {
+      "sourceId": "plusnet",
+      "sourceName": "Plusnet",
+      "sourceType": "provider-direct",
+      "snippetsAvailable": 0,
+      "candidatesCreated": 0,
+      "warningMessages": [
+        "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.plus.net",
+        "Candidate page was not fetched because robots.txt access was unclear."
+      ]
+    },
+    {
+      "sourceId": "uswitch",
+      "sourceName": "Uswitch",
+      "sourceType": "comparison-site",
+      "snippetsAvailable": 0,
+      "candidatesCreated": 0,
+      "warningMessages": [
+        "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.uswitch.com",
+        "Candidate page was not fetched because robots.txt access was unclear."
+      ]
+    },
+    {
+      "sourceId": "broadband-genie",
+      "sourceName": "Broadband Genie",
+      "sourceType": "comparison-site",
+      "snippetsAvailable": 0,
+      "candidatesCreated": 0,
+      "warningMessages": [
+        "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.broadbandgenie.co.uk",
         "Candidate page was not fetched because robots.txt access was unclear."
       ]
     }
   ],
-  "candidates": [],
   "warningMessages": [
-    "TalkTalk source result was found, but it did not contain any snippets to inspect.",
-    "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.talktalk.co.uk",
-    "Candidate page was not fetched because robots.txt access was unclear."
-  ]
+    "BT (bt) had no snippets available; no candidates were extracted.",
+    "BT (bt): Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.bt.com",
+    "BT (bt): Candidate page was not fetched because robots.txt access was unclear.",
+    "Vodafone (vodafone) had no snippets available; no candidates were extracted.",
+    "Vodafone (vodafone): Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.vodafone.co.uk",
+    "Vodafone (vodafone): Candidate page was not fetched because robots.txt access was unclear.",
+    "TalkTalk (talktalk) had no snippets available; no candidates were extracted.",
+    "TalkTalk (talktalk): Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.talktalk.co.uk",
+    "TalkTalk (talktalk): Candidate page was not fetched because robots.txt access was unclear.",
+    "Plusnet (plusnet) had no snippets available; no candidates were extracted.",
+    "Plusnet (plusnet): Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.plus.net",
+    "Plusnet (plusnet): Candidate page was not fetched because robots.txt access was unclear.",
+    "Uswitch (uswitch) had no snippets available; no candidates were extracted.",
+    "Uswitch (uswitch): Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.uswitch.com",
+    "Uswitch (uswitch): Candidate page was not fetched because robots.txt access was unclear.",
+    "Broadband Genie (broadband-genie) had no snippets available; no candidates were extracted.",
+    "Broadband Genie (broadband-genie): Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.broadbandgenie.co.uk",
+    "Broadband Genie (broadband-genie): Candidate page was not fetched because robots.txt access was unclear."
+  ],
+  "generatedAt": "2026-06-03T12:35:00.805Z"
 }

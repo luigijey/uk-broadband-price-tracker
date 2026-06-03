@@ -171,6 +171,10 @@
       min-width: 1380px;
     }
 
+    #active-candidate-table {
+      min-width: 1320px;
+    }
+
     th,
     td {
       padding: 10px 11px;
@@ -291,6 +295,16 @@
       font-weight: 800;
     }
 
+    .warning-box {
+      margin: 12px 0 14px;
+      padding: 14px 16px;
+      border: 1px solid #f0d88a;
+      border-radius: 12px;
+      background: var(--yellow);
+      color: var(--yellow-text);
+      font-weight: 800;
+    }
+
     .no-results-message {
       margin: 12px 0 0;
       padding: 12px 14px;
@@ -398,6 +412,18 @@
   </header>
 
   <main>
+
+    <section class="card" aria-labelledby="active-candidates-heading">
+      <h2 id="active-candidates-heading">Active online candidate deals</h2>
+      <div class="warning-box">These are automatically extracted online candidate deals. They are not postcode checked, not manually approved, and may be incomplete. Use for review only.</div>
+      <p class="no-results-message">No online candidate deals have been extracted yet. Run npm run extract-snippets and npm run extract-providers.</p>
+    </section>
+
+    <section class="card" aria-labelledby="sample-data-heading">
+      <h2 id="sample-data-heading">Sample data prototype tables</h2>
+      <p class="small-note">The tables below use fake sample data and are kept separate from the active online candidate deals above.</p>
+    </section>
+
     <section class="card" aria-labelledby="national-heading">
       <h2 id="national-heading">National cheapest by speed tier</h2>
       <p class="small-note">Cheapest means the lowest effective monthly price in the fake sample data for each speed tier.</p>
