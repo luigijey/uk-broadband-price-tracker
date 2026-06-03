@@ -590,3 +590,24 @@ Each active deal gets a generated evidence/detail page under `site/active-deals/
 The daily GitHub Pages workflow refreshes the source snippets, provider candidates, active online deals, fake sample exports, and static site. Review artifacts remain available from GitHub Actions, including provider candidate usable/review-only/discarded files and the active online deals JSON/CSV.
 
 The active pipeline does not add browser automation, proxies, security-check bypassing, login-wall bypassing, or CAPTCHA bypassing. If a source is blocked or returns a security check, it is recorded in review artifacts instead of being bypassed.
+
+## Active demo summary tables
+
+The active demo build also creates cheapest-by-speed-tier summary exports from the review-only active deal feed:
+
+```bash
+npm run active-summary
+```
+
+This writes:
+
+- `exports/active-cheapest-by-speed-tier.json`
+- `exports/active-cheapest-by-speed-tier.csv`
+
+`active-cheapest-by-speed-tier.json` is generated only from active deals where `showOnHomepage === true`. Hidden review/evidence records stay in the active review artifacts but are excluded from this cheapest-by-speed-tier summary.
+
+The homepage shows a **Cheapest active deals by speed tier** table above the full active feed. For each speed tier, it displays the homepage-visible active deal with the lowest `effectiveMonthlyPrice` and links to the active deal evidence page.
+
+These rows are still active review deals only. They are **not** provider-level postcode availability checks, they do not confirm service at a specific address, and they should not be treated as final checkout prices.
+
+Unknown setup fees are visibly caveated. If an active deal has `setupFeeStatus: "unknown"` or an `effectivePriceCaveat`, the homepage keeps that warning visible so reviewers can see when the effective monthly price may exclude an unknown upfront/setup fee.

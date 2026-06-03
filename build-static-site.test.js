@@ -7,7 +7,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
-const { buildActiveDealDetailHtml, buildCandidateSection, buildHtml, createActiveDealDetailPages } = require('./build-static-site');
+const { buildActiveCheapestBySpeedTierSection, buildActiveDealDetailHtml, buildCandidateSection, buildHtml, createActiveDealDetailPages } = require('./build-static-site');
 
 const candidate = {
   activeDealId: 'active-talktalk-full-fibre-150-provider-page',
@@ -249,4 +249,75 @@ test('active deal detail page includes setup fee status, caveat, and ordinary so
   assert.match(html, /Effective monthly price excludes any unknown upfront\/setup fee\./);
   assert.match(html, /Open provider\/source page to check availability/);
   assert.match(html, /ordinary link only/);
+});
+
+
+test('active homepage summary cards render', () => {
+  const html = buildCandidateSection([
+    candidate,
+    { ...candidate, activeDealId: 'active-uswitch-500', sourceType: 'comparison-site', speedMbps: 500, effectiveMonthlyPrice: 27, setupFeeStatus: 'unknown' },
+  ], '2026-06-03T00:00:00.000Z');
+
+  assert.match(html, /Homepage active deals/);
+  assert.match(html, /Provider-direct deals/);
+  assert.match(html, /Comparison-site deals/);
+  assert.match(html, /Lowest effective monthly price/);
+  assert.match(html, /Fastest speed/);
+  assert.match(html, /Deals with unknown setup fee/);
+});
+
+test('cheapest-by-speed-tier homepage section renders setup fee status and evidence links', () => {
+  const html = buildActiveCheapestBySpeedTierSection({
+    rows: [{
+      speedTier: '900 Mbps+',
+      provider: 'Vodafone',
+      packageName: 'Full Fibre 910',
+      sourceName: 'Vodafone',
+      advertisedMonthlyPrice: 35,
+      effectiveMonthlyPrice: 37.5,
+      speedMbps: 910,
+      setupFeeStatus: 'unknown',
+      activeDealId: 'active-vodafone-full-fibre-910',
+    }],
+  });
+
+  assert.match(html, /Cheapest active deals by speed tier/);
+  assert.match(html, /These are active review deals only and are not provider-level postcode availability checks\./);
+  assert.match(html, /<table id="active-cheapest-speed-tier-table">/);
+  assert.match(html, /Setup Fee Status/);
+  assert.match(html, /unknown/);
+  assert.match(html, /active-deals\/active-vodafone-full-fibre-910\.html/);
+});
+
+test('full generated homepage includes cheapest active deals by speed tier above active feed', () => {
+  const html = buildHtml([], [], { activeDeals: [candidate], summary: { generatedAt: '2026-06-03T00:00:00.000Z' } }, { rows: [], summary: {} }, {
+    rows: [{
+      speedTier: candidate.speedTier,
+      provider: candidate.provider,
+      packageName: candidate.packageName,
+      sourceName: candidate.sourceName,
+      advertisedMonthlyPrice: candidate.advertisedMonthlyPrice,
+      effectiveMonthlyPrice: candidate.effectiveMonthlyPrice,
+      speedMbps: candidate.speedMbps,
+      setupFeeStatus: 'known-zero',
+      activeDealId: candidate.activeDealId,
+    }],
+  });
+
+  assert.ok(html.indexOf('Cheapest active deals by speed tier') < html.indexOf('Active online deal feed'));
+});
+
+test('effectivePriceCaveat appears as visible warning text in active feed row when present', () => {
+  const html = buildCandidateSection([{ ...candidate, setupFeeStatus: 'unknown', effectivePriceCaveat: 'Effective monthly price excludes any unknown upfront/setup fee.' }]);
+
+  assert.match(html, /<th>Caveat<\/th>/);
+  assert.match(html, /⚠ Caveat: Effective monthly price excludes any unknown upfront\/setup fee\./);
+});
+
+test('postcode check result message includes postcode area, region, and active row count', () => {
+  const html = buildHtml([], [], { activeDeals: [], summary: { generatedAt: '2026-06-03T00:00:00.000Z' } }, { rows: [], summary: {} });
+
+  assert.match(html, /countPostcodeAreaV1Rows\(postcodeArea\)/);
+  assert.match(html, /Postcode area detected: ' \+ postcodeArea \+ ' — ' \+ match\.regionName/);
+  assert.match(html, /Showing ' \+ activeCandidateRowCount \+ ' active national candidate deals for this postcode area/);
 });

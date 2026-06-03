@@ -17,6 +17,7 @@ test('active build summary reports output files and candidate count', () => {
   const discardedCandidatesPath = path.join(tempFolder, 'provider-deal-candidates-discarded.json');
   const providerDirectExpansionSummaryPath = path.join(tempFolder, 'provider-direct-expansion-summary.json');
   const activeDealsPath = path.join(tempFolder, 'active-online-deals.json');
+  const activeCheapestBySpeedTierPath = path.join(tempFolder, 'active-cheapest-by-speed-tier.json');
   const postcodeAreaActiveComparisonPath = path.join(tempFolder, 'postcode-area-active-comparison.json');
   const postcodeCheckV1SummaryPath = path.join(tempFolder, 'postcode-check-v1-summary.json');
   const activeDealsFolder = path.join(tempFolder, 'site', 'active-deals');
@@ -32,6 +33,7 @@ test('active build summary reports output files and candidate count', () => {
   fs.mkdirSync(activeDealsFolder, { recursive: true });
   fs.writeFileSync(path.join(activeDealsFolder, 'active-example.html'), '<!doctype html>');
   fs.writeFileSync(activeDealsPath, JSON.stringify({ activeDeals: [{ activeDealId: 'active-example' }] }));
+  fs.writeFileSync(activeCheapestBySpeedTierPath, JSON.stringify({ rows: [{ speedTier: '100-300 Mbps' }] }));
   fs.writeFileSync(postcodeAreaActiveComparisonPath, JSON.stringify({ rows: [{ postcodeArea: 'OX' }] }));
   fs.writeFileSync(postcodeCheckV1SummaryPath, JSON.stringify({ supportedPostcodeAreaCount: 1 }));
   fs.writeFileSync(siteIndexPath, '<!doctype html>');
@@ -44,6 +46,7 @@ test('active build summary reports output files and candidate count', () => {
     discardedProviderCandidates: discardedCandidatesPath,
     providerDirectExpansionSummary: providerDirectExpansionSummaryPath,
     activeOnlineDeals: activeDealsPath,
+    activeCheapestBySpeedTier: activeCheapestBySpeedTierPath,
     postcodeAreaActiveComparison: postcodeAreaActiveComparisonPath,
     postcodeCheckV1Summary: postcodeCheckV1SummaryPath,
     activeDealsFolder,
@@ -60,12 +63,20 @@ test('active build summary reports output files and candidate count', () => {
     activeOnlineDealsFileExists: true,
     postcodeAreaActiveComparisonFileExists: true,
     postcodeCheckV1SummaryFileExists: true,
+    activeCheapestBySpeedTierFileExists: true,
     candidateCount: 1,
     activeOnlineDealCount: 1,
     postcodeAreaActiveRowCount: 1,
     supportedPostcodeAreaCount: 1,
+    activeCheapestSpeedTierRowCount: 1,
     activeDealPagesGenerated: 1,
     siteIndexCreated: true,
   });
   assert.equal(readCandidateCount(candidatesPath), 1);
+});
+
+
+test('active-build command list includes active-summary after postcode-area-build', () => {
+  const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+  assert.match(packageJson.scripts['active-build'], /postcode-area-build && npm run active-summary && npm run export/);
 });

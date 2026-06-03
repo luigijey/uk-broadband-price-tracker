@@ -27,6 +27,7 @@ const exportFiles = {
   usableProviderDealCandidates: path.join(exportsFolder, 'provider-deal-candidates-usable.json'),
   activeOnlineDeals: path.join(exportsFolder, 'active-online-deals.json'),
   postcodeAreaActiveComparison: path.join(exportsFolder, 'postcode-area-active-comparison.json'),
+  activeCheapestBySpeedTier: path.join(exportsFolder, 'active-cheapest-by-speed-tier.json'),
 };
 
 function readJsonFile(filePath) {
@@ -267,6 +268,14 @@ function formatCandidateReward(candidate) {
   return rewards.map(([label, value]) => `${label}: ${formatMoney(value)}`).join(', ');
 }
 
+function formatActiveSummaryValue(value, formatter = (input) => input) {
+  if (value === null || value === undefined || value === '') {
+    return 'Not available';
+  }
+
+  return formatter(value);
+}
+
 function formatCandidateSetupFee(candidate) {
   if (candidate.setupFee === null || candidate.setupFee === undefined) {
     return 'Unknown';
@@ -296,25 +305,22 @@ function buildActiveFilterOptions(candidates, fieldName, allLabel) {
 }
 
 function buildCandidateRows(candidates) {
-  return candidates.map((candidate) => `
+  return candidates.map((candidate) => {
+    const caveat = candidate.effectivePriceCaveat ? `⚠ Caveat: ${candidate.effectivePriceCaveat}` : '';
+    return `
             <tr class="active-review-only" data-provider="${escapeHtml(candidate.provider || '')}" data-speed-tier="${escapeHtml(candidate.speedTier || '')}" data-homepage-category="${escapeHtml(candidate.homepageCategory || '')}" data-source-type="${escapeHtml(candidate.sourceType || '')}" data-effective-monthly-price="${escapeHtml(candidate.effectiveMonthlyPrice ?? '')}" data-advertised-monthly-price="${escapeHtml(candidate.advertisedMonthlyPrice ?? '')}" data-speed-mbps="${escapeHtml(candidate.speedMbps ?? '')}">
               <td>${escapeHtml(candidate.provider)}</td>
               <td>${escapeHtml(candidate.packageName)}</td>
+              <td>${escapeHtml(candidate.homepageCategory || '')}</td>
               <td class="wrap-text">${escapeHtml(candidate.sourceName)}</td>
               <td class="number">${escapeHtml(candidate.speedMbps || '')} Mbps</td>
               <td class="money">${formatOptionalMoney(candidate.advertisedMonthlyPrice)}</td>
               <td class="money effective-price">${formatOptionalMoney(candidate.effectiveMonthlyPrice)}</td>
-              <td class="number">${candidate.contractLengthMonths ? `${escapeHtml(candidate.contractLengthMonths)} months` : 'Unknown'}</td>
-              <td class="money">${escapeHtml(formatCandidateAprilRise(candidate))}</td>
-              <td class="wrap-text">${escapeHtml(formatCandidateReward(candidate))}</td>
-              <td class="money">${escapeHtml(formatCandidateSetupFee(candidate))}</td>
               <td>${escapeHtml(candidate.setupFeeStatus || '')}</td>
-              <td class="wrap-text">${escapeHtml(candidate.effectivePriceCaveat || '')}</td>
-              <td>${escapeHtml(candidate.extractionConfidence)}</td>
-              <td>${escapeHtml(candidate.extractionQuality)}</td>
-              <td>${escapeHtml(candidate.homepageCategory || '')}</td>
+              <td class="wrap-text caveat-text">${escapeHtml(caveat)}</td>
               <td><a class="details-button" href="${escapeHtml(activeDealDetailHref(candidate))}">View evidence</a></td>
-            </tr>`).join('');
+            </tr>`;
+  }).join('');
 }
 
 function formatGeneratedAt(generatedAt) {
@@ -345,6 +351,94 @@ function normalizeActiveDealOutput(activeDealOutput) {
   };
 }
 
+
+function countDealsBySourceType(candidates, sourceType) {
+  return candidates.filter((candidate) => candidate.sourceType === sourceType).length;
+}
+
+function buildActiveSummaryCards(candidates) {
+  const prices = candidates.map((candidate) => Number(candidate.effectiveMonthlyPrice)).filter(Number.isFinite);
+  const speeds = candidates.map((candidate) => Number(candidate.speedMbps)).filter(Number.isFinite);
+  const cards = [
+    ['Homepage active deals', candidates.length],
+    ['Provider-direct deals', countDealsBySourceType(candidates, 'provider-direct')],
+    ['Comparison-site deals', countDealsBySourceType(candidates, 'comparison-site')],
+    ['Lowest effective monthly price', prices.length > 0 ? formatMoney(Math.min(...prices)) : 'Not available'],
+    ['Fastest speed', speeds.length > 0 ? `${Math.max(...speeds)} Mbps` : 'Not available'],
+    ['Deals with unknown setup fee', candidates.filter((candidate) => candidate.setupFeeStatus === 'unknown').length],
+  ];
+
+  return `
+      <section class="summary-grid active-summary-grid" aria-label="Active homepage deal summary">
+${cards.map(([label, value]) => `        <article class="summary-card">
+          <span class="summary-number">${escapeHtml(value)}</span>
+          <span class="summary-label">${escapeHtml(label)}</span>
+        </article>`).join('\n')}
+      </section>`;
+}
+
+function normalizeActiveCheapestOutput(activeCheapestOutput) {
+  if (Array.isArray(activeCheapestOutput)) {
+    return { rows: activeCheapestOutput, summary: {} };
+  }
+
+  if (!activeCheapestOutput || typeof activeCheapestOutput !== 'object') {
+    return { rows: [], summary: {} };
+  }
+
+  return {
+    rows: Array.isArray(activeCheapestOutput.rows) ? activeCheapestOutput.rows : [],
+    summary: activeCheapestOutput.summary || {},
+  };
+}
+
+function buildActiveCheapestRows(rows) {
+  return rows.map((row) => `
+            <tr>
+              <td>${escapeHtml(row.speedTier || '')}</td>
+              <td>${escapeHtml(row.provider || '')}</td>
+              <td>${escapeHtml(row.packageName || '')}</td>
+              <td class="wrap-text">${escapeHtml(row.sourceName || '')}</td>
+              <td class="number">${escapeHtml(row.speedMbps || '')} Mbps</td>
+              <td class="money">${formatOptionalMoney(row.advertisedMonthlyPrice)}</td>
+              <td class="money effective-price">${formatOptionalMoney(row.effectiveMonthlyPrice)}</td>
+              <td>${escapeHtml(row.setupFeeStatus || '')}</td>
+              <td><a class="details-button" href="${escapeHtml(activeDealDetailHref(row))}">View evidence</a></td>
+            </tr>`).join('');
+}
+
+function buildActiveCheapestBySpeedTierSection(activeCheapestOutput = { rows: [], summary: {} }) {
+  const activeCheapestData = normalizeActiveCheapestOutput(activeCheapestOutput);
+  const rows = activeCheapestData.rows;
+
+  return `
+    <section class="card" aria-labelledby="active-cheapest-speed-tier-heading">
+      <h2 id="active-cheapest-speed-tier-heading">Cheapest active deals by speed tier</h2>
+      <p class="small-note">These are active review deals only and are not provider-level postcode availability checks.</p>
+      ${rows.length === 0 ? '<p class="no-results-message">No active homepage-visible deals are available for this summary yet.</p>' : `
+      <p class="small-note scroll-tip">Tip: if needed, scroll sideways to see all columns.</p>
+      <div class="table-wrap" tabindex="0" aria-label="Cheapest active deals by speed tier table with horizontal scrolling">
+        <table id="active-cheapest-speed-tier-table">
+          <thead>
+            <tr>
+              <th>Speed Tier</th>
+              <th>Provider</th>
+              <th>Package</th>
+              <th>Source</th>
+              <th>Speed</th>
+              <th>Advertised Monthly Price</th>
+              <th>Effective Monthly Price</th>
+              <th>Setup Fee Status</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>${buildActiveCheapestRows(rows)}
+          </tbody>
+        </table>
+      </div>`}
+    </section>`;
+}
+
 function buildCandidateSection(candidates, generatedAt = null, summary = {}) {
   const candidateRows = buildCandidateRows(candidates);
   const providerOptions = buildActiveFilterOptions(candidates, 'provider', 'All providers');
@@ -359,6 +453,7 @@ function buildCandidateSection(candidates, generatedAt = null, summary = {}) {
       <h2 id="active-candidates-heading">Active online deal feed</h2>
       <div class="warning-box">These are automatically extracted active review deals. They are not postcode checked, not manually approved, and may be incomplete.</div>
       <p class="small-note">Lower-confidence extracted rows are kept in review artifacts and are not shown in this main table.</p>
+${buildActiveSummaryCards(candidates)}
       <div class="status-box" aria-label="Active candidate data freshness">
         <p><strong>Active deal data generated:</strong> ${escapeHtml(formatGeneratedAt(generatedAt))}</p>
         <p><strong>Active deals shown on homepage:</strong> ${escapeHtml(shownCount)}</p>
@@ -411,19 +506,13 @@ ${sourceTypeOptions}
             <tr>
               <th>Provider</th>
               <th>Package</th>
+              <th>Homepage Category</th>
               <th>Source</th>
               <th>Speed</th>
               <th>Advertised Monthly Price</th>
               <th>Effective Monthly Price</th>
-              <th>Contract Length</th>
-              <th>April Price Rise</th>
-              <th>Voucher/Reward</th>
-              <th>Setup Fee</th>
               <th>Setup Fee Status</th>
-              <th>Effective Price Caveat</th>
-              <th>Confidence</th>
-              <th>Quality</th>
-              <th>Homepage Category</th>
+              <th>Caveat</th>
               <th>Details</th>
             </tr>
           </thead>
@@ -449,7 +538,7 @@ function normalizeProviderCandidateOutput(providerCandidateOutput) {
   };
 }
 
-function buildHtml(nationalDeals, postcodeDeals, activeDealOutput = { activeDeals: [] }, postcodeAreaActiveComparison = { rows: [], summary: {} }) {
+function buildHtml(nationalDeals, postcodeDeals, activeDealOutput = { activeDeals: [] }, postcodeAreaActiveComparison = { rows: [], summary: {} }, activeCheapestBySpeedTier = { rows: [], summary: {} }) {
   const activeDealData = normalizeActiveDealOutput(activeDealOutput);
   const providerCandidates = activeDealData.activeDeals.filter((deal) => deal.showOnHomepage === true && isHomepageVisibleCategory(deal.homepageCategory));
   const summaryCards = [
@@ -633,7 +722,11 @@ function buildHtml(nationalDeals, postcodeDeals, activeDealOutput = { activeDeal
     }
 
     #active-candidate-table {
-      min-width: 1560px;
+      min-width: 1180px;
+    }
+
+    #active-cheapest-speed-tier-table {
+      min-width: 1080px;
     }
 
     #postcode-area-v1-table {
@@ -796,6 +889,11 @@ function buildHtml(nationalDeals, postcodeDeals, activeDealOutput = { activeDeal
       display: none;
     }
 
+    .caveat-text {
+      color: var(--yellow-text);
+      font-weight: 800;
+    }
+
     .small-note {
       color: var(--muted);
       font-size: 0.95rem;
@@ -878,6 +976,7 @@ ${summaryCards.map(([label, value]) => `        <article class="summary-card">
 
   <main>
 ${buildPostcodeCheckV1Section(postcodeAreas)}
+${buildActiveCheapestBySpeedTierSection(activeCheapestBySpeedTier)}
 ${buildCandidateSection(providerCandidates, activeDealData.summary.generatedAt, activeDealData.summary)}
 ${buildPostcodeAreaV1Section(postcodeAreaActiveComparison)}
 
@@ -1037,6 +1136,10 @@ ${buildPostcodeAreaV1Section(postcodeAreaActiveComparison)}
       });
     }
 
+    function countPostcodeAreaV1Rows(postcodeArea) {
+      return Array.from(postcodeAreaV1Rows).filter((row) => postcodeArea === 'all' || row.dataset.postcodeArea === postcodeArea).length;
+    }
+
     function filterPostcodeAreaV1Rows() {
       if (!postcodeAreaV1Filter || !postcodeAreaV1ResultCount) {
         return;
@@ -1140,7 +1243,8 @@ ${buildPostcodeAreaV1Section(postcodeAreaActiveComparison)}
 
       postcodeAreaV1Filter.value = postcodeArea;
       filterPostcodeAreaV1Rows();
-      postcodeCheckResult.textContent = 'Postcode area detected: ' + postcodeArea + ' — showing active national candidate deals for ' + match.regionName + '. These results are not provider-level availability checks yet. They are active national candidate deals grouped by postcode area.';
+      const activeCandidateRowCount = countPostcodeAreaV1Rows(postcodeArea);
+      postcodeCheckResult.textContent = 'Postcode area detected: ' + postcodeArea + ' — ' + match.regionName + '. Showing ' + activeCandidateRowCount + ' active national candidate deals for this postcode area. These results are not provider-level availability checks yet. They are active national candidate deals grouped by postcode area.';
     }
 
     function showAllPostcodeAreas() {
@@ -1421,6 +1525,11 @@ function buildDealDetailHtml(deal) {
       font-weight: 800;
     }
 
+    .caveat-text {
+      color: var(--yellow-text);
+      font-weight: 800;
+    }
+
     .small-note {
       color: var(--muted);
       font-size: 0.95rem;
@@ -1686,8 +1795,9 @@ function buildStaticSite() {
   const postcodeDeals = readJsonFile(exportFiles.postcodeAreaComparison);
   const activeDealsOutput = readJsonFileIfExists(exportFiles.activeOnlineDeals, { activeDeals: [], summary: { generatedAt: null } });
   const postcodeAreaActiveComparison = readJsonFileIfExists(exportFiles.postcodeAreaActiveComparison, { rows: [], summary: {} });
+  const activeCheapestBySpeedTier = readJsonFileIfExists(exportFiles.activeCheapestBySpeedTier, { rows: [], summary: {} });
   const activeDeals = Array.isArray(activeDealsOutput.activeDeals) ? activeDealsOutput.activeDeals : [];
-  const html = buildHtml(nationalDeals, postcodeDeals, activeDealsOutput, postcodeAreaActiveComparison);
+  const html = buildHtml(nationalDeals, postcodeDeals, activeDealsOutput, postcodeAreaActiveComparison, activeCheapestBySpeedTier);
 
   fs.mkdirSync(siteFolder, { recursive: true });
   fs.writeFileSync(path.join(siteFolder, 'index.html'), html);
@@ -1699,6 +1809,7 @@ function buildStaticSite() {
     postcodeDealCount: postcodeDeals.length,
     providerCandidateCount: activeDeals.length,
     postcodeAreaActiveRowCount: Array.isArray(postcodeAreaActiveComparison.rows) ? postcodeAreaActiveComparison.rows.length : 0,
+    activeCheapestSpeedTierRowCount: Array.isArray(activeCheapestBySpeedTier.rows) ? activeCheapestBySpeedTier.rows.length : 0,
     createdFile: path.join(siteFolder, 'index.html'),
     createdDealFiles,
     createdActiveDealFiles,
@@ -1713,6 +1824,7 @@ function main() {
   console.log(`Postcode rows: ${summary.postcodeDealCount}`);
   console.log(`Active provider candidate rows: ${summary.providerCandidateCount}`);
   console.log(`Postcode Area V1 rows: ${summary.postcodeAreaActiveRowCount}`);
+  console.log(`Active cheapest speed-tier rows: ${summary.activeCheapestSpeedTierRowCount}`);
   console.log(`File created: ${path.relative(__dirname, summary.createdFile)}`);
   console.log(`Deal detail pages created: ${summary.createdDealFiles.length}`);
   console.log(`Active deal pages generated: ${summary.createdActiveDealFiles.length}`);
@@ -1727,6 +1839,8 @@ if (require.main === module) {
 module.exports = {
   buildHtml,
   buildCandidateSection,
+  buildActiveCheapestBySpeedTierSection,
+  buildActiveSummaryCards,
   buildPostcodeAreaV1Section,
   buildPostcodeCheckV1Section,
   buildDealDetailHtml,

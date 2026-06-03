@@ -1,0 +1,14 @@
+{
+  "summary": {
+    "generatedAt": "2026-06-03T20:48:03.436Z",
+    "sourceFile": "exports/active-online-deals.json",
+    "homepageVisibleDealsIncluded": 0,
+    "speedTierSummaryRows": 0,
+    "hiddenRecordsExcluded": 0,
+    "warningMessages": [
+      "These are active review deals only and are not provider-level postcode availability checks.",
+      "No active homepage-visible deals were available, so cheapest-by-speed-tier rows are empty."
+    ]
+  },
+  "rows": []
+}
