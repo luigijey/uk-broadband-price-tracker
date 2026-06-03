@@ -9,7 +9,8 @@
     "extract-snippets": "node extract-price-snippets.js",
     "extract-talktalk": "node extract-talktalk-deals.js",
     "extract-providers": "node extract-provider-candidates.js",
-    "active-build": "npm run extract-snippets && npm run extract-providers && npm run promote-active && npm run export && npm run build-site",
-    "promote-active": "node promote-usable-candidates.js"
+    "active-build": "npm run extract-snippets && npm run extract-providers && npm run promote-active && npm run postcode-area-build && npm run export && npm run build-site",
+    "promote-active": "node promote-usable-candidates.js",
+    "postcode-area-build": "node build-postcode-area-active-comparison.js"
   }
 }

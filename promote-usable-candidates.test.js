@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 
-const { ACTIVE_COLUMNS, buildActiveOnlineDealsOutput, isPromotableCandidate } = require('./promote-usable-candidates');
+const { ACTIVE_COLUMNS, buildActiveOnlineDealsOutput, classifyProductType, isPromotableCandidate } = require('./promote-usable-candidates');
 
 const baseCandidate = {
   candidateId: 'talktalk-full-fibre-150-provider-page',
@@ -103,6 +103,19 @@ function buildRequiredActiveFixture() {
       sourceSnippet: 'Vodafone Fibre 67 Mbps £24 a month. Plusnet Fibre 66 66 Mbps £24.99 a month. Price rises each April by £4.00. 24 month contract.',
     }),
     candidate({
+      candidateId: 'uswitch-virgin-media-virgin-media-516-mbps-broadband',
+      provider: 'Virgin Media',
+      packageName: 'Virgin Media M500 Sport HD + Cinema + Netflix',
+      sourceName: 'Uswitch',
+      sourceType: 'comparison-site',
+      advertisedMonthlyPrice: 34.99,
+      effectiveMonthlyPrice: 37.49,
+      speedMbps: 516,
+      speedTier: '500-900 Mbps',
+      availabilityScope: 'comparison-page-not-postcode-checked',
+      sourceSnippet: 'Virgin Media M500 Sport HD + Cinema + Netflix 516 Mbps £34.99 a month. Price rises each April by £4.00. 24 month contract.',
+    }),
+    candidate({
       candidateId: 'broadband-genie-bt-full-fibre-150',
       provider: 'BT',
       packageName: 'Full Fibre 150',
@@ -139,10 +152,19 @@ test('adds homepage trust metadata to provider-direct calculated rows', () => {
   assert.equal(output.summary.providerDirectHomepageCount, 1);
   assert.equal(output.activeDeals[0].activeDealId, 'active-talktalk-full-fibre-150-provider-page');
   assert.equal(output.activeDeals[0].activeFeedTrustLevel, 'provider-direct-calculated');
+  assert.equal(output.activeDeals[0].productType, 'broadband-only');
   assert.equal(output.activeDeals[0].showOnHomepage, true);
   assert.equal(output.activeDeals[0].publishStatus, 'active-review-only');
   assert.equal(output.activeDeals[0].requiresHumanReview, true);
   assert.equal(output.activeDeals[0].generatedAt, '2026-06-03T00:00:00.000Z');
+});
+
+test('classifies product types from package names and source snippets', () => {
+  assert.equal(classifyProductType(candidate({ packageName: 'Full Fibre 150' })), 'broadband-only');
+  assert.equal(classifyProductType(candidate({ packageName: 'Virgin Media M500 Sport HD + Cinema + Netflix' })), 'broadband-tv-bundle');
+  assert.equal(classifyProductType(candidate({ packageName: 'Full Fibre 150 with SIM' })), 'broadband-mobile-bundle');
+  assert.equal(classifyProductType(candidate({ packageName: 'Broadband and phone' })), 'broadband-phone-bundle');
+  assert.equal(classifyProductType(candidate({ packageName: 'Starter plan', sourceSnippet: 'Starter plan £20 a month' })), 'unknown');
 });
 
 test('keeps source-effective-only candidates as hidden evidence records', () => {
@@ -180,9 +202,14 @@ test('required active feed examples are classified into homepage and hidden evid
   assert.equal(byId(output, 'uswitch-virgin-media-gig1-fibre-broadband').showOnHomepage, true);
   assert.equal(byId(output, 'uswitch-virgin-media-broadband-132').showOnHomepage, true);
   assert.equal(byId(output, 'uswitch-virgin-media-superfast-broadband').showOnHomepage, false);
+  assert.equal(byId(output, 'uswitch-virgin-media-virgin-media-516-mbps-broadband').productType, 'broadband-tv-bundle');
+  assert.equal(byId(output, 'uswitch-virgin-media-virgin-media-516-mbps-broadband').showOnHomepage, false);
   assert.equal(byId(output, 'uswitch-plusnet-fibre-66').showOnHomepage, false);
   assert.equal(byId(output, 'broadband-genie-bt-full-fibre-150').showOnHomepage, false);
   assert.equal(byId(output, 'broadband-genie-plusnet-fibre-66').showOnHomepage, false);
+  assert.equal(byId(output, 'uswitch-virgin-media-gig1-fibre-broadband').productType, 'broadband-only');
+  assert.equal(byId(output, 'bt-full-fibre-150-provider-page').productType, 'broadband-only');
+  assert.equal(byId(output, 'talktalk-full-fibre-150-provider-page').productType, 'broadband-only');
   assert.equal(byId(output, 'uswitch-virgin-media-gig1-fibre-broadband').activeFeedTrustLevel, 'comparison-clean-calculated');
   assert.equal(byId(output, 'uswitch-virgin-media-broadband-132').activeFeedTrustLevel, 'comparison-clean-calculated');
   assert.equal(byId(output, 'uswitch-virgin-media-superfast-broadband').activeFeedTrustLevel, 'review-artifact-only');
@@ -194,12 +221,15 @@ test('summary counts homepage vs hidden rows correctly', () => {
   const output = buildActiveOnlineDealsOutput({ candidates: buildRequiredActiveFixture() }, '2026-06-03T00:00:00.000Z');
 
   assert.deepEqual(output.summary, {
-    totalActiveDeals: 8,
+    totalActiveDeals: 9,
     homepageActiveDeals: 4,
-    hiddenReviewDeals: 4,
+    broadbandOnlyHomepageCount: 4,
+    hiddenReviewDeals: 5,
     providerDirectHomepageCount: 2,
     comparisonHomepageCount: 2,
     sourceEffectiveOnlyHiddenCount: 2,
+    hiddenBundleCount: 1,
+    hiddenUnknownProductTypeCount: 0,
     generatedAt: '2026-06-03T00:00:00.000Z',
     warningMessages: output.summary.warningMessages,
   });
@@ -225,10 +255,13 @@ test('active-online-deals output shape includes summary and required fields', ()
   assert.deepEqual(Object.keys(output.summary), [
     'totalActiveDeals',
     'homepageActiveDeals',
+    'broadbandOnlyHomepageCount',
     'hiddenReviewDeals',
     'providerDirectHomepageCount',
     'comparisonHomepageCount',
     'sourceEffectiveOnlyHiddenCount',
+    'hiddenBundleCount',
+    'hiddenUnknownProductTypeCount',
     'generatedAt',
     'warningMessages',
   ]);

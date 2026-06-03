@@ -335,7 +335,7 @@ Candidate quality is separated as follows:
 - `review-only-missing-fields` means important fields are missing, so the row stays in review artifacts instead of the homepage table.
 - `discarded-noisy` means a block was too noisy to show as an active candidate, but remains available as an audit artifact if exported.
 
-The active promotion step reads `provider-deal-candidates-usable.json` and writes `exports/active-online-deals.json` plus `exports/active-online-deals.csv`. Active deals can exist in two roles: high-trust rows for the homepage and review/evidence records for audit. Every promoted active record has `activeFeedTrustLevel` and `showOnHomepage` fields. Only rows with `showOnHomepage: true` appear in the homepage active feed; hidden rows are still kept in `active-online-deals.json` and still receive active detail/evidence pages.
+The active promotion step reads `provider-deal-candidates-usable.json` and writes `exports/active-online-deals.json` plus `exports/active-online-deals.csv`. Active deals can exist in two roles: high-trust rows for the homepage and review/evidence records for audit. Every promoted active record has `activeFeedTrustLevel`, `productType`, and `showOnHomepage` fields. For now, only rows with `showOnHomepage: true` and `productType: "broadband-only"` appear in the homepage active feed; hidden rows are still kept in `active-online-deals.json` and still receive active detail/evidence pages.
 
 Active feed trust levels are separated as follows:
 
@@ -358,6 +358,7 @@ This runs:
 npm run extract-snippets
 npm run extract-providers
 npm run promote-active
+npm run postcode-area-build
 npm run export
 npm run build-site
 ```
@@ -369,7 +370,40 @@ Important limits:
 - Candidate deals may be incomplete or wrong and are for review only.
 - Blocked, HTTP 403, CAPTCHA, anti-bot, login-wall, security-check, robots-disallowed, or unclear sources are skipped and recorded, not bypassed.
 - MoneySuperMarket and Compare the Market must not be used if they return HTTP 403 or security checks.
-- The static site displays only high-trust active candidate deals with `showOnHomepage: true` in the **Active online candidate deals** section, clearly separated from the **Sample data prototype tables** section that still uses fake sample data. Review/evidence active records remain in `active-online-deals.json` and detail pages but are hidden from the main homepage table.
+- The static site displays only high-trust active candidate deals with `showOnHomepage: true` and `productType: "broadband-only"` in the **Active online candidate deals** section, clearly separated from the **Sample data prototype tables** section that still uses fake sample data. Review/evidence active records remain in `active-online-deals.json` and detail pages but are hidden from the main homepage table.
+
+
+## Postcode Area V1
+
+Postcode Area V1 is the first postcode-area prototype for active online candidate deals. It is intentionally review-only and simple: it groups active national candidate deals by broad UK postcode area so the homepage can show what a future postcode-area comparison might look like.
+
+Important limits:
+
+- It is **not true postcode-level availability** yet.
+- Prices are **not postcode checked**.
+- Provider landing-page prices must not be described as postcode checked.
+- No postcode-check forms are bypassed.
+- No blocked source, CAPTCHA, security check, login wall, or website restriction is bypassed.
+- True postcode checking will come later through approved data sources or another compliant availability method.
+
+The starter postcode areas live in `postcode-areas.js`. To build the Postcode Area V1 review files, run:
+
+```bash
+npm run postcode-area-build
+```
+
+This runs:
+
+```bash
+node build-postcode-area-active-comparison.js
+```
+
+The script reads `exports/active-online-deals.json` and the enabled rows in `postcode-areas.js`, then writes:
+
+- `exports/postcode-area-active-comparison.json`
+- `exports/postcode-area-active-comparison.csv`
+
+Every generated row is marked with `availabilityStatus: "not-postcode-checked"`, `availabilityConfidence: "national-candidate-only"`, and `publishStatus: "postcode-area-v1-review-only"`. The homepage shows these rows in a **Postcode Area V1 comparison** section with a clear warning and a simple postcode area dropdown filter.
 
 
 ## Live active deployment pipeline
@@ -383,11 +417,13 @@ On every push to `main`, every manual `workflow_dispatch` run, and once per day 
 3. runs `npm test`
 4. runs `npm run extract-snippets` to extract conservative online price snippets into `exports/online-price-snippets.json`
 5. runs `npm run extract-providers` to turn available snippets into provider candidate deals in `exports/provider-deal-candidates.json`, `exports/provider-deal-candidates.csv`, and the usable/review-only/discarded JSON files
-6. runs `npm run export` to refresh the fake sample-data exports
-7. runs `npm run build-site` to rebuild `site/index.html` and the static deal pages
-8. confirms the required generated files exist
-9. uploads the `site` folder and deploys it to GitHub Pages
-10. uploads review artifacts named **active-pricing-review-data** for the extracted snippet and candidate files
+6. runs `npm run promote-active` to write active review/evidence deals
+7. runs `npm run postcode-area-build` to write Postcode Area V1 review-only comparison files
+8. runs `npm run export` to refresh the fake sample-data exports
+9. runs `npm run build-site` to rebuild `site/index.html` and the static deal pages
+10. confirms the required generated files exist
+11. uploads the `site` folder and deploys it to GitHub Pages
+12. uploads review artifacts named **active-pricing-review-data** for the extracted snippet and candidate files
 
 The review artifact includes:
 
@@ -400,6 +436,8 @@ The review artifact includes:
 - `exports/source-access-report.json`, when that file exists in the workflow run
 - `exports/active-online-deals.json`
 - `exports/active-online-deals.csv`
+- `exports/postcode-area-active-comparison.json`
+- `exports/postcode-area-active-comparison.csv`
 
 Important live deployment limits:
 
@@ -408,7 +446,7 @@ Important live deployment limits:
 - Candidate deals remain marked for human review only.
 - Blocked, unknown, unclear, HTTP 403, CAPTCHA, anti-bot, login-wall, security-check, robots-disallowed, or failed sources are skipped and recorded, not bypassed.
 - MoneySuperMarket and Compare the Market must not be used if they return HTTP 403 or security checks.
-- The live site separates the **Active online candidate deals** section from the fake **Sample data prototype tables** and uses only active records with `showOnHomepage: true` for the main active table. Source-effective-only and review-artifact-only rows remain hidden evidence records with detail pages.
+- The live site separates the **Active online candidate deals** section from the fake **Sample data prototype tables** and uses only active records with `showOnHomepage: true` and `productType: "broadband-only"` for the main active table. Source-effective-only and review-artifact-only rows remain hidden evidence records with detail pages.
 
 ## What will be added later
 

@@ -25,6 +25,7 @@ const ACTIVE_COLUMNS = [
   'extractionConfidence',
   'extractionQuality',
   'activeFeedTrustLevel',
+  'productType',
   'showOnHomepage',
   'publishStatus',
   'requiresHumanReview',
@@ -57,6 +58,46 @@ const FORCE_HOMEPAGE_HIDDEN_CANDIDATE_IDS = new Set([
   'uswitch-virgin-media-superfast-broadband',
   'uswitch-plusnet-fibre-66',
 ]);
+
+const PRODUCT_TYPES = new Set([
+  'broadband-only',
+  'broadband-tv-bundle',
+  'broadband-mobile-bundle',
+  'broadband-phone-bundle',
+  'unknown',
+]);
+
+function classifyProductType(candidate) {
+  const packageName = String(candidate.packageName || '');
+  const sourceSnippet = String(candidate.sourceSnippet || '');
+  const text = `${packageName} ${sourceSnippet}`;
+  const normalizedText = normalizeForMatching(text);
+
+  const hasTvBundleTerm = /\b(tv|sport|sports|cinema|netflix|channels?)\b/i.test(text) ||
+    /\bsky\s+(sports?|cinema)\b/i.test(text) ||
+    /\bapple\s+tv\b/i.test(text);
+  if (hasTvBundleTerm) {
+    return 'broadband-tv-bundle';
+  }
+
+  const hasMobileBundleTerm = /\b(sim|mobile)\b/i.test(text) || /\b5g\s+broadband\b/i.test(text);
+  if (hasMobileBundleTerm) {
+    return 'broadband-mobile-bundle';
+  }
+
+  const hasPhoneBundleTerm = /\b(landline|phone|calls?|anytime\s+calls?|weekend\s+calls?)\b/i.test(text);
+  if (hasPhoneBundleTerm) {
+    return 'broadband-phone-bundle';
+  }
+
+  const hasBroadbandOnlyTerm = /\b(broadband|fibre|fiber|full\s+fibre|gig1|superfast|ultrafast|m\d{2,4})\b/i.test(text) ||
+    /\b(full\s+fibre|fibre\s+broadband|fiber\s+broadband)\b/.test(normalizedText);
+  if (hasBroadbandOnlyTerm) {
+    return 'broadband-only';
+  }
+
+  return 'unknown';
+}
 
 function escapeRegex(text) {
   return String(text).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -294,9 +335,22 @@ function createActiveDealId(candidate, index) {
 
 function toActiveDeal(candidate, generatedAt, index) {
   const homepageDecision = getHomepageDecision(candidate);
+  const productType = classifyProductType(candidate);
+  const productTypeWarnings = [];
+
+  if (!PRODUCT_TYPES.has(productType)) {
+    throw new Error(`Unexpected product type: ${productType}`);
+  }
+
+  if (homepageDecision.showOnHomepage === true && productType !== 'broadband-only') {
+    homepageDecision.showOnHomepage = false;
+    productTypeWarnings.push(`Active feed product gate: hidden from homepage because productType is ${productType}, not broadband-only.`);
+  }
+
   const extractionWarnings = [...new Set([
     ...(Array.isArray(candidate.extractionWarnings) ? candidate.extractionWarnings : []),
     ...homepageDecision.warnings,
+    ...productTypeWarnings,
   ])];
 
   if (!ACTIVE_FEED_TRUST_LEVELS.has(homepageDecision.activeFeedTrustLevel)) {
@@ -326,6 +380,7 @@ function toActiveDeal(candidate, generatedAt, index) {
     extractionConfidence: candidate.extractionConfidence || null,
     extractionQuality: candidate.extractionQuality || null,
     activeFeedTrustLevel: homepageDecision.activeFeedTrustLevel,
+    productType,
     showOnHomepage: homepageDecision.showOnHomepage,
     availabilityScope: candidate.availabilityScope || null,
     publishStatus: 'active-review-only',
@@ -350,15 +405,18 @@ function buildActiveOnlineDealsOutput(candidateOutput, generatedAt = new Date().
     activeDeals,
     summary: {
       totalActiveDeals: activeDeals.length,
-      homepageActiveDeals: activeDeals.filter((deal) => deal.showOnHomepage === true).length,
+      homepageActiveDeals: activeDeals.filter((deal) => deal.showOnHomepage === true && deal.productType === 'broadband-only').length,
+      broadbandOnlyHomepageCount: activeDeals.filter((deal) => deal.showOnHomepage === true && deal.productType === 'broadband-only').length,
       hiddenReviewDeals: activeDeals.filter((deal) => deal.showOnHomepage !== true).length,
       providerDirectHomepageCount: activeDeals.filter((deal) => deal.showOnHomepage === true && deal.activeFeedTrustLevel === 'provider-direct-calculated').length,
       comparisonHomepageCount: activeDeals.filter((deal) => deal.showOnHomepage === true && deal.activeFeedTrustLevel === 'comparison-clean-calculated').length,
       sourceEffectiveOnlyHiddenCount: activeDeals.filter((deal) => deal.showOnHomepage !== true && deal.activeFeedTrustLevel === 'comparison-source-effective-only').length,
+      hiddenBundleCount: activeDeals.filter((deal) => deal.showOnHomepage !== true && ['broadband-tv-bundle', 'broadband-mobile-bundle', 'broadband-phone-bundle'].includes(deal.productType)).length,
+      hiddenUnknownProductTypeCount: activeDeals.filter((deal) => deal.showOnHomepage !== true && deal.productType === 'unknown').length,
       generatedAt,
       warningMessages: [...new Set([
         ...warningMessages,
-        ...activeDeals.flatMap((deal) => Array.isArray(deal.extractionWarnings) ? deal.extractionWarnings.filter((warning) => String(warning).startsWith('Active feed trust gate:')) : []),
+        ...activeDeals.flatMap((deal) => Array.isArray(deal.extractionWarnings) ? deal.extractionWarnings.filter((warning) => String(warning).startsWith('Active feed trust gate:') || String(warning).startsWith('Active feed product gate:')) : []),
       ])],
     },
   };
@@ -405,6 +463,9 @@ function main() {
   console.log('====================================');
   console.log(`Active online deals: ${output.summary.totalActiveDeals}`);
   console.log(`Homepage active deals: ${output.summary.homepageActiveDeals}`);
+  console.log(`Broadband-only homepage deals: ${output.summary.broadbandOnlyHomepageCount}`);
+  console.log(`Hidden bundle active records: ${output.summary.hiddenBundleCount}`);
+  console.log(`Hidden unknown-product active records: ${output.summary.hiddenUnknownProductTypeCount}`);
   console.log(`Hidden review/evidence active records: ${output.summary.hiddenReviewDeals}`);
   console.log(`JSON created: ${path.relative(__dirname, JSON_OUTPUT_PATH)}`);
   console.log(`CSV created: ${path.relative(__dirname, CSV_OUTPUT_PATH)}`);
@@ -421,7 +482,9 @@ if (require.main === module) {
 module.exports = {
   ACTIVE_COLUMNS,
   ACTIVE_FEED_TRUST_LEVELS,
+  PRODUCT_TYPES,
   buildActiveOnlineDealsOutput,
+  classifyProductType,
   getHomepageDecision,
   isPromotableCandidate,
   passedStricterQualityGate,
