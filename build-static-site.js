@@ -20,10 +20,19 @@ const dealsFolder = path.join(siteFolder, 'deals');
 const exportFiles = {
   nationalCheapestBySpeedTier: path.join(exportsFolder, 'national-cheapest-by-speed-tier.json'),
   postcodeAreaComparison: path.join(exportsFolder, 'postcode-area-comparison.json'),
+  providerDealCandidates: path.join(exportsFolder, 'provider-deal-candidates.json'),
 };
 
 function readJsonFile(filePath) {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+}
+
+function readJsonFileIfExists(filePath, fallbackValue) {
+  if (!fs.existsSync(filePath)) {
+    return fallbackValue;
+  }
+
+  return readJsonFile(filePath);
 }
 
 function escapeHtml(value) {
@@ -37,6 +46,14 @@ function escapeHtml(value) {
 
 function formatMoney(value) {
   return `£${Number(value || 0).toFixed(2)}`;
+}
+
+function formatOptionalMoney(value) {
+  if (value === null || value === undefined || value === '') {
+    return 'Not calculated';
+  }
+
+  return formatMoney(value);
 }
 
 function formatRewardSummary(deal) {
@@ -132,7 +149,90 @@ function buildPostcodeRows(deals) {
             </tr>`).join('');
 }
 
-function buildHtml(nationalDeals, postcodeDeals) {
+function formatCandidateReward(candidate) {
+  const rewards = [
+    ['Voucher', candidate.voucherValue],
+    ['Reward card', candidate.rewardCardValue],
+    ['Cashback', candidate.cashbackValue],
+    ['Bill credit', candidate.billCreditValue],
+  ].filter(([, value]) => Number(value) > 0);
+
+  if (rewards.length === 0) {
+    return 'None extracted';
+  }
+
+  return rewards.map(([label, value]) => `${label}: ${formatMoney(value)}`).join(', ');
+}
+
+function formatCandidateSetupFee(candidate) {
+  if (candidate.setupFee === null || candidate.setupFee === undefined) {
+    return 'Unknown';
+  }
+
+  return Number(candidate.setupFee) === 0 ? 'None extracted' : formatMoney(candidate.setupFee);
+}
+
+function formatCandidateAprilRise(candidate) {
+  if (candidate.annualAprilPriceRise === null || candidate.annualAprilPriceRise === undefined) {
+    return 'Unknown';
+  }
+
+  return `${formatMoney(candidate.annualAprilPriceRise)} per April`;
+}
+
+function buildCandidateRows(candidates) {
+  return candidates.map((candidate) => `
+            <tr>
+              <td>${escapeHtml(candidate.provider)}</td>
+              <td>${escapeHtml(candidate.packageName)}</td>
+              <td class="wrap-text">${escapeHtml(candidate.sourceName)}</td>
+              <td class="number">${escapeHtml(candidate.speedMbps || '')} Mbps</td>
+              <td class="money">${formatOptionalMoney(candidate.advertisedMonthlyPrice)}</td>
+              <td class="money effective-price">${formatOptionalMoney(candidate.effectiveMonthlyPrice)}</td>
+              <td class="number">${candidate.contractLengthMonths ? `${escapeHtml(candidate.contractLengthMonths)} months` : 'Unknown'}</td>
+              <td class="money">${escapeHtml(formatCandidateAprilRise(candidate))}</td>
+              <td class="wrap-text">${escapeHtml(formatCandidateReward(candidate))}</td>
+              <td class="money">${escapeHtml(formatCandidateSetupFee(candidate))}</td>
+              <td>${escapeHtml(candidate.extractionConfidence)}</td>
+              <td class="wrap-text">${escapeHtml(candidate.publishStatus)}; ${escapeHtml(candidate.availabilityScope)}</td>
+            </tr>`).join('');
+}
+
+function buildCandidateSection(candidates) {
+  const candidateRows = buildCandidateRows(candidates);
+
+  return `
+    <section class="card" aria-labelledby="active-candidates-heading">
+      <h2 id="active-candidates-heading">Active online candidate deals</h2>
+      <div class="warning-box">These are automatically extracted online candidate deals. They are not postcode checked, not manually approved, and may be incomplete. Use for review only.</div>
+      ${candidates.length === 0 ? '<p class="no-results-message">No online candidate deals have been extracted yet. Run npm run extract-snippets and npm run extract-providers.</p>' : `
+      <p class="small-note scroll-tip">Tip: if needed, scroll sideways to see all columns.</p>
+      <div class="table-wrap" tabindex="0" aria-label="Active online candidate deals table with horizontal scrolling">
+        <table id="active-candidate-table">
+          <thead>
+            <tr>
+              <th>Provider</th>
+              <th>Package</th>
+              <th>Source</th>
+              <th>Speed</th>
+              <th>Advertised Monthly Price</th>
+              <th>Effective Monthly Price</th>
+              <th>Contract Length</th>
+              <th>April Price Rise</th>
+              <th>Voucher/Reward</th>
+              <th>Setup Fee</th>
+              <th>Confidence</th>
+              <th>Review Status</th>
+            </tr>
+          </thead>
+          <tbody>${candidateRows}
+          </tbody>
+        </table>
+      </div>`}
+    </section>`;
+}
+
+function buildHtml(nationalDeals, postcodeDeals, providerCandidates = []) {
   const summaryCards = [
     ['Sample deals', postcodeDeals.length],
     ['Postcode areas', countUniqueValues(postcodeDeals, 'postcodeArea')],
@@ -313,6 +413,10 @@ function buildHtml(nationalDeals, postcodeDeals) {
       min-width: 1380px;
     }
 
+    #active-candidate-table {
+      min-width: 1320px;
+    }
+
     th,
     td {
       padding: 10px 11px;
@@ -433,6 +537,16 @@ function buildHtml(nationalDeals, postcodeDeals) {
       font-weight: 800;
     }
 
+    .warning-box {
+      margin: 12px 0 14px;
+      padding: 14px 16px;
+      border: 1px solid #f0d88a;
+      border-radius: 12px;
+      background: var(--yellow);
+      color: var(--yellow-text);
+      font-weight: 800;
+    }
+
     .no-results-message {
       margin: 12px 0 0;
       padding: 12px 14px;
@@ -528,6 +642,13 @@ ${summaryCards.map(([label, value]) => `        <article class="summary-card">
   </header>
 
   <main>
+${buildCandidateSection(providerCandidates)}
+
+    <section class="card" aria-labelledby="sample-data-heading">
+      <h2 id="sample-data-heading">Sample data prototype tables</h2>
+      <p class="small-note">The tables below use fake sample data and are kept separate from the active online candidate deals above.</p>
+    </section>
+
     <section class="card" aria-labelledby="national-heading">
       <h2 id="national-heading">National cheapest by speed tier</h2>
       <p class="small-note">Cheapest means the lowest effective monthly price in the fake sample data for each speed tier.</p>
@@ -1041,7 +1162,9 @@ function buildStaticSite() {
 
   const nationalDeals = readJsonFile(exportFiles.nationalCheapestBySpeedTier);
   const postcodeDeals = readJsonFile(exportFiles.postcodeAreaComparison);
-  const html = buildHtml(nationalDeals, postcodeDeals);
+  const providerCandidatesOutput = readJsonFileIfExists(exportFiles.providerDealCandidates, { candidates: [] });
+  const providerCandidates = Array.isArray(providerCandidatesOutput.candidates) ? providerCandidatesOutput.candidates : [];
+  const html = buildHtml(nationalDeals, postcodeDeals, providerCandidates);
 
   fs.mkdirSync(siteFolder, { recursive: true });
   fs.writeFileSync(path.join(siteFolder, 'index.html'), html);
@@ -1050,6 +1173,7 @@ function buildStaticSite() {
   return {
     nationalDealCount: nationalDeals.length,
     postcodeDealCount: postcodeDeals.length,
+    providerCandidateCount: providerCandidates.length,
     createdFile: path.join(siteFolder, 'index.html'),
     createdDealFiles,
   };
@@ -1061,6 +1185,7 @@ function main() {
   console.log('==========================');
   console.log(`National rows: ${summary.nationalDealCount}`);
   console.log(`Postcode rows: ${summary.postcodeDealCount}`);
+  console.log(`Active provider candidate rows: ${summary.providerCandidateCount}`);
   console.log(`File created: ${path.relative(__dirname, summary.createdFile)}`);
   console.log(`Deal detail pages created: ${summary.createdDealFiles.length}`);
   console.log(`Deals folder: ${path.relative(__dirname, dealsFolder)}`);
