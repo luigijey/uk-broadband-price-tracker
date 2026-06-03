@@ -331,12 +331,12 @@ The provider candidate extractor currently looks for conservative candidates fro
 
 Candidate quality is separated as follows:
 
-- `usable-calculated` means the extractor found the core fields needed for this repository to calculate an effective monthly price: provider, package, advertised monthly price, speed, contract length, annual rise or explicit price sequence, and setup/upfront fee or a known zero fee.
+- `usable-calculated` means the extractor found the core fields needed for this repository to calculate an effective monthly price: provider, package, advertised monthly price, speed, contract length, and annual rise or explicit price sequence. Provider-direct rows can still be usable when setup/upfront fee could not be found; in that case the calculated effective monthly price excludes any unknown upfront/setup fee and the active output marks `setupFeeStatus: "unknown"`.
 - `usable-source-effective-only` means a source-provided effective monthly price was found, but this repository could not yet calculate its own value from the extracted fields.
 - `review-only-missing-fields` means important fields are missing, so the row stays in review artifacts instead of the homepage table.
 - `discarded-noisy` means a block was too noisy to show as an active candidate, but remains available as an audit artifact if exported.
 
-The active promotion step reads `provider-deal-candidates-usable.json` and writes `exports/active-online-deals.json` plus `exports/active-online-deals.csv`. Active deals can exist in two roles: high-trust rows for the homepage and review/evidence records for audit. Every promoted active record keeps the backwards-compatible `productType` field and also has `connectionTechnology`, `serviceCategory`, `landlineStatus`, `callsPackageStatus`, `homepageCategory`, and `showOnHomepage` fields. Landline and non-landline versions of a broadband package are separate categories: a fixed broadband-only package is not merged with the same package when a landline is included, and a landline-plus-calls package is separate again. 5G home broadband is also its own category instead of being hidden permanently as a mobile bundle. Homepage-visible categories are Fixed broadband, Fixed broadband with landline, Fixed broadband with calls, and 5G home broadband. Hidden rows are still kept in `active-online-deals.json` and still receive active detail/evidence pages.
+The active promotion step reads `provider-deal-candidates-usable.json` and writes `exports/active-online-deals.json` plus `exports/active-online-deals.csv`. Both active outputs include `setupFeeStatus` and `effectivePriceCaveat`. When a reliable provider-direct row has no extracted setup fee, `setupFeeStatus` is `unknown` and `effectivePriceCaveat` says that the effective monthly price excludes any unknown upfront/setup fee. Active deals can exist in two roles: high-trust rows for the homepage and review/evidence records for audit. Every promoted active record keeps the backwards-compatible `productType` field and also has `connectionTechnology`, `serviceCategory`, `landlineStatus`, `callsPackageStatus`, `homepageCategory`, and `showOnHomepage` fields. Landline and non-landline versions of a broadband package are separate categories: a fixed broadband-only package is not merged with the same package when a landline is included, and a landline-plus-calls package is separate again. 5G home broadband is also its own category instead of being hidden permanently as a mobile bundle. Homepage-visible categories are Fixed broadband, Fixed broadband with landline, Fixed broadband with calls, and 5G home broadband. Hidden rows are still kept in `active-online-deals.json` and still receive active detail/evidence pages.
 
 
 Product classification is deliberately conservative:
@@ -349,8 +349,8 @@ Product classification is deliberately conservative:
 
 Active feed trust levels are separated as follows:
 
-- `provider-direct-calculated` is the highest-trust homepage path. Provider-direct calculated rows are trusted first when the core numeric fields are present and the source snippet mentions the extracted provider or package.
-- `comparison-clean-calculated` can appear on the homepage only when a comparison-site row passes stricter clean-block validation: the snippet must begin with, or very closely begin with, the same provider/package block being extracted and must not contain another provider before that extracted block.
+- `provider-direct-calculated` is the highest-trust homepage path. Provider-direct calculated rows are trusted first when the reliable core fields are present and the source snippet mentions the extracted provider or package. Provider-direct rows do not need a known setup fee to appear, but rows with `setupFeeStatus: "unknown"` carry the effective price caveat.
+- `comparison-clean-calculated` can appear on the homepage only when a comparison-site row passes stricter clean-block validation: the snippet must begin with, or very closely begin with, the same provider/package block being extracted, must not contain another provider before that extracted block, and must have a known setup fee or extracted no-setup wording. Comparison-site rows with unknown setup fee remain hidden from clean homepage rows.
 - `comparison-source-effective-only` rows are kept as evidence because a source-provided effective monthly price was found, but they are hidden from the homepage for now. Broadband Genie effective monthly costs are preserved as `sourceEffectiveMonthlyPrice` and remain hidden until this repository can calculate them reliably or a separate source-effective-only section is added.
 - `review-artifact-only` rows are active evidence records that are useful for review but are hidden from the homepage, for example when a comparison snippet appears to mix adjacent provider/deal text or starts with the wrong provider.
 
@@ -380,7 +380,7 @@ Important limits:
 - Candidate deals may be incomplete or wrong and are for review only.
 - Blocked, HTTP 403, CAPTCHA, anti-bot, login-wall, security-check, robots-disallowed, or unclear sources are skipped and recorded, not bypassed.
 - MoneySuperMarket and Compare the Market must not be used if they return HTTP 403 or security checks.
-- The static site displays only high-trust active candidate deals with `showOnHomepage: true` and a homepage-visible `homepageCategory` in the **Active online candidate deals** section, clearly separated from the **Sample data prototype tables** section that still uses fake sample data. Review/evidence active records, including TV/Sports/Cinema/Netflix bundles and unknown rows, remain in `active-online-deals.json` and detail pages but are hidden from the main homepage table.
+- The static site displays only high-trust active candidate deals with `showOnHomepage: true` and a homepage-visible `homepageCategory` in the **Active online candidate deals** section, clearly separated from the **Sample data prototype tables** section that still uses fake sample data. The active feed has simple demo usability controls for provider, speed tier, homepage category, source type, sorting, a result count, and reset; these controls only filter/sort the active feed table. Review/evidence active records, including TV/Sports/Cinema/Netflix bundles and unknown rows, remain in `active-online-deals.json` and detail pages but are hidden from the main homepage table.
 
 
 ## Postcode Area V1
@@ -414,13 +414,13 @@ The script reads `exports/active-online-deals.json` and the enabled rows in `pos
 - `exports/postcode-area-active-comparison.csv`
 - `exports/postcode-check-v1-summary.json` - the supported postcode areas, supported postcode area count, rows available, generated time, and Postcode Check V1 warning messages.
 
-Postcode Area V1 can include homepage-visible fixed broadband, fixed broadband with landline, fixed broadband with calls, and 5G home broadband rows. Every generated row is still marked with `availabilityStatus: "not-postcode-checked"`, `availabilityConfidence: "national-candidate-only"`, and `publishStatus: "postcode-area-v1-review-only"`. The homepage shows these rows in a **Postcode Area V1 comparison** section with a clear warning and a simple postcode area dropdown filter.
+Postcode Area V1 can include homepage-visible fixed broadband, fixed broadband with landline, fixed broadband with calls, and 5G home broadband rows. The postcode-area JSON and CSV preserve `setupFeeStatus` and `effectivePriceCaveat` from the active deal. Every generated row is still marked with `availabilityStatus: "not-postcode-checked"`, `availabilityConfidence: "national-candidate-only"`, and `publishStatus: "postcode-area-v1-review-only"`. The homepage shows these rows in a **Postcode Area V1 comparison** section with a clear warning and a simple postcode area dropdown filter.
 
 
 
 ## Postcode Check V1
 
-The homepage now includes a **Check broadband deals by postcode** section with a full postcode input. The postcode is used locally in the browser by the static page: the site normalises the postcode, validates common UK formats, extracts the broad postcode area (for example `OX14 1AA` becomes `OX`), and filters the Postcode Area V1 active national candidate rows for that postcode area.
+The homepage now includes a **Check broadband deals by postcode** section with a full postcode input and the example placeholder `e.g. OX14 1AA`. The postcode is used locally in the browser by the static page: the site normalises the postcode, validates common UK formats, extracts the broad postcode area (for example `OX14 1AA` becomes `OX`), and filters only the Postcode Area V1 active national candidate rows for that postcode area.
 
 Postcode Check V1 is intentionally limited:
 
@@ -428,7 +428,7 @@ Postcode Check V1 is intentionally limited:
 - It does **not** submit postcode forms.
 - It does **not** send the postcode to providers or third-party websites.
 - It does **not** bypass blocked provider websites, CAPTCHAs, security checks, login walls, robots restrictions, or postcode-check forms.
-- The results are active national candidate deals grouped by postcode area, not confirmed address-level availability.
+- The results are active national candidate deals grouped by postcode area, not provider-level availability checks or confirmed address-level availability.
 - Provider/source pages can be opened manually from active evidence pages using the ordinary **Open provider/source page to check availability** link.
 - True postcode availability will require approved APIs, licensed data, or another compliant provider-specific method.
 

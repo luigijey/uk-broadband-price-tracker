@@ -444,11 +444,12 @@ function hasQualityGateWarning(candidate) {
 }
 
 function canCalculateReliablePrice(candidate) {
+  const setupFeeKnown = candidate.setupFee !== null || candidate.sourceType === 'provider-direct';
   return candidate.advertisedMonthlyPrice !== null &&
     candidate.contractLengthMonths !== null &&
     candidate.annualAprilPriceRise !== null &&
     candidate.speedMbps !== null &&
-    candidate.setupFee !== null &&
+    setupFeeKnown &&
     !hasQualityGateWarning(candidate);
 }
 
@@ -492,6 +493,7 @@ function addCalculatedFields(candidate, extractedAt) {
 
   const calculatedPrice = calculateBroadbandPrice({
     ...candidate,
+    setupFee: candidate.setupFee === null && candidate.sourceType === 'provider-direct' ? 0 : candidate.setupFee,
     contractStartDate: extractedAt.slice(0, 10),
   });
 
