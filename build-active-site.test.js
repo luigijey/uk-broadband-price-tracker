@@ -18,6 +18,7 @@ test('active build summary reports output files and candidate count', () => {
   const providerDirectExpansionSummaryPath = path.join(tempFolder, 'provider-direct-expansion-summary.json');
   const activeDealsPath = path.join(tempFolder, 'active-online-deals.json');
   const postcodeAreaActiveComparisonPath = path.join(tempFolder, 'postcode-area-active-comparison.json');
+  const postcodeCheckV1SummaryPath = path.join(tempFolder, 'postcode-check-v1-summary.json');
   const activeDealsFolder = path.join(tempFolder, 'site', 'active-deals');
   const siteIndexPath = path.join(tempFolder, 'site', 'index.html');
 
@@ -32,6 +33,7 @@ test('active build summary reports output files and candidate count', () => {
   fs.writeFileSync(path.join(activeDealsFolder, 'active-example.html'), '<!doctype html>');
   fs.writeFileSync(activeDealsPath, JSON.stringify({ activeDeals: [{ activeDealId: 'active-example' }] }));
   fs.writeFileSync(postcodeAreaActiveComparisonPath, JSON.stringify({ rows: [{ postcodeArea: 'OX' }] }));
+  fs.writeFileSync(postcodeCheckV1SummaryPath, JSON.stringify({ supportedPostcodeAreaCount: 1 }));
   fs.writeFileSync(siteIndexPath, '<!doctype html>');
 
   const summary = buildActiveBuildSummary({
@@ -43,6 +45,7 @@ test('active build summary reports output files and candidate count', () => {
     providerDirectExpansionSummary: providerDirectExpansionSummaryPath,
     activeOnlineDeals: activeDealsPath,
     postcodeAreaActiveComparison: postcodeAreaActiveComparisonPath,
+    postcodeCheckV1Summary: postcodeCheckV1SummaryPath,
     activeDealsFolder,
     siteIndex: siteIndexPath,
   });
@@ -56,9 +59,11 @@ test('active build summary reports output files and candidate count', () => {
     providerDirectExpansionSummaryFileExists: true,
     activeOnlineDealsFileExists: true,
     postcodeAreaActiveComparisonFileExists: true,
+    postcodeCheckV1SummaryFileExists: true,
     candidateCount: 1,
     activeOnlineDealCount: 1,
     postcodeAreaActiveRowCount: 1,
+    supportedPostcodeAreaCount: 1,
     activeDealPagesGenerated: 1,
     siteIndexCreated: true,
   });

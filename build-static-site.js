@@ -13,6 +13,7 @@ const sampleDeals = require('./sample-deals');
 const { calculateBroadbandPrice } = require('./pricing-calculator');
 const { exportPricingData } = require('./export-pricing-data');
 const { isHomepageVisibleCategory } = require('./product-classification');
+const postcodeAreas = require('./postcode-areas');
 
 const exportsFolder = path.join(__dirname, 'exports');
 const siteFolder = path.join(__dirname, 'site');
@@ -138,12 +139,12 @@ function buildPostcodeAreaActiveRows(rows) {
             <tr data-postcode-area="${escapeHtml(row.postcodeArea)}">
               <td>${escapeHtml(row.postcodeArea)}</td>
               <td>${escapeHtml(row.regionName)}</td>
+              <td>${escapeHtml(row.homepageCategory || '')}</td>
               <td>${escapeHtml(row.provider)}</td>
               <td>${escapeHtml(row.packageName)}</td>
               <td class="number">${escapeHtml(row.speedMbps || '')} Mbps</td>
               <td class="money">${formatOptionalMoney(row.advertisedMonthlyPrice)}</td>
               <td class="money effective-price">${formatOptionalMoney(row.effectiveMonthlyPrice)}</td>
-              <td>${escapeHtml(row.homepageCategory || '')}</td>
               <td>${escapeHtml(row.availabilityStatus)}</td>
               <td><a class="details-button" href="${escapeHtml(activeDealDetailHref(row))}">View evidence</a></td>
             </tr>`).join('');
@@ -152,6 +153,31 @@ function buildPostcodeAreaActiveRows(rows) {
 function buildPostcodeAreaActiveOptions(rows) {
   const postcodeAreas = [...new Set(rows.map((row) => row.postcodeArea).filter(Boolean))].sort();
   return postcodeAreas.map((postcodeArea) => `            <option value="${escapeHtml(postcodeArea)}">${escapeHtml(postcodeArea)}</option>`).join('\n');
+}
+
+
+function buildPostcodeCheckV1Section(areas = postcodeAreas) {
+  const enabledAreas = areas.filter((area) => area && area.enabled === true);
+  return `
+    <section class="card" aria-labelledby="postcode-check-heading">
+      <h2 id="postcode-check-heading">Check broadband deals by postcode</h2>
+      <p class="small-note">Enter a full UK postcode to filter the Postcode Area V1 comparison below. These results are not provider-level availability checks yet. They are active national candidate deals grouped by postcode area.</p>
+      <div class="filter-row" aria-label="Full postcode check">
+        <div class="filter-field postcode-input-field">
+          <label for="full-postcode-input">Full postcode</label>
+          <input id="full-postcode-input" type="text" inputmode="text" autocomplete="postal-code" placeholder="e.g. OX14 1AA" aria-describedby="postcode-check-help">
+        </div>
+        <div class="filter-field">
+          <button type="button" id="check-postcode-button">Check postcode</button>
+        </div>
+        <div class="filter-field">
+          <button type="button" id="show-all-postcode-areas">Show all postcode areas</button>
+        </div>
+      </div>
+      <p id="postcode-check-help" class="small-note">Your postcode is used locally in this page to find the postcode area. It is not stored by this static site.</p>
+      <p id="postcode-check-result" class="result-count" aria-live="polite">These results are not provider-level availability checks yet. They are active national candidate deals grouped by postcode area.</p>
+      <script type="application/json" id="postcode-area-starter-data">${escapeHtml(JSON.stringify(enabledAreas.map((area) => ({ postcodeArea: area.postcodeArea, regionName: area.regionName, country: area.country, enabled: area.enabled }))))}</script>
+    </section>`;
 }
 
 function buildPostcodeAreaV1Section(postcodeAreaActiveComparison = { rows: [], summary: {} }) {
@@ -187,12 +213,12 @@ ${optionHtml}
             <tr>
               <th>Postcode Area</th>
               <th>Region</th>
+              <th>Homepage Category</th>
               <th>Provider</th>
               <th>Package</th>
               <th>Speed</th>
               <th>Advertised Monthly Price</th>
               <th>Effective Monthly Price</th>
-              <th>Homepage Category</th>
               <th>Availability Status</th>
               <th>Details</th>
             </tr>
@@ -797,6 +823,7 @@ ${summaryCards.map(([label, value]) => `        <article class="summary-card">
   </header>
 
   <main>
+${buildPostcodeCheckV1Section(postcodeAreas)}
 ${buildCandidateSection(providerCandidates, activeDealData.summary.generatedAt, activeDealData.summary)}
 ${buildPostcodeAreaV1Section(postcodeAreaActiveComparison)}
 
@@ -905,6 +932,11 @@ ${buildPostcodeAreaV1Section(postcodeAreaActiveComparison)}
     const postcodeAreaV1Rows = document.querySelectorAll('#postcode-area-v1-table tbody tr');
     const postcodeAreaV1ResultCount = document.getElementById('postcode-area-v1-result-count');
     const postcodeAreaV1NoResultsMessage = document.getElementById('postcode-area-v1-no-results');
+    const fullPostcodeInput = document.getElementById('full-postcode-input');
+    const checkPostcodeButton = document.getElementById('check-postcode-button');
+    const showAllPostcodeAreasButton = document.getElementById('show-all-postcode-areas');
+    const postcodeCheckResult = document.getElementById('postcode-check-result');
+    const postcodeAreaStarterData = document.getElementById('postcode-area-starter-data');
     const postcodeFilter = document.getElementById('postcode-filter');
     const providerFilter = document.getElementById('provider-filter');
     const speedTierFilter = document.getElementById('speed-tier-filter');
@@ -913,6 +945,28 @@ ${buildPostcodeAreaV1Section(postcodeAreaActiveComparison)}
     const noResultsMessage = document.getElementById('postcode-no-results');
     const postcodeRows = document.querySelectorAll('#postcode-area-table tbody tr');
     const totalDeals = postcodeRows.length;
+    const postcodeAreas = postcodeAreaStarterData ? JSON.parse(postcodeAreaStarterData.textContent || '[]') : [];
+
+    function normalisePostcode(postcode) {
+      const compact = String(postcode || '').toUpperCase().replace(/\\s+/g, '');
+      if (compact.length <= 3) return compact;
+      return compact.slice(0, -3) + ' ' + compact.slice(-3);
+    }
+
+    function isValidUkPostcode(postcode) {
+      return /^(GIR 0AA|[A-Z]{1,2}\\d[A-Z\\d]? \\d[A-Z]{2})$/.test(normalisePostcode(postcode));
+    }
+
+    function extractPostcodeArea(postcode) {
+      if (!isValidUkPostcode(postcode)) return null;
+      const areaMatch = normalisePostcode(postcode).split(' ')[0].match(/^[A-Z]{1,2}/);
+      return areaMatch ? areaMatch[0] : null;
+    }
+
+    function getPostcodeAreaMatch(postcode, areas) {
+      const postcodeArea = extractPostcodeArea(postcode);
+      return areas.find((area) => area.postcodeArea === postcodeArea && area.enabled !== false) || null;
+    }
 
     function resetTableScroll() {
       tableScrollContainers.forEach((container) => {
@@ -966,11 +1020,52 @@ ${buildPostcodeAreaV1Section(postcodeAreaActiveComparison)}
       noResultsMessage.hidden = visibleDeals !== 0;
     }
 
+    function runPostcodeCheck() {
+      if (!fullPostcodeInput || !postcodeCheckResult || !postcodeAreaV1Filter) return;
+      const postcode = fullPostcodeInput.value;
+      if (!isValidUkPostcode(postcode)) {
+        postcodeCheckResult.textContent = 'Please enter a valid UK postcode.';
+        return;
+      }
+
+      const postcodeArea = extractPostcodeArea(postcode);
+      const match = getPostcodeAreaMatch(postcode, postcodeAreas);
+      if (!match) {
+        postcodeCheckResult.textContent = 'We recognise the postcode format, but this postcode area is not in the starter coverage list yet. These results are not provider-level availability checks yet. They are active national candidate deals grouped by postcode area.';
+        return;
+      }
+
+      postcodeAreaV1Filter.value = postcodeArea;
+      filterPostcodeAreaV1Rows();
+      postcodeCheckResult.textContent = 'Postcode area detected: ' + postcodeArea + ' — showing active national candidate deals for ' + match.regionName + '. These results are not provider-level availability checks yet. They are active national candidate deals grouped by postcode area.';
+    }
+
+    function showAllPostcodeAreas() {
+      if (postcodeAreaV1Filter) {
+        postcodeAreaV1Filter.value = 'all';
+        filterPostcodeAreaV1Rows();
+      }
+      if (postcodeCheckResult) {
+        postcodeCheckResult.textContent = 'Showing all postcode areas. These results are not provider-level availability checks yet. They are active national candidate deals grouped by postcode area.';
+      }
+    }
+
     resetTableScroll();
 
     window.addEventListener('load', resetTableScroll);
     if (postcodeAreaV1Filter) {
       postcodeAreaV1Filter.addEventListener('change', filterPostcodeAreaV1Rows);
+    }
+    if (checkPostcodeButton) {
+      checkPostcodeButton.addEventListener('click', runPostcodeCheck);
+    }
+    if (fullPostcodeInput) {
+      fullPostcodeInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') runPostcodeCheck();
+      });
+    }
+    if (showAllPostcodeAreasButton) {
+      showAllPostcodeAreasButton.addEventListener('click', showAllPostcodeAreas);
     }
     postcodeFilter.addEventListener('change', filterPostcodeRows);
     providerFilter.addEventListener('change', filterPostcodeRows);
@@ -1423,7 +1518,7 @@ function buildActiveDealDetailHtml(deal) {
       <a href="../index.html">← Back to homepage</a>
       <p class="badge">Active review evidence page</p>
       <h1>${escapeHtml(deal.provider)} — ${escapeHtml(deal.packageName)}</h1>
-      <p class="warning-box">This is not postcode checked and requires human review. It is an automatically extracted review/evidence page, not a final checkout page.</p>
+      <p class="warning-box">This page is an evidence page. It is not a checkout page and does not confirm postcode-level availability.</p>
     </div>
   </header>
   <main>
@@ -1432,6 +1527,11 @@ function buildActiveDealDetailHtml(deal) {
       <div class="table-wrap" tabindex="0" aria-label="Active deal detail table with horizontal scrolling">
         <table><tbody>${buildDetailRows(detailRows)}</tbody></table>
       </div>
+    </section>
+    <section class="card" aria-labelledby="source-link-heading">
+      <h2 id="source-link-heading">Provider/source availability link</h2>
+      <p><a href="${escapeHtml(deal.sourceUrl || '#')}">Open provider/source page to check availability</a></p>
+      <p class="small-note">This is an ordinary link only. This site does not submit postcode forms or automate provider checks.</p>
     </section>
     <section class="card" aria-labelledby="evidence-heading">
       <h2 id="evidence-heading">Source snippet / evidence</h2>
@@ -1509,6 +1609,7 @@ module.exports = {
   buildHtml,
   buildCandidateSection,
   buildPostcodeAreaV1Section,
+  buildPostcodeCheckV1Section,
   buildDealDetailHtml,
   buildActiveDealDetailHtml,
   buildStaticSite,

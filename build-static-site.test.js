@@ -118,6 +118,20 @@ test('full generated homepage includes active online candidate and Postcode Area
 });
 
 
+
+test('generated homepage includes embedded Postcode Check V1 controls and messages', () => {
+  const html = buildHtml([], [], { activeDeals: [], summary: { generatedAt: '2026-06-03T00:00:00.000Z' } }, { rows: [], summary: {} });
+
+  assert.match(html, /Check broadband deals by postcode/);
+  assert.match(html, /id="full-postcode-input"/);
+  assert.match(html, />Check postcode<\/button>/);
+  assert.match(html, /Please enter a valid UK postcode\./);
+  assert.match(html, /Postcode area detected:/);
+  assert.match(html, /These results are not provider-level availability checks yet\. They are active national candidate deals grouped by postcode area\./);
+  assert.match(html, />Show all postcode areas<\/button>/);
+  assert.match(html, /id="postcode-area-v1-filter"/);
+});
+
 test('homepage active feed includes details link to active deal page', () => {
   const html = buildCandidateSection([candidate], '2026-06-03T00:00:00.000Z');
 
@@ -129,7 +143,7 @@ test('active deal detail page is generated as a review evidence page', () => {
   const html = buildActiveDealDetailHtml(candidate);
 
   assert.match(html, /Active review evidence page/);
-  assert.match(html, /not postcode checked and requires human review/);
+  assert.match(html, /does not confirm postcode-level availability/);
   assert.match(html, /TalkTalk Full Fibre 150 evidence snippet/);
   assert.match(html, /Connection technology/);
   assert.match(html, /Service category/);

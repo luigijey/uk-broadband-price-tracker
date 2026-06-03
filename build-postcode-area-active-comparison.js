@@ -12,6 +12,7 @@ const postcodeAreas = require('./postcode-areas');
 const ACTIVE_DEALS_PATH = path.join(__dirname, 'exports', 'active-online-deals.json');
 const JSON_OUTPUT_PATH = path.join(__dirname, 'exports', 'postcode-area-active-comparison.json');
 const CSV_OUTPUT_PATH = path.join(__dirname, 'exports', 'postcode-area-active-comparison.csv');
+const POSTCODE_CHECK_V1_SUMMARY_PATH = path.join(__dirname, 'exports', 'postcode-check-v1-summary.json');
 const ROW_WARNING = 'This active deal is shown for postcode-area comparison only and has not been checked against this postcode area.';
 const { isHomepageVisibleCategory } = require('./product-classification');
 
@@ -102,6 +103,27 @@ function buildPostcodeAreaRows(activeDeals, areas = postcodeAreas) {
   })));
 }
 
+function buildPostcodeCheckV1Summary(activeDealOutput, areas = postcodeAreas, generatedAt = new Date().toISOString()) {
+  const activeDeals = normalizeActiveDealOutput(activeDealOutput);
+  const enabledAreas = enabledPostcodeAreas(areas);
+  const rows = buildPostcodeAreaRows(activeDeals, areas);
+
+  return {
+    generatedAt,
+    supportedPostcodeAreas: enabledAreas.map((area) => ({
+      postcodeArea: area.postcodeArea,
+      regionName: area.regionName,
+      country: area.country,
+    })),
+    supportedPostcodeAreaCount: enabledAreas.length,
+    rowsAvailable: rows.length,
+    warningMessages: [
+      'Postcode Check V1 extracts postcode area locally in the browser only.',
+      'These results are not provider-level availability checks yet. They are active national candidate deals grouped by postcode area.',
+    ],
+  };
+}
+
 function buildPostcodeAreaActiveComparisonOutput(activeDealOutput, areas = postcodeAreas, generatedAt = new Date().toISOString()) {
   const activeDeals = normalizeActiveDealOutput(activeDealOutput);
   const enabledAreas = enabledPostcodeAreas(areas);
@@ -159,8 +181,10 @@ function buildPostcodeAreaActiveComparison({
 } = {}) {
   const activeDealOutput = readJsonFileIfExists(activeDealsPath, { activeDeals: [] });
   const output = buildPostcodeAreaActiveComparisonOutput(activeDealOutput, areas, generatedAt);
+  const postcodeCheckSummary = buildPostcodeCheckV1Summary(activeDealOutput, areas, generatedAt);
   writeJsonFile(jsonOutputPath, output);
   writeCsvFile(csvOutputPath, output.rows);
+  writeJsonFile(POSTCODE_CHECK_V1_SUMMARY_PATH, postcodeCheckSummary);
   return output;
 }
 
@@ -173,6 +197,7 @@ function main() {
   console.log(`Rows created: ${output.summary.rowsCreated}`);
   console.log(`JSON created: ${path.relative(__dirname, JSON_OUTPUT_PATH)}`);
   console.log(`CSV created: ${path.relative(__dirname, CSV_OUTPUT_PATH)}`);
+  console.log(`Postcode Check V1 summary created: ${path.relative(__dirname, POSTCODE_CHECK_V1_SUMMARY_PATH)}`);
   if (output.summary.warningMessages.length > 0) {
     console.log('Warnings:');
     output.summary.warningMessages.forEach((warning) => console.log(`- ${warning}`));
@@ -189,6 +214,7 @@ module.exports = {
   activeHomepageBroadbandOnlyDeals,
   buildPostcodeAreaActiveComparison,
   buildPostcodeAreaActiveComparisonOutput,
+  buildPostcodeCheckV1Summary,
   buildPostcodeAreaRows,
   enabledPostcodeAreas,
 };

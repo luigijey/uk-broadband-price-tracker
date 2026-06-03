@@ -325,13 +325,13 @@ This runs `node extract-provider-candidates.js`, reads `exports/online-price-sni
 - `exports/provider-deal-candidates-usable.json` - candidates with `extractionQuality` of `usable-calculated` or `usable-source-effective-only`.
 - `exports/provider-deal-candidates-review-only.json` - candidates with `extractionQuality` of `review-only-missing-fields` for human follow-up.
 - `exports/provider-deal-candidates-discarded.json` - candidates with `extractionQuality` of `discarded-noisy` that are too noisy for the main table.
-- `exports/provider-direct-expansion-summary.json` - category counts for fixed broadband, landline, calls package, 5G home broadband, TV bundle, mobile bundle, and unknown product candidates.
+- `exports/provider-direct-expansion-summary.json` - one row per Provider Direct Expansion V2 provider (Sky, Plusnet, EE, Hyperoptic, and Community Fibre) with snippet coverage, usable/review-only counts, product category counts, and a `reasonNotUsable` explaining why a provider remains review-only.
 
-The provider candidate extractor currently looks for conservative candidates from TalkTalk, Vodafone, BT, Plusnet, Broadband Genie, and Uswitch where useful snippets are available. Each candidate is marked `candidate-review-only`, requires human review, and uses a not-postcode-checked availability scope such as `provider-landing-page-not-postcode-checked` or `comparison-page-not-postcode-checked`.
+The provider candidate extractor currently looks for conservative candidates from TalkTalk, Vodafone, BT, Sky, Plusnet, EE, Hyperoptic, Community Fibre, Broadband Genie, and Uswitch where useful snippets are available. Each candidate is marked `candidate-review-only`, requires human review, and uses a not-postcode-checked availability scope such as `provider-landing-page-not-postcode-checked` or `comparison-page-not-postcode-checked`.
 
 Candidate quality is separated as follows:
 
-- `usable-calculated` means the extractor found the core fields needed for this repository to calculate an effective monthly price.
+- `usable-calculated` means the extractor found the core fields needed for this repository to calculate an effective monthly price: provider, package, advertised monthly price, speed, contract length, annual rise or explicit price sequence, and setup/upfront fee or a known zero fee.
 - `usable-source-effective-only` means a source-provided effective monthly price was found, but this repository could not yet calculate its own value from the extracted fields.
 - `review-only-missing-fields` means important fields are missing, so the row stays in review artifacts instead of the homepage table.
 - `discarded-noisy` means a block was too noisy to show as an active candidate, but remains available as an audit artifact if exported.
@@ -351,7 +351,7 @@ Active feed trust levels are separated as follows:
 
 - `provider-direct-calculated` is the highest-trust homepage path. Provider-direct calculated rows are trusted first when the core numeric fields are present and the source snippet mentions the extracted provider or package.
 - `comparison-clean-calculated` can appear on the homepage only when a comparison-site row passes stricter clean-block validation: the snippet must begin with, or very closely begin with, the same provider/package block being extracted and must not contain another provider before that extracted block.
-- `comparison-source-effective-only` rows are kept as evidence because a source-provided effective monthly price was found, but they are hidden from the homepage for now.
+- `comparison-source-effective-only` rows are kept as evidence because a source-provided effective monthly price was found, but they are hidden from the homepage for now. Broadband Genie effective monthly costs are preserved as `sourceEffectiveMonthlyPrice` and remain hidden until this repository can calculate them reliably or a separate source-effective-only section is added.
 - `review-artifact-only` rows are active evidence records that are useful for review but are hidden from the homepage, for example when a comparison snippet appears to mix adjacent provider/deal text or starts with the wrong provider.
 
 The all-candidates, review-only, discarded, and active hidden artifacts preserve extracted rows for audit and manual review without promoting lower-trust data into the main live homepage table.
@@ -412,9 +412,27 @@ The script reads `exports/active-online-deals.json` and the enabled rows in `pos
 
 - `exports/postcode-area-active-comparison.json`
 - `exports/postcode-area-active-comparison.csv`
+- `exports/postcode-check-v1-summary.json` - the supported postcode areas, supported postcode area count, rows available, generated time, and Postcode Check V1 warning messages.
 
 Postcode Area V1 can include homepage-visible fixed broadband, fixed broadband with landline, fixed broadband with calls, and 5G home broadband rows. Every generated row is still marked with `availabilityStatus: "not-postcode-checked"`, `availabilityConfidence: "national-candidate-only"`, and `publishStatus: "postcode-area-v1-review-only"`. The homepage shows these rows in a **Postcode Area V1 comparison** section with a clear warning and a simple postcode area dropdown filter.
 
+
+
+## Postcode Check V1
+
+The homepage now includes a **Check broadband deals by postcode** section with a full postcode input. The postcode is used locally in the browser by the static page: the site normalises the postcode, validates common UK formats, extracts the broad postcode area (for example `OX14 1AA` becomes `OX`), and filters the Postcode Area V1 active national candidate rows for that postcode area.
+
+Postcode Check V1 is intentionally limited:
+
+- It does **not** run provider-level availability checks yet.
+- It does **not** submit postcode forms.
+- It does **not** send the postcode to providers or third-party websites.
+- It does **not** bypass blocked provider websites, CAPTCHAs, security checks, login walls, robots restrictions, or postcode-check forms.
+- The results are active national candidate deals grouped by postcode area, not confirmed address-level availability.
+- Provider/source pages can be opened manually from active evidence pages using the ordinary **Open provider/source page to check availability** link.
+- True postcode availability will require approved APIs, licensed data, or another compliant provider-specific method.
+
+The browser helper functions live in `postcode-utils.js`: `normalisePostcode(postcode)`, `isValidUkPostcode(postcode)`, `extractPostcodeArea(postcode)`, and `getPostcodeAreaMatch(postcode, postcodeAreas)`.
 
 ## Live active deployment pipeline
 
@@ -427,13 +445,14 @@ On every push to `main`, every manual `workflow_dispatch` run, and once per day 
 3. runs `npm test`
 4. runs `npm run extract-snippets` to extract conservative online price snippets into `exports/online-price-snippets.json`
 5. runs `npm run extract-providers` to turn available snippets into provider candidate deals in `exports/provider-deal-candidates.json`, `exports/provider-deal-candidates.csv`, and the usable/review-only/discarded JSON files
-6. runs `npm run promote-active` to write active review/evidence deals
-7. runs `npm run postcode-area-build` to write Postcode Area V1 review-only comparison files
-8. runs `npm run export` to refresh the fake sample-data exports
-9. runs `npm run build-site` to rebuild `site/index.html` and the static deal pages
-10. confirms the required generated files exist
-11. uploads the `site` folder and deploys it to GitHub Pages
-12. uploads review artifacts named **active-pricing-review-data** for the extracted snippet and candidate files
+6. confirms `exports/provider-direct-expansion-summary.json` exists after provider extraction
+7. runs `npm run promote-active` to write active review/evidence deals
+8. runs `npm run postcode-area-build` to write Postcode Area V1 review-only comparison files
+9. runs `npm run export` to refresh the fake sample-data exports
+10. runs `npm run build-site` to rebuild `site/index.html` and the static deal pages
+11. confirms the required generated files exist
+12. uploads the `site` folder and deploys it to GitHub Pages
+13. uploads review artifacts named **active-pricing-review-data** for the extracted snippet and candidate files
 
 The review artifact includes:
 
@@ -444,6 +463,7 @@ The review artifact includes:
 - `exports/provider-deal-candidates-review-only.json`
 - `exports/provider-deal-candidates-discarded.json`
 - `exports/provider-direct-expansion-summary.json`
+- `exports/postcode-check-v1-summary.json`
 - `exports/source-access-report.json`, when that file exists in the workflow run
 - `exports/active-online-deals.json`
 - `exports/active-online-deals.csv`
