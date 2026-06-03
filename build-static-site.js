@@ -21,6 +21,7 @@ const exportFiles = {
   nationalCheapestBySpeedTier: path.join(exportsFolder, 'national-cheapest-by-speed-tier.json'),
   postcodeAreaComparison: path.join(exportsFolder, 'postcode-area-comparison.json'),
   providerDealCandidates: path.join(exportsFolder, 'provider-deal-candidates.json'),
+  usableProviderDealCandidates: path.join(exportsFolder, 'provider-deal-candidates-usable.json'),
 };
 
 function readJsonFile(filePath) {
@@ -226,6 +227,7 @@ function buildCandidateSection(candidates, generatedAt = null) {
     <section class="card" aria-labelledby="active-candidates-heading">
       <h2 id="active-candidates-heading">Active online candidate deals</h2>
       <div class="warning-box">These are automatically extracted online candidate deals. They are not postcode checked, not manually approved, and may be incomplete. Use for review only.</div>
+      <p class="small-note">Lower-confidence extracted rows are kept in review artifacts and are not shown in this main table.</p>
       <div class="status-box" aria-label="Active candidate data freshness">
         <p><strong>Candidate data generated:</strong> ${escapeHtml(formatGeneratedAt(generatedAt))}</p>
         <p><strong>Online candidates:</strong> ${escapeHtml(candidates.length)}</p>
@@ -1217,7 +1219,9 @@ function buildStaticSite() {
 
   const nationalDeals = readJsonFile(exportFiles.nationalCheapestBySpeedTier);
   const postcodeDeals = readJsonFile(exportFiles.postcodeAreaComparison);
-  const providerCandidatesOutput = readJsonFileIfExists(exportFiles.providerDealCandidates, { candidates: [] });
+  const providerCandidatesOutput = fs.existsSync(exportFiles.usableProviderDealCandidates)
+    ? readJsonFile(exportFiles.usableProviderDealCandidates)
+    : readJsonFileIfExists(exportFiles.providerDealCandidates, { candidates: [] });
   const providerCandidates = Array.isArray(providerCandidatesOutput.candidates) ? providerCandidatesOutput.candidates : [];
   const html = buildHtml(nationalDeals, postcodeDeals, providerCandidatesOutput);
 

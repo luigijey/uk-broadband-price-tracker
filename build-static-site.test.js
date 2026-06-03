@@ -43,6 +43,7 @@ test('candidate section renders active candidate table with review-only markings
   assert.match(html, /Advertised Monthly Price/);
   assert.match(html, /Effective Monthly Price/);
   assert.match(html, /candidate-review-only/);
+  assert.match(html, /Lower-confidence extracted rows are kept in review artifacts and are not shown in this main table\./);
   assert.match(html, /not postcode checked/);
   assert.match(html, /requires human review/);
   assert.match(html, /Online candidates:<\/strong> 1/);

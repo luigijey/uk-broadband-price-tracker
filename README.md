@@ -320,10 +320,22 @@ npm run extract-providers
 
 This runs `node extract-provider-candidates.js`, reads `exports/online-price-snippets.json`, and writes:
 
-- `exports/provider-deal-candidates.json` - structured provider and comparison-site candidate deal output.
+- `exports/provider-deal-candidates.json` - all structured provider and comparison-site candidate deal output for audit.
 - `exports/provider-deal-candidates.csv` - a flat CSV version for spreadsheet review.
+- `exports/provider-deal-candidates-usable.json` - candidates with `extractionQuality` of `usable-calculated` or `usable-source-effective-only`.
+- `exports/provider-deal-candidates-review-only.json` - candidates with `extractionQuality` of `review-only-missing-fields` for human follow-up.
+- `exports/provider-deal-candidates-discarded.json` - candidates with `extractionQuality` of `discarded-noisy` that are too noisy for the main table.
 
 The provider candidate extractor currently looks for conservative candidates from TalkTalk, Vodafone, BT, Plusnet, Broadband Genie, and Uswitch where useful snippets are available. Each candidate is marked `candidate-review-only`, requires human review, and uses a not-postcode-checked availability scope such as `provider-landing-page-not-postcode-checked` or `comparison-page-not-postcode-checked`.
+
+Candidate quality is separated as follows:
+
+- `usable-calculated` means the extractor found the core fields needed for this repository to calculate an effective monthly price.
+- `usable-source-effective-only` means a source-provided effective monthly price was found, but this repository could not yet calculate its own value from the extracted fields.
+- `review-only-missing-fields` means important fields are missing, so the row stays in review artifacts instead of the homepage table.
+- `discarded-noisy` means a block was too noisy to show as an active candidate, but remains available as an audit artifact if exported.
+
+The homepage reads `provider-deal-candidates-usable.json` when it exists, so it shows usable candidates only by default. The all-candidates, review-only, and discarded artifacts still preserve extracted rows for audit and manual review.
 
 To refresh snippets, extract provider candidates, export the fake sample data, and rebuild the static site in one command, run:
 
@@ -347,7 +359,7 @@ Important limits:
 - Candidate deals may be incomplete or wrong and are for review only.
 - Blocked, HTTP 403, CAPTCHA, anti-bot, login-wall, security-check, robots-disallowed, or unclear sources are skipped and recorded, not bypassed.
 - MoneySuperMarket and Compare the Market must not be used if they return HTTP 403 or security checks.
-- The static site displays active candidate deals in an **Active online candidate deals** section, clearly separated from the **Sample data prototype tables** section that still uses fake sample data.
+- The static site displays usable active candidate deals in an **Active online candidate deals** section, clearly separated from the **Sample data prototype tables** section that still uses fake sample data. Lower-confidence rows remain in review artifacts and are not shown in the main homepage table.
 
 
 ## Live active deployment pipeline
@@ -360,7 +372,7 @@ On every push to `main`, every manual `workflow_dispatch` run, and once per day 
 2. sets up Node.js 20
 3. runs `npm test`
 4. runs `npm run extract-snippets` to extract conservative online price snippets into `exports/online-price-snippets.json`
-5. runs `npm run extract-providers` to turn available snippets into provider candidate deals in `exports/provider-deal-candidates.json` and `exports/provider-deal-candidates.csv`
+5. runs `npm run extract-providers` to turn available snippets into provider candidate deals in `exports/provider-deal-candidates.json`, `exports/provider-deal-candidates.csv`, and the usable/review-only/discarded JSON files
 6. runs `npm run export` to refresh the fake sample-data exports
 7. runs `npm run build-site` to rebuild `site/index.html` and the static deal pages
 8. confirms the required generated files exist
@@ -372,6 +384,9 @@ The review artifact includes:
 - `exports/online-price-snippets.json`
 - `exports/provider-deal-candidates.json`
 - `exports/provider-deal-candidates.csv`
+- `exports/provider-deal-candidates-usable.json`
+- `exports/provider-deal-candidates-review-only.json`
+- `exports/provider-deal-candidates-discarded.json`
 - `exports/source-access-report.json`, when that file exists in the workflow run
 
 Important live deployment limits:
@@ -381,7 +396,7 @@ Important live deployment limits:
 - Candidate deals remain marked for human review only.
 - Blocked, unknown, unclear, HTTP 403, CAPTCHA, anti-bot, login-wall, security-check, robots-disallowed, or failed sources are skipped and recorded, not bypassed.
 - MoneySuperMarket and Compare the Market must not be used if they return HTTP 403 or security checks.
-- The live site separates the **Active online candidate deals** section from the fake **Sample data prototype tables**.
+- The live site separates the **Active online candidate deals** section from the fake **Sample data prototype tables** and uses the usable candidate artifact for the main active table by default.
 
 ## What will be added later
 
@@ -454,6 +469,9 @@ The generated records are marked `candidate-review-only`. They are provider land
 The script writes:
 
 - `exports/talktalk-deal-candidates.json` - TalkTalk-only candidate deal output.
-- `exports/provider-deal-candidates.json` - combined provider candidate output, currently containing only TalkTalk candidates but structured so other providers can be added later.
+- `exports/provider-deal-candidates.json` - combined provider candidate output for audit.
+- `exports/provider-deal-candidates-usable.json` - calculated or source-effective candidates shown by default on the homepage.
+- `exports/provider-deal-candidates-review-only.json` - missing-field candidates kept for review.
+- `exports/provider-deal-candidates-discarded.json` - noisy extracted rows kept out of the homepage table.
 
 A human must review every extracted candidate deal before it can become live pricing data. These candidate files are discovery and review artifacts only; they should not be used as buying advice.

@@ -43,16 +43,21 @@ function parsePoundPrice(priceText) {
     return null;
   }
 
-  const cleaned = String(priceText).replace(/[^0-9.]/g, '');
-  if (cleaned === '') {
+  const cleaned = String(priceText)
+    .replace(/,/g, '')
+    .replace(/£/g, '')
+    .replace(/\s+/g, '')
+    .replace(/\s*\.\s*/g, '.');
+  const numericText = cleaned.replace(/[^0-9.]/g, '');
+  if (numericText === '') {
     return null;
   }
 
-  return roundMoney(Number(cleaned));
+  return roundMoney(Number(numericText));
 }
 
 function findPoundPrices(text) {
-  const priceRegex = /£\s?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{1,2})?/g;
+  const priceRegex = /£\s*(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{1,2}|\s+\.\s*\d{1,2})?/g;
   const prices = [];
   let match = priceRegex.exec(text);
 
