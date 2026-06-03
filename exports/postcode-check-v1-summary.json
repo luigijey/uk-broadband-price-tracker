@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-03T17:03:15.584Z",
+  "generatedAt": "2026-06-03T21:08:08.117Z",
   "supportedPostcodeAreas": [
     {
       "postcodeArea": "SW",
@@ -128,7 +128,7 @@
     }
   ],
   "supportedPostcodeAreaCount": 25,
-  "rowsAvailable": 0,
+  "rowsAvailable": 125,
   "warningMessages": [
     "Postcode Check V1 extracts postcode area locally in the browser only.",
     "These results are not provider-level availability checks yet. They are active national candidate deals grouped by postcode area."

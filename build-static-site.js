@@ -26,6 +26,7 @@ const exportFiles = {
   providerDealCandidates: path.join(exportsFolder, 'provider-deal-candidates.json'),
   usableProviderDealCandidates: path.join(exportsFolder, 'provider-deal-candidates-usable.json'),
   activeOnlineDeals: path.join(exportsFolder, 'active-online-deals.json'),
+  activeOnlineDealsWithFallbacks: path.join(exportsFolder, 'active-online-deals-with-fallbacks.json'),
   postcodeAreaActiveComparison: path.join(exportsFolder, 'postcode-area-active-comparison.json'),
   activeCheapestBySpeedTier: path.join(exportsFolder, 'active-cheapest-by-speed-tier.json'),
 };
@@ -276,6 +277,23 @@ function formatActiveSummaryValue(value, formatter = (input) => input) {
   return formatter(value);
 }
 
+
+function resolveActiveOnlineDealsPath(files = exportFiles) {
+  return fs.existsSync(files.activeOnlineDealsWithFallbacks) ? files.activeOnlineDealsWithFallbacks : files.activeOnlineDeals;
+}
+
+function formatDataFreshnessStatus(status) {
+  if (status === 'last-known-good-fallback') return 'Last-known-good fallback';
+  return 'Fresh current run';
+}
+
+function formatFallbackCaveat(deal) {
+  if (deal.dataFreshnessStatus === 'last-known-good-fallback') {
+    return 'Last-known-good fallback: provider source was unavailable in the latest run.';
+  }
+  return '';
+}
+
 function formatCandidateSetupFee(candidate) {
   if (candidate.setupFee === null || candidate.setupFee === undefined) {
     return 'Unknown';
@@ -306,9 +324,10 @@ function buildActiveFilterOptions(candidates, fieldName, allLabel) {
 
 function buildCandidateRows(candidates) {
   return candidates.map((candidate) => {
-    const caveat = candidate.effectivePriceCaveat ? `⚠ Caveat: ${candidate.effectivePriceCaveat}` : '';
+    const caveatParts = [candidate.effectivePriceCaveat ? `⚠ Caveat: ${candidate.effectivePriceCaveat}` : '', formatFallbackCaveat(candidate)].filter(Boolean);
+    const caveat = caveatParts.join(' ');
     return `
-            <tr class="active-review-only" data-provider="${escapeHtml(candidate.provider || '')}" data-speed-tier="${escapeHtml(candidate.speedTier || '')}" data-homepage-category="${escapeHtml(candidate.homepageCategory || '')}" data-source-type="${escapeHtml(candidate.sourceType || '')}" data-effective-monthly-price="${escapeHtml(candidate.effectiveMonthlyPrice ?? '')}" data-advertised-monthly-price="${escapeHtml(candidate.advertisedMonthlyPrice ?? '')}" data-speed-mbps="${escapeHtml(candidate.speedMbps ?? '')}">
+            <tr class="active-review-only" data-provider="${escapeHtml(candidate.provider || '')}" data-speed-tier="${escapeHtml(candidate.speedTier || '')}" data-homepage-category="${escapeHtml(candidate.homepageCategory || '')}" data-source-type="${escapeHtml(candidate.sourceType || '')}" data-effective-monthly-price="${escapeHtml(candidate.effectiveMonthlyPrice ?? '')}" data-advertised-monthly-price="${escapeHtml(candidate.advertisedMonthlyPrice ?? '')}" data-speed-mbps="${escapeHtml(candidate.speedMbps ?? '')}" data-data-freshness-status="${escapeHtml(candidate.dataFreshnessStatus || 'fresh-current-run')}">
               <td>${escapeHtml(candidate.provider)}</td>
               <td>${escapeHtml(candidate.packageName)}</td>
               <td>${escapeHtml(candidate.homepageCategory || '')}</td>
@@ -317,6 +336,7 @@ function buildCandidateRows(candidates) {
               <td class="money">${formatOptionalMoney(candidate.advertisedMonthlyPrice)}</td>
               <td class="money effective-price">${formatOptionalMoney(candidate.effectiveMonthlyPrice)}</td>
               <td>${escapeHtml(candidate.setupFeeStatus || '')}</td>
+              <td>${escapeHtml(formatDataFreshnessStatus(candidate.dataFreshnessStatus))}</td>
               <td class="wrap-text caveat-text">${escapeHtml(caveat)}</td>
               <td><a class="details-button" href="${escapeHtml(activeDealDetailHref(candidate))}">View evidence</a></td>
             </tr>`;
@@ -445,6 +465,7 @@ function buildCandidateSection(candidates, generatedAt = null, summary = {}) {
   const speedTierOptions = buildActiveFilterOptions(candidates, 'speedTier', 'All speed tiers');
   const homepageCategoryOptions = buildActiveFilterOptions(candidates, 'homepageCategory', 'All homepage categories');
   const sourceTypeOptions = buildActiveFilterOptions(candidates, 'sourceType', 'All source types');
+  const fallbackCount = candidates.filter((candidate) => candidate.dataFreshnessStatus === 'last-known-good-fallback').length;
   const shownCount = Number.isFinite(Number(summary.homepageActiveDeals)) ? Number(summary.homepageActiveDeals) : candidates.length;
   const hiddenCount = Number.isFinite(Number(summary.hiddenReviewDeals)) ? Number(summary.hiddenReviewDeals) : 0;
 
@@ -453,11 +474,13 @@ function buildCandidateSection(candidates, generatedAt = null, summary = {}) {
       <h2 id="active-candidates-heading">Active online deal feed</h2>
       <div class="warning-box">These are automatically extracted active review deals. They are not postcode checked, not manually approved, and may be incomplete.</div>
       <p class="small-note">Lower-confidence extracted rows are kept in review artifacts and are not shown in this main table.</p>
+      <p class="small-note">If a provider cannot be fetched in the latest run, the site may show clearly labelled last-known-good review rows instead of dropping the provider completely.</p>
 ${buildActiveSummaryCards(candidates)}
       <div class="status-box" aria-label="Active candidate data freshness">
         <p><strong>Active deal data generated:</strong> ${escapeHtml(formatGeneratedAt(generatedAt))}</p>
         <p><strong>Active deals shown on homepage:</strong> ${escapeHtml(shownCount)}</p>
         <p><strong>Review/evidence active records hidden from homepage:</strong> ${escapeHtml(hiddenCount)}</p>
+        <p><strong>Last-known-good fallback rows shown:</strong> ${escapeHtml(fallbackCount)}</p>
         <p><strong>Review warning:</strong> Active review deals are not postcode checked, not manually approved, and requires human review.</p>
       </div>
       <div class="filter-row" aria-label="Active online deal feed filters">
@@ -512,6 +535,7 @@ ${sourceTypeOptions}
               <th>Advertised Monthly Price</th>
               <th>Effective Monthly Price</th>
               <th>Setup Fee Status</th>
+              <th>Data Freshness</th>
               <th>Caveat</th>
               <th>Details</th>
             </tr>
@@ -1700,6 +1724,8 @@ function buildActiveDealDetailHtml(deal) {
     ['Speed tier', deal.speedTier || 'Unknown'],
     ['Extraction confidence', deal.extractionConfidence || 'Unknown'],
     ['Extraction quality', deal.extractionQuality || 'Unknown'],
+    ['Data freshness', formatDataFreshnessStatus(deal.dataFreshnessStatus)],
+    ['Fallback reason', deal.fallbackReason || 'Not a fallback row'],
     ['Active feed trust level', deal.activeFeedTrustLevel || 'Unknown'],
     ['Product type', deal.productType || 'Unknown'],
     ['Connection technology', deal.connectionTechnology || 'Unknown'],
@@ -1747,6 +1773,7 @@ function buildActiveDealDetailHtml(deal) {
       <p class="badge">Active review evidence page</p>
       <h1>${escapeHtml(deal.provider)} — ${escapeHtml(deal.packageName)}</h1>
       <p class="warning-box">This page is an evidence page. It is not a checkout page and does not confirm postcode-level availability.</p>
+      ${deal.dataFreshnessStatus === 'last-known-good-fallback' ? '<p class="warning-box">Last-known-good fallback: provider source was unavailable in the latest run.</p>' : ''}
     </div>
   </header>
   <main>
@@ -1793,7 +1820,8 @@ function buildStaticSite() {
 
   const nationalDeals = readJsonFile(exportFiles.nationalCheapestBySpeedTier);
   const postcodeDeals = readJsonFile(exportFiles.postcodeAreaComparison);
-  const activeDealsOutput = readJsonFileIfExists(exportFiles.activeOnlineDeals, { activeDeals: [], summary: { generatedAt: null } });
+  const activeDealsPath = resolveActiveOnlineDealsPath();
+  const activeDealsOutput = readJsonFileIfExists(activeDealsPath, { activeDeals: [], summary: { generatedAt: null } });
   const postcodeAreaActiveComparison = readJsonFileIfExists(exportFiles.postcodeAreaActiveComparison, { rows: [], summary: {} });
   const activeCheapestBySpeedTier = readJsonFileIfExists(exportFiles.activeCheapestBySpeedTier, { rows: [], summary: {} });
   const activeDeals = Array.isArray(activeDealsOutput.activeDeals) ? activeDealsOutput.activeDeals : [];
@@ -1841,6 +1869,8 @@ module.exports = {
   buildCandidateSection,
   buildActiveCheapestBySpeedTierSection,
   buildActiveSummaryCards,
+  resolveActiveOnlineDealsPath,
+  formatDataFreshnessStatus,
   buildPostcodeAreaV1Section,
   buildPostcodeCheckV1Section,
   buildDealDetailHtml,

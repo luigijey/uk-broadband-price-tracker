@@ -82,3 +82,33 @@ test('active summary tables writes JSON and CSV, including empty warning output'
   assert.match(json.summary.warningMessages.join(' '), /No active homepage-visible deals/);
   assert.match(csv, /^speedTier,provider,packageName,sourceName,advertisedMonthlyPrice,effectiveMonthlyPrice,speedMbps,setupFeeStatus,effectivePriceCaveat,activeDealId\n$/);
 });
+
+
+test('active summary uses active-online-deals-with-fallbacks.json when present', () => {
+  const tempFolder = fs.mkdtempSync(path.join(os.tmpdir(), 'active-summary-prefer-'));
+  const staleActiveDealsPath = path.join(tempFolder, 'active-online-deals.json');
+  const fallbackEnhancedPath = path.join(tempFolder, 'active-online-deals-with-fallbacks.json');
+  const jsonOutputPath = path.join(tempFolder, 'active-cheapest-by-speed-tier.json');
+  const csvOutputPath = path.join(tempFolder, 'active-cheapest-by-speed-tier.csv');
+  fs.writeFileSync(staleActiveDealsPath, JSON.stringify({ activeDeals: [] }));
+  fs.writeFileSync(fallbackEnhancedPath, JSON.stringify({ activeDeals: [{ ...baseDeal, activeDealId: 'fallback-enhanced', dataFreshnessStatus: 'last-known-good-fallback' }] }));
+
+  const output = buildActiveSummaryTables({ activeDealsPath: fallbackEnhancedPath, jsonOutputPath, csvOutputPath, generatedAt: '2026-06-03T00:00:00.000Z' });
+
+  assert.equal(output.rows.length, 1);
+  assert.equal(output.rows[0].activeDealId, 'fallback-enhanced');
+  assert.match(output.summary.sourceFile, /active-online-deals-with-fallbacks\.json$/);
+});
+
+test('cheapest-by-speed-tier excludes hidden rows but includes fallback homepage rows', () => {
+  const output = buildActiveCheapestBySpeedTierOutput({
+    activeDeals: [
+      { ...baseDeal, activeDealId: 'hidden-fresh', effectiveMonthlyPrice: 1, showOnHomepage: false },
+      { ...baseDeal, activeDealId: 'fallback-homepage', provider: 'TalkTalk', dataFreshnessStatus: 'last-known-good-fallback', showOnHomepage: true, effectiveMonthlyPrice: 26.67 },
+    ],
+  });
+
+  assert.equal(output.rows.length, 1);
+  assert.equal(output.rows[0].activeDealId, 'fallback-homepage');
+  assert.equal(output.summary.hiddenRecordsExcluded, 1);
+});
