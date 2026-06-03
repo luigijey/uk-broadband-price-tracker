@@ -5,6 +5,8 @@ on:
     branches:
       - main
   workflow_dispatch:
+  schedule:
+    - cron: '17 5 * * *'
 
 permissions:
   contents: read
@@ -34,11 +36,34 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - name: Extract online price snippets
+        run: npm run extract-snippets
+
+      - name: Extract provider deal candidates
+        run: npm run extract-providers
+
       - name: Export sample pricing data
         run: npm run export
 
       - name: Build static site
         run: npm run build-site
+
+      - name: Confirm generated deployment files
+        run: |
+          test -f site/index.html
+          test -f exports/online-price-snippets.json
+          test -f exports/provider-deal-candidates.json
+
+      - name: Upload active pricing review data
+        uses: actions/upload-artifact@v4
+        with:
+          name: active-pricing-review-data
+          if-no-files-found: error
+          path: |
+            exports/online-price-snippets.json
+            exports/provider-deal-candidates.json
+            exports/provider-deal-candidates.csv
+            exports/source-access-report.json
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5

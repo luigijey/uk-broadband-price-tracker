@@ -181,8 +181,15 @@ function formatCandidateAprilRise(candidate) {
 }
 
 function buildCandidateRows(candidates) {
-  return candidates.map((candidate) => `
-            <tr>
+  return candidates.map((candidate) => {
+    const reviewStatus = [
+      candidate.publishStatus || 'candidate-review-only',
+      'not postcode checked',
+      candidate.requiresHumanReview === false ? 'human review status unknown' : 'requires human review',
+    ].join('; ');
+
+    return `
+            <tr class="candidate-review-only">
               <td>${escapeHtml(candidate.provider)}</td>
               <td>${escapeHtml(candidate.packageName)}</td>
               <td class="wrap-text">${escapeHtml(candidate.sourceName)}</td>
@@ -194,17 +201,36 @@ function buildCandidateRows(candidates) {
               <td class="wrap-text">${escapeHtml(formatCandidateReward(candidate))}</td>
               <td class="money">${escapeHtml(formatCandidateSetupFee(candidate))}</td>
               <td>${escapeHtml(candidate.extractionConfidence)}</td>
-              <td class="wrap-text">${escapeHtml(candidate.publishStatus)}; ${escapeHtml(candidate.availabilityScope)}</td>
-            </tr>`).join('');
+              <td class="wrap-text">${escapeHtml(reviewStatus)}; ${escapeHtml(candidate.availabilityScope)}</td>
+            </tr>`;
+  }).join('');
 }
 
-function buildCandidateSection(candidates) {
+function formatGeneratedAt(generatedAt) {
+  if (!generatedAt) {
+    return 'Not available';
+  }
+
+  const parsedDate = new Date(generatedAt);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return generatedAt;
+  }
+
+  return parsedDate.toISOString();
+}
+
+function buildCandidateSection(candidates, generatedAt = null) {
   const candidateRows = buildCandidateRows(candidates);
 
   return `
     <section class="card" aria-labelledby="active-candidates-heading">
       <h2 id="active-candidates-heading">Active online candidate deals</h2>
       <div class="warning-box">These are automatically extracted online candidate deals. They are not postcode checked, not manually approved, and may be incomplete. Use for review only.</div>
+      <div class="status-box" aria-label="Active candidate data freshness">
+        <p><strong>Candidate data generated:</strong> ${escapeHtml(formatGeneratedAt(generatedAt))}</p>
+        <p><strong>Online candidates:</strong> ${escapeHtml(candidates.length)}</p>
+        <p><strong>Review warning:</strong> Online candidates are not postcode checked and not manually approved.</p>
+      </div>
       ${candidates.length === 0 ? '<p class="no-results-message">No online candidate deals have been extracted yet. Run npm run extract-snippets and npm run extract-providers.</p>' : `
       <p class="small-note scroll-tip">Tip: if needed, scroll sideways to see all columns.</p>
       <div class="table-wrap" tabindex="0" aria-label="Active online candidate deals table with horizontal scrolling">
@@ -232,7 +258,24 @@ function buildCandidateSection(candidates) {
     </section>`;
 }
 
-function buildHtml(nationalDeals, postcodeDeals, providerCandidates = []) {
+function normalizeProviderCandidateOutput(providerCandidateOutput) {
+  if (Array.isArray(providerCandidateOutput)) {
+    return { candidates: providerCandidateOutput, generatedAt: null };
+  }
+
+  if (!providerCandidateOutput || typeof providerCandidateOutput !== 'object') {
+    return { candidates: [], generatedAt: null };
+  }
+
+  return {
+    candidates: Array.isArray(providerCandidateOutput.candidates) ? providerCandidateOutput.candidates : [],
+    generatedAt: providerCandidateOutput.generatedAt || null,
+  };
+}
+
+function buildHtml(nationalDeals, postcodeDeals, providerCandidateOutput = { candidates: [] }) {
+  const providerCandidateData = normalizeProviderCandidateOutput(providerCandidateOutput);
+  const providerCandidates = providerCandidateData.candidates;
   const summaryCards = [
     ['Sample deals', postcodeDeals.length],
     ['Postcode areas', countUniqueValues(postcodeDeals, 'postcodeArea')],
@@ -547,6 +590,18 @@ function buildHtml(nationalDeals, postcodeDeals, providerCandidates = []) {
       font-weight: 800;
     }
 
+    .status-box {
+      margin: 0 0 14px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--blue-soft);
+    }
+
+    .status-box p {
+      margin-bottom: 6px;
+    }
+
     .no-results-message {
       margin: 12px 0 0;
       padding: 12px 14px;
@@ -642,7 +697,7 @@ ${summaryCards.map(([label, value]) => `        <article class="summary-card">
   </header>
 
   <main>
-${buildCandidateSection(providerCandidates)}
+${buildCandidateSection(providerCandidates, providerCandidateData.generatedAt)}
 
     <section class="card" aria-labelledby="sample-data-heading">
       <h2 id="sample-data-heading">Sample data prototype tables</h2>
@@ -1164,7 +1219,7 @@ function buildStaticSite() {
   const postcodeDeals = readJsonFile(exportFiles.postcodeAreaComparison);
   const providerCandidatesOutput = readJsonFileIfExists(exportFiles.providerDealCandidates, { candidates: [] });
   const providerCandidates = Array.isArray(providerCandidatesOutput.candidates) ? providerCandidatesOutput.candidates : [];
-  const html = buildHtml(nationalDeals, postcodeDeals, providerCandidates);
+  const html = buildHtml(nationalDeals, postcodeDeals, providerCandidatesOutput);
 
   fs.mkdirSync(siteFolder, { recursive: true });
   fs.writeFileSync(path.join(siteFolder, 'index.html'), html);
@@ -1197,6 +1252,7 @@ if (require.main === module) {
 
 module.exports = {
   buildHtml,
+  buildCandidateSection,
   buildDealDetailHtml,
   buildStaticSite,
   escapeHtml,

@@ -305,6 +305,18 @@
       font-weight: 800;
     }
 
+    .status-box {
+      margin: 0 0 14px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--blue-soft);
+    }
+
+    .status-box p {
+      margin-bottom: 6px;
+    }
+
     .no-results-message {
       margin: 12px 0 0;
       padding: 12px 14px;
@@ -416,6 +428,11 @@
     <section class="card" aria-labelledby="active-candidates-heading">
       <h2 id="active-candidates-heading">Active online candidate deals</h2>
       <div class="warning-box">These are automatically extracted online candidate deals. They are not postcode checked, not manually approved, and may be incomplete. Use for review only.</div>
+      <div class="status-box" aria-label="Active candidate data freshness">
+        <p><strong>Candidate data generated:</strong> 2026-06-03T12:45:42.919Z</p>
+        <p><strong>Online candidates:</strong> 0</p>
+        <p><strong>Review warning:</strong> Online candidates are not postcode checked and not manually approved.</p>
+      </div>
       <p class="no-results-message">No online candidate deals have been extracted yet. Run npm run extract-snippets and npm run extract-providers.</p>
     </section>
 
