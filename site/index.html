@@ -461,21 +461,86 @@
     <section class="card" aria-labelledby="active-cheapest-speed-tier-heading">
       <h2 id="active-cheapest-speed-tier-heading">Cheapest active deals by speed tier</h2>
       <p class="small-note">These are active review deals only and are not provider-level postcode availability checks.</p>
-      <p class="no-results-message">No active homepage-visible deals are available for this summary yet.</p>
+      
+      <p class="small-note scroll-tip">Tip: if needed, scroll sideways to see all columns.</p>
+      <div class="table-wrap" tabindex="0" aria-label="Cheapest active deals by speed tier table with horizontal scrolling">
+        <table id="active-cheapest-speed-tier-table">
+          <thead>
+            <tr>
+              <th>Speed Tier</th>
+              <th>Provider</th>
+              <th>Package</th>
+              <th>Source</th>
+              <th>Speed</th>
+              <th>Advertised Monthly Price</th>
+              <th>Effective Monthly Price</th>
+              <th>Setup Fee Status</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>35-75 Mbps</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="wrap-text">TalkTalk</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>known-zero</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr>
+              <td>100-300 Mbps</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="wrap-text">TalkTalk</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>known-zero</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr>
+              <td>500-900 Mbps</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="wrap-text">TalkTalk</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>known-zero</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr>
+              <td>900 Mbps+</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="wrap-text">TalkTalk</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>known-zero</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </section>
 
     <section class="card" aria-labelledby="active-candidates-heading">
       <h2 id="active-candidates-heading">Active online deal feed</h2>
       <div class="warning-box">These are automatically extracted active review deals. They are not postcode checked, not manually approved, and may be incomplete.</div>
       <p class="small-note">Lower-confidence extracted rows are kept in review artifacts and are not shown in this main table.</p>
+      <p class="small-note">If a provider cannot be fetched in the latest run, the site may show clearly labelled last-known-good review rows instead of dropping the provider completely.</p>
 
       <section class="summary-grid active-summary-grid" aria-label="Active homepage deal summary">
         <article class="summary-card">
-          <span class="summary-number">0</span>
+          <span class="summary-number">5</span>
           <span class="summary-label">Homepage active deals</span>
         </article>
         <article class="summary-card">
-          <span class="summary-number">0</span>
+          <span class="summary-number">5</span>
           <span class="summary-label">Provider-direct deals</span>
         </article>
         <article class="summary-card">
@@ -483,11 +548,11 @@
           <span class="summary-label">Comparison-site deals</span>
         </article>
         <article class="summary-card">
-          <span class="summary-number">Not available</span>
+          <span class="summary-number">£26.67</span>
           <span class="summary-label">Lowest effective monthly price</span>
         </article>
         <article class="summary-card">
-          <span class="summary-number">Not available</span>
+          <span class="summary-number">900 Mbps</span>
           <span class="summary-label">Fastest speed</span>
         </article>
         <article class="summary-card">
@@ -496,9 +561,10 @@
         </article>
       </section>
       <div class="status-box" aria-label="Active candidate data freshness">
-        <p><strong>Active deal data generated:</strong> 2026-06-03T17:03:15.184Z</p>
-        <p><strong>Active deals shown on homepage:</strong> 0</p>
+        <p><strong>Active deal data generated:</strong> 2026-06-03T21:08:07.706Z</p>
+        <p><strong>Active deals shown on homepage:</strong> 5</p>
         <p><strong>Review/evidence active records hidden from homepage:</strong> 0</p>
+        <p><strong>Last-known-good fallback rows shown:</strong> 5</p>
         <p><strong>Review warning:</strong> Active review deals are not postcode checked, not manually approved, and requires human review.</p>
       </div>
       <div class="filter-row" aria-label="Active online deal feed filters">
@@ -506,24 +572,31 @@
           <label for="active-provider-filter">Provider</label>
           <select id="active-provider-filter">
             <option value="all">All providers</option>
+            <option value="TalkTalk">TalkTalk</option>
           </select>
         </div>
         <div class="filter-field">
           <label for="active-speed-tier-filter">Speed tier</label>
           <select id="active-speed-tier-filter">
             <option value="all">All speed tiers</option>
+            <option value="100-300 Mbps">100-300 Mbps</option>
+            <option value="35-75 Mbps">35-75 Mbps</option>
+            <option value="500-900 Mbps">500-900 Mbps</option>
+            <option value="900 Mbps+">900 Mbps+</option>
           </select>
         </div>
         <div class="filter-field">
           <label for="active-homepage-category-filter">Homepage category</label>
           <select id="active-homepage-category-filter">
             <option value="all">All homepage categories</option>
+            <option value="Fixed broadband">Fixed broadband</option>
           </select>
         </div>
         <div class="filter-field">
           <label for="active-source-type-filter">Source type</label>
           <select id="active-source-type-filter">
             <option value="all">All source types</option>
+            <option value="provider-direct">provider-direct</option>
           </select>
         </div>
         <div class="filter-field">
@@ -538,8 +611,95 @@
           <button type="button" id="reset-active-filters">Reset filters</button>
         </div>
       </div>
-      <p id="active-result-count" class="result-count" aria-live="polite">Showing 0 active deals</p>
-      <p class="no-results-message">No usable active online deals were created in this run. Check the review artifacts.</p>
+      <p id="active-result-count" class="result-count" aria-live="polite">Showing 5 active deals</p>
+      
+      <p class="small-note scroll-tip">Tip: if needed, scroll sideways to see all columns.</p>
+      <div class="table-wrap" tabindex="0" aria-label="Active online candidate deals table with horizontal scrolling">
+        <table id="active-candidate-table">
+          <thead>
+            <tr>
+              <th>Provider</th>
+              <th>Package</th>
+              <th>Homepage Category</th>
+              <th>Source</th>
+              <th>Speed</th>
+              <th>Advertised Monthly Price</th>
+              <th>Effective Monthly Price</th>
+              <th>Setup Fee Status</th>
+              <th>Data Freshness</th>
+              <th>Caveat</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="active-review-only" data-provider="TalkTalk" data-speed-tier="35-75 Mbps" data-homepage-category="Fixed broadband" data-source-type="provider-direct" data-effective-monthly-price="28.67" data-advertised-monthly-price="26" data-speed-mbps="35" data-data-freshness-status="last-known-good-fallback">
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td>Fixed broadband</td>
+              <td class="wrap-text">TalkTalk</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>known-zero</td>
+              <td>Last-known-good fallback</td>
+              <td class="wrap-text caveat-text">⚠ Caveat: This row uses last-known-good extracted review data because the provider source was unavailable in the latest run. Last-known-good fallback: provider source was unavailable in the latest run.</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr class="active-review-only" data-provider="TalkTalk" data-speed-tier="35-75 Mbps" data-homepage-category="Fixed broadband" data-source-type="provider-direct" data-effective-monthly-price="28.67" data-advertised-monthly-price="26" data-speed-mbps="65" data-data-freshness-status="last-known-good-fallback">
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td>Fixed broadband</td>
+              <td class="wrap-text">TalkTalk</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>known-zero</td>
+              <td>Last-known-good fallback</td>
+              <td class="wrap-text caveat-text">⚠ Caveat: This row uses last-known-good extracted review data because the provider source was unavailable in the latest run. Last-known-good fallback: provider source was unavailable in the latest run.</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr class="active-review-only" data-provider="TalkTalk" data-speed-tier="100-300 Mbps" data-homepage-category="Fixed broadband" data-source-type="provider-direct" data-effective-monthly-price="26.67" data-advertised-monthly-price="24" data-speed-mbps="150" data-data-freshness-status="last-known-good-fallback">
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td>Fixed broadband</td>
+              <td class="wrap-text">TalkTalk</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>known-zero</td>
+              <td>Last-known-good fallback</td>
+              <td class="wrap-text caveat-text">⚠ Caveat: This row uses last-known-good extracted review data because the provider source was unavailable in the latest run. Last-known-good fallback: provider source was unavailable in the latest run.</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr class="active-review-only" data-provider="TalkTalk" data-speed-tier="500-900 Mbps" data-homepage-category="Fixed broadband" data-source-type="provider-direct" data-effective-monthly-price="32.67" data-advertised-monthly-price="30" data-speed-mbps="500" data-data-freshness-status="last-known-good-fallback">
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td>Fixed broadband</td>
+              <td class="wrap-text">TalkTalk</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>known-zero</td>
+              <td>Last-known-good fallback</td>
+              <td class="wrap-text caveat-text">⚠ Caveat: This row uses last-known-good extracted review data because the provider source was unavailable in the latest run. Last-known-good fallback: provider source was unavailable in the latest run.</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr class="active-review-only" data-provider="TalkTalk" data-speed-tier="900 Mbps+" data-homepage-category="Fixed broadband" data-source-type="provider-direct" data-effective-monthly-price="38.67" data-advertised-monthly-price="36" data-speed-mbps="900" data-data-freshness-status="last-known-good-fallback">
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td>Fixed broadband</td>
+              <td class="wrap-text">TalkTalk</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>known-zero</td>
+              <td>Last-known-good fallback</td>
+              <td class="wrap-text caveat-text">⚠ Caveat: This row uses last-known-good extracted review data because the provider source was unavailable in the latest run. Last-known-good fallback: provider source was unavailable in the latest run.</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </section>
 
     <section class="card" aria-labelledby="postcode-area-v1-heading">
@@ -547,20 +707,1566 @@
       <div class="warning-box">These rows are not true postcode-checked availability results yet. They show active national candidate deals grouped by postcode area for the first postcode-area prototype.</div>
       <div class="status-box" aria-label="Postcode Area V1 status">
         <p><strong>Postcode areas included:</strong> 25</p>
-        <p><strong>Active homepage-visible deals included:</strong> 0</p>
-        <p><strong>Rows created:</strong> 0</p>
+        <p><strong>Active homepage-visible deals included:</strong> 5</p>
+        <p><strong>Rows created:</strong> 125</p>
       </div>
       <div class="filter-row" aria-label="Postcode Area V1 filters">
         <div class="filter-field">
           <label for="postcode-area-v1-filter">Postcode area</label>
           <select id="postcode-area-v1-filter">
             <option value="all">All postcode areas</option>
-
+            <option value="B">B</option>
+            <option value="BN">BN</option>
+            <option value="BS">BS</option>
+            <option value="CB">CB</option>
+            <option value="CF">CF</option>
+            <option value="E">E</option>
+            <option value="EC">EC</option>
+            <option value="EH">EH</option>
+            <option value="G">G</option>
+            <option value="L">L</option>
+            <option value="LS">LS</option>
+            <option value="M">M</option>
+            <option value="MK">MK</option>
+            <option value="N">N</option>
+            <option value="NE">NE</option>
+            <option value="NG">NG</option>
+            <option value="NW">NW</option>
+            <option value="OX">OX</option>
+            <option value="RG">RG</option>
+            <option value="S">S</option>
+            <option value="SE">SE</option>
+            <option value="SO">SO</option>
+            <option value="SW">SW</option>
+            <option value="W">W</option>
+            <option value="WC">WC</option>
           </select>
         </div>
       </div>
       <p id="postcode-area-v1-result-count" class="result-count" aria-live="polite"></p>
-      <p class="no-results-message">No active homepage-visible deals are available for Postcode Area V1 yet.</p>
+      
+      <p class="small-note scroll-tip">Tip: if needed, scroll sideways to see all columns.</p>
+      <div class="table-wrap" tabindex="0" aria-label="Postcode Area V1 active comparison table with horizontal scrolling">
+        <table id="postcode-area-v1-table">
+          <thead>
+            <tr>
+              <th>Postcode Area</th>
+              <th>Region</th>
+              <th>Homepage Category</th>
+              <th>Provider</th>
+              <th>Package</th>
+              <th>Speed</th>
+              <th>Advertised Monthly Price</th>
+              <th>Effective Monthly Price</th>
+              <th>Availability Status</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-postcode-area="SW">
+              <td>SW</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="SW">
+              <td>SW</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="SW">
+              <td>SW</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="SW">
+              <td>SW</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="SW">
+              <td>SW</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="SE">
+              <td>SE</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="SE">
+              <td>SE</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="SE">
+              <td>SE</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="SE">
+              <td>SE</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="SE">
+              <td>SE</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="NW">
+              <td>NW</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="NW">
+              <td>NW</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="NW">
+              <td>NW</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="NW">
+              <td>NW</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="NW">
+              <td>NW</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="N">
+              <td>N</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="N">
+              <td>N</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="N">
+              <td>N</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="N">
+              <td>N</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="N">
+              <td>N</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="E">
+              <td>E</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="E">
+              <td>E</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="E">
+              <td>E</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="E">
+              <td>E</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="E">
+              <td>E</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="W">
+              <td>W</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="W">
+              <td>W</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="W">
+              <td>W</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="W">
+              <td>W</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="W">
+              <td>W</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="EC">
+              <td>EC</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="EC">
+              <td>EC</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="EC">
+              <td>EC</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="EC">
+              <td>EC</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="EC">
+              <td>EC</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="WC">
+              <td>WC</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="WC">
+              <td>WC</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="WC">
+              <td>WC</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="WC">
+              <td>WC</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="WC">
+              <td>WC</td>
+              <td>London</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="OX">
+              <td>OX</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="OX">
+              <td>OX</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="OX">
+              <td>OX</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="OX">
+              <td>OX</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="OX">
+              <td>OX</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="SO">
+              <td>SO</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="SO">
+              <td>SO</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="SO">
+              <td>SO</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="SO">
+              <td>SO</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="SO">
+              <td>SO</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="BN">
+              <td>BN</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="BN">
+              <td>BN</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="BN">
+              <td>BN</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="BN">
+              <td>BN</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="BN">
+              <td>BN</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="MK">
+              <td>MK</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="MK">
+              <td>MK</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="MK">
+              <td>MK</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="MK">
+              <td>MK</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="MK">
+              <td>MK</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="RG">
+              <td>RG</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="RG">
+              <td>RG</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="RG">
+              <td>RG</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="RG">
+              <td>RG</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="RG">
+              <td>RG</td>
+              <td>South East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="CB">
+              <td>CB</td>
+              <td>East of England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="CB">
+              <td>CB</td>
+              <td>East of England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="CB">
+              <td>CB</td>
+              <td>East of England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="CB">
+              <td>CB</td>
+              <td>East of England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="CB">
+              <td>CB</td>
+              <td>East of England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="B">
+              <td>B</td>
+              <td>West Midlands</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="B">
+              <td>B</td>
+              <td>West Midlands</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="B">
+              <td>B</td>
+              <td>West Midlands</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="B">
+              <td>B</td>
+              <td>West Midlands</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="B">
+              <td>B</td>
+              <td>West Midlands</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="NG">
+              <td>NG</td>
+              <td>East Midlands</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="NG">
+              <td>NG</td>
+              <td>East Midlands</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="NG">
+              <td>NG</td>
+              <td>East Midlands</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="NG">
+              <td>NG</td>
+              <td>East Midlands</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="NG">
+              <td>NG</td>
+              <td>East Midlands</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="BS">
+              <td>BS</td>
+              <td>South West England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="BS">
+              <td>BS</td>
+              <td>South West England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="BS">
+              <td>BS</td>
+              <td>South West England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="BS">
+              <td>BS</td>
+              <td>South West England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="BS">
+              <td>BS</td>
+              <td>South West England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="CF">
+              <td>CF</td>
+              <td>South Wales</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="CF">
+              <td>CF</td>
+              <td>South Wales</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="CF">
+              <td>CF</td>
+              <td>South Wales</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="CF">
+              <td>CF</td>
+              <td>South Wales</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="CF">
+              <td>CF</td>
+              <td>South Wales</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="G">
+              <td>G</td>
+              <td>Scotland</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="G">
+              <td>G</td>
+              <td>Scotland</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="G">
+              <td>G</td>
+              <td>Scotland</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="G">
+              <td>G</td>
+              <td>Scotland</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="G">
+              <td>G</td>
+              <td>Scotland</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="EH">
+              <td>EH</td>
+              <td>Scotland</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="EH">
+              <td>EH</td>
+              <td>Scotland</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="EH">
+              <td>EH</td>
+              <td>Scotland</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="EH">
+              <td>EH</td>
+              <td>Scotland</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="EH">
+              <td>EH</td>
+              <td>Scotland</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="M">
+              <td>M</td>
+              <td>North West England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="M">
+              <td>M</td>
+              <td>North West England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="M">
+              <td>M</td>
+              <td>North West England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="M">
+              <td>M</td>
+              <td>North West England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="M">
+              <td>M</td>
+              <td>North West England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="L">
+              <td>L</td>
+              <td>North West England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="L">
+              <td>L</td>
+              <td>North West England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="L">
+              <td>L</td>
+              <td>North West England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="L">
+              <td>L</td>
+              <td>North West England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="L">
+              <td>L</td>
+              <td>North West England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="LS">
+              <td>LS</td>
+              <td>Yorkshire and the Humber</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="LS">
+              <td>LS</td>
+              <td>Yorkshire and the Humber</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="LS">
+              <td>LS</td>
+              <td>Yorkshire and the Humber</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="LS">
+              <td>LS</td>
+              <td>Yorkshire and the Humber</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="LS">
+              <td>LS</td>
+              <td>Yorkshire and the Humber</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="NE">
+              <td>NE</td>
+              <td>North East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="NE">
+              <td>NE</td>
+              <td>North East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="NE">
+              <td>NE</td>
+              <td>North East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="NE">
+              <td>NE</td>
+              <td>North East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="NE">
+              <td>NE</td>
+              <td>North East England</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="S">
+              <td>S</td>
+              <td>Yorkshire and the Humber</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 35</td>
+              <td class="number">35 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-35.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="S">
+              <td>S</td>
+              <td>Yorkshire and the Humber</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Fibre 65</td>
+              <td class="number">65 Mbps</td>
+              <td class="money">£26.00</td>
+              <td class="money effective-price">£28.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-fibre-65.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="S">
+              <td>S</td>
+              <td>Yorkshire and the Humber</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 150</td>
+              <td class="number">150 Mbps</td>
+              <td class="money">£24.00</td>
+              <td class="money effective-price">£26.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-150.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="S">
+              <td>S</td>
+              <td>Yorkshire and the Humber</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 500</td>
+              <td class="number">500 Mbps</td>
+              <td class="money">£30.00</td>
+              <td class="money effective-price">£32.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-500.html">View evidence</a></td>
+            </tr>
+            <tr data-postcode-area="S">
+              <td>S</td>
+              <td>Yorkshire and the Humber</td>
+              <td>Fixed broadband</td>
+              <td>TalkTalk</td>
+              <td>Full Fibre 900</td>
+              <td class="number">900 Mbps</td>
+              <td class="money">£36.00</td>
+              <td class="money effective-price">£38.67</td>
+              <td>not-postcode-checked</td>
+              <td><a class="details-button" href="active-deals/active-fallback-talktalk-full-fibre-900.html">View evidence</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p id="postcode-area-v1-no-results" class="no-results-message" hidden>No rows match this postcode area filter.</p>
     </section>
 
     <section class="card" aria-labelledby="sample-data-heading">

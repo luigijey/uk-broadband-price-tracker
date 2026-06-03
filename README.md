@@ -611,3 +611,13 @@ The homepage shows a **Cheapest active deals by speed tier** table above the ful
 These rows are still active review deals only. They are **not** provider-level postcode availability checks, they do not confirm service at a specific address, and they should not be treated as final checkout prices.
 
 Unknown setup fees are visibly caveated. If an active deal has `setupFeeStatus: "unknown"` or an `effectivePriceCaveat`, the homepage keeps that warning visible so reviewers can see when the effective monthly price may exclude an unknown upfront/setup fee.
+
+## Last Known Good Fallback V1
+
+Daily active-source checks can fail for ordinary resilience reasons such as DNS errors, unclear robots.txt access, HTTP 403 responses, or other source-access warnings. The tracker must not bypass robots restrictions, blocked sources, CAPTCHAs, login walls, security checks, postcode-check forms, or any other access controls to recover those rows.
+
+Last Known Good Fallback V1 lets the active review feed use manually approved `fallback-data/last-known-good-active-deals.json` records when a provider disappears from the latest homepage-visible active feed because the provider source could not be fetched or produced no snippets. These fallback rows are clearly labelled as `last-known-good-fallback` and are merged into `exports/active-online-deals-with-fallbacks.json` by `npm run merge-fallbacks`.
+
+Fallback rows are not fresh prices. They are last-known-good extracted review rows, remain `active-review-only`, require human review, and must not be presented as newly checked provider data. They are also not provider-level postcode checked; their availability scope remains `provider-landing-page-not-postcode-checked`, and postcode-area prototype rows keep `availabilityStatus: "not-postcode-checked"` and `availabilityConfidence: "national-candidate-only"`.
+
+The homepage and active detail pages visibly label fallback rows as Last Known Good fallback rows and show a caveat that the provider source was unavailable in the latest run. Postcode Area V1 may include fallback rows only as national candidate review rows repeated across supported postcode areas for the prototype comparison; it does not upgrade them into postcode availability results.

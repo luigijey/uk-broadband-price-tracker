@@ -9,9 +9,10 @@
     "extract-snippets": "node extract-price-snippets.js",
     "extract-talktalk": "node extract-talktalk-deals.js",
     "extract-providers": "node extract-provider-candidates.js",
-    "active-build": "npm run extract-snippets && npm run extract-providers && npm run promote-active && npm run postcode-area-build && npm run active-summary && npm run export && npm run build-site",
+    "active-build": "npm run extract-snippets && npm run extract-providers && npm run promote-active && npm run merge-fallbacks && npm run postcode-area-build && npm run active-summary && npm run export && npm run build-site",
     "promote-active": "node promote-usable-candidates.js",
     "postcode-area-build": "node build-postcode-area-active-comparison.js",
-    "active-summary": "node build-active-summary-tables.js"
+    "active-summary": "node build-active-summary-tables.js",
+    "merge-fallbacks": "node merge-active-fallbacks.js"
   }
 }

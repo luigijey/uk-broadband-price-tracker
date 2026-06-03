@@ -7,7 +7,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
-const { buildActiveCheapestBySpeedTierSection, buildActiveDealDetailHtml, buildCandidateSection, buildHtml, createActiveDealDetailPages } = require('./build-static-site');
+const { buildActiveCheapestBySpeedTierSection, buildActiveDealDetailHtml, buildCandidateSection, buildHtml, createActiveDealDetailPages, resolveActiveOnlineDealsPath } = require('./build-static-site');
 
 const candidate = {
   activeDealId: 'active-talktalk-full-fibre-150-provider-page',
@@ -320,4 +320,45 @@ test('postcode check result message includes postcode area, region, and active r
   assert.match(html, /countPostcodeAreaV1Rows\(postcodeArea\)/);
   assert.match(html, /Postcode area detected: ' \+ postcodeArea \+ ' — ' \+ match\.regionName/);
   assert.match(html, /Showing ' \+ activeCandidateRowCount \+ ' active national candidate deals for this postcode area/);
+});
+
+
+test('fallback caveat text renders on homepage active feed', () => {
+  const html = buildCandidateSection([{ ...candidate, dataFreshnessStatus: 'last-known-good-fallback' }], '2026-06-03T00:00:00.000Z');
+
+  assert.match(html, /Data Freshness/);
+  assert.match(html, /Last-known-good fallback/);
+  assert.match(html, /Last-known-good fallback: provider source was unavailable in the latest run\./);
+  assert.match(html, /If a provider cannot be fetched in the latest run/);
+});
+
+test('active detail page labels fallback rows', () => {
+  const html = buildActiveDealDetailHtml({
+    ...candidate,
+    dataFreshnessStatus: 'last-known-good-fallback',
+    fallbackReason: 'Provider source was unavailable in the latest run, so this row uses the last-known-good extracted review data.',
+  });
+
+  assert.match(html, /Data freshness/);
+  assert.match(html, /Last-known-good fallback/);
+  assert.match(html, /Fallback reason/);
+  assert.match(html, /provider source was unavailable in the latest run/i);
+});
+
+test('active detail pages are generated for fallback rows', () => {
+  const tempFolder = fs.mkdtempSync(path.join(os.tmpdir(), 'active-detail-fallback-'));
+  const created = createActiveDealDetailPages([{ ...candidate, activeDealId: 'active-fallback-talktalk-full-fibre-150', dataFreshnessStatus: 'last-known-good-fallback' }], tempFolder);
+
+  assert.equal(created.length, 1);
+  assert.ok(fs.existsSync(path.join(tempFolder, 'active-fallback-talktalk-full-fibre-150.html')));
+});
+
+test('homepage active feed prefers active-online-deals-with-fallbacks.json when present', () => {
+  const tempFolder = fs.mkdtempSync(path.join(os.tmpdir(), 'active-feed-prefer-'));
+  const freshPath = path.join(tempFolder, 'active-online-deals.json');
+  const fallbackPath = path.join(tempFolder, 'active-online-deals-with-fallbacks.json');
+  fs.writeFileSync(freshPath, JSON.stringify({ activeDeals: [] }));
+  fs.writeFileSync(fallbackPath, JSON.stringify({ activeDeals: [{ ...candidate, dataFreshnessStatus: 'last-known-good-fallback' }] }));
+
+  assert.equal(resolveActiveOnlineDealsPath({ activeOnlineDeals: freshPath, activeOnlineDealsWithFallbacks: fallbackPath }), fallbackPath);
 });

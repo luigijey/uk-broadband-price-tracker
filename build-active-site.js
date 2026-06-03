@@ -13,6 +13,7 @@ const commands = [
   ['npm', ['run', 'extract-snippets']],
   ['npm', ['run', 'extract-providers']],
   ['npm', ['run', 'promote-active']],
+  ['npm', ['run', 'merge-fallbacks']],
   ['npm', ['run', 'postcode-area-build']],
   ['npm', ['run', 'active-summary']],
   ['npm', ['run', 'export']],
@@ -27,6 +28,7 @@ const summaryFiles = {
   discardedProviderCandidates: path.join(rootFolder, 'exports', 'provider-deal-candidates-discarded.json'),
   providerDirectExpansionSummary: path.join(rootFolder, 'exports', 'provider-direct-expansion-summary.json'),
   activeOnlineDeals: path.join(rootFolder, 'exports', 'active-online-deals.json'),
+  activeOnlineDealsWithFallbacks: path.join(rootFolder, 'exports', 'active-online-deals-with-fallbacks.json'),
   postcodeAreaActiveComparison: path.join(rootFolder, 'exports', 'postcode-area-active-comparison.json'),
   postcodeCheckV1Summary: path.join(rootFolder, 'exports', 'postcode-check-v1-summary.json'),
   activeCheapestBySpeedTier: path.join(rootFolder, 'exports', 'active-cheapest-by-speed-tier.json'),
@@ -53,6 +55,19 @@ function countActiveDealPages(activeDealsFolder = summaryFiles.activeDealsFolder
   }
 
   return fs.readdirSync(activeDealsFolder).filter((fileName) => fileName.endsWith('.html')).length;
+}
+
+
+function readFallbackDealsAdded(activeDealsWithFallbacksPath = summaryFiles.activeOnlineDealsWithFallbacks) {
+  if (!fs.existsSync(activeDealsWithFallbacksPath)) return null;
+  const output = JSON.parse(fs.readFileSync(activeDealsWithFallbacksPath, 'utf8'));
+  return output.summary && typeof output.summary.fallbackDealsAdded === 'number' ? output.summary.fallbackDealsAdded : null;
+}
+
+function readHomepageActiveDealsAfterFallback(activeDealsWithFallbacksPath = summaryFiles.activeOnlineDealsWithFallbacks) {
+  if (!fs.existsSync(activeDealsWithFallbacksPath)) return null;
+  const output = JSON.parse(fs.readFileSync(activeDealsWithFallbacksPath, 'utf8'));
+  return output.summary && typeof output.summary.homepageActiveDealsAfterFallback === 'number' ? output.summary.homepageActiveDealsAfterFallback : null;
 }
 
 function readActiveDealCount(activeDealsPath = summaryFiles.activeOnlineDeals) {
@@ -85,11 +100,15 @@ function buildActiveBuildSummary(files = summaryFiles) {
     discardedProviderCandidatesFileExists: fs.existsSync(files.discardedProviderCandidates),
     providerDirectExpansionSummaryFileExists: fs.existsSync(files.providerDirectExpansionSummary),
     activeOnlineDealsFileExists: fs.existsSync(files.activeOnlineDeals),
+    activeOnlineDealsWithFallbacksFileExists: fs.existsSync(files.activeOnlineDealsWithFallbacks),
     postcodeAreaActiveComparisonFileExists: fs.existsSync(files.postcodeAreaActiveComparison),
     postcodeCheckV1SummaryFileExists: fs.existsSync(files.postcodeCheckV1Summary),
     activeCheapestBySpeedTierFileExists: fs.existsSync(files.activeCheapestBySpeedTier),
     candidateCount: readCandidateCount(files.providerCandidates),
     activeOnlineDealCount: readActiveDealCount(files.activeOnlineDeals),
+    activeOnlineDealsWithFallbacksCount: readActiveDealCount(files.activeOnlineDealsWithFallbacks),
+    fallbackDealsAdded: readFallbackDealsAdded(files.activeOnlineDealsWithFallbacks),
+    homepageActiveDealsAfterFallback: readHomepageActiveDealsAfterFallback(files.activeOnlineDealsWithFallbacks),
     postcodeAreaActiveRowCount: readPostcodeAreaActiveRowCount(files.postcodeAreaActiveComparison),
     supportedPostcodeAreaCount: readSupportedPostcodeAreaCount(files.postcodeCheckV1Summary),
     activeCheapestSpeedTierRowCount: readActiveCheapestSpeedTierRowCount(files.activeCheapestBySpeedTier),
@@ -110,6 +129,10 @@ function printActiveBuildSummary(summary) {
   console.log(`Provider candidate count: ${summary.candidateCount === null ? 'unknown' : summary.candidateCount}`);
   console.log(`active-online-deals.json exists: ${summary.activeOnlineDealsFileExists ? 'yes' : 'no'}`);
   console.log(`Active online deal count: ${summary.activeOnlineDealCount === null ? 'unknown' : summary.activeOnlineDealCount}`);
+  console.log(`active-online-deals-with-fallbacks.json exists: ${summary.activeOnlineDealsWithFallbacksFileExists ? 'yes' : 'no'}`);
+  console.log(`Active online deals with fallbacks count: ${summary.activeOnlineDealsWithFallbacksCount === null ? 'unknown' : summary.activeOnlineDealsWithFallbacksCount}`);
+  console.log(`Fallback deals added: ${summary.fallbackDealsAdded === null ? 'unknown' : summary.fallbackDealsAdded}`);
+  console.log(`Homepage active deals after fallback: ${summary.homepageActiveDealsAfterFallback === null ? 'unknown' : summary.homepageActiveDealsAfterFallback}`);
   console.log(`postcode-area-active-comparison.json exists: ${summary.postcodeAreaActiveComparisonFileExists ? 'yes' : 'no'}`);
   console.log(`Postcode-area row count: ${summary.postcodeAreaActiveRowCount === null ? 'unknown' : summary.postcodeAreaActiveRowCount}`);
   console.log(`postcode-check-v1-summary.json exists: ${summary.postcodeCheckV1SummaryFileExists ? 'yes' : 'no'}`);
@@ -145,6 +168,8 @@ module.exports = {
   printActiveBuildSummary,
   countActiveDealPages,
   readActiveDealCount,
+  readFallbackDealsAdded,
+  readHomepageActiveDealsAfterFallback,
   readCandidateCount,
   readPostcodeAreaActiveRowCount,
   readSupportedPostcodeAreaCount,

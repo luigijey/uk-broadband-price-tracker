@@ -55,6 +55,8 @@ test('postcode-area comparison output has the expected shape and review-only war
   assert.equal(output.rows[0].callsPackageStatus, 'not-included');
   assert.equal(output.rows[0].homepageCategory, 'Fixed broadband');
   assert.equal(output.rows[0].warningMessage, ROW_WARNING);
+  assert.equal(output.rows[0].dataFreshnessStatus, 'fresh-current-run');
+  assert.equal(output.rows[0].fallbackReason, null);
 });
 
 test('postcode-area comparison creates valid empty rows when no homepage-visible deals exist', () => {
@@ -101,4 +103,31 @@ test('postcode-area rows include setupFeeStatus and effectivePriceCaveat', () =>
 
   assert.equal(output.rows[0].setupFeeStatus, 'unknown');
   assert.equal(output.rows[0].effectivePriceCaveat, 'Effective monthly price excludes any unknown upfront/setup fee.');
+});
+
+
+test('postcode rows include dataFreshnessStatus and fallbackReason for fallback rows', () => {
+  const output = buildPostcodeAreaActiveComparisonOutput({
+    activeDeals: [{
+      ...activeDeal,
+      dataFreshnessStatus: 'last-known-good-fallback',
+      fallbackReason: 'Provider source was unavailable in the latest run, so this row uses the last-known-good extracted review data.',
+    }],
+  }, postcodeAreas, '2026-06-03T00:00:00.000Z');
+
+  assert.equal(output.rows[0].dataFreshnessStatus, 'last-known-good-fallback');
+  assert.match(output.rows[0].fallbackReason, /Provider source was unavailable/);
+  assert.equal(output.rows[0].availabilityStatus, 'not-postcode-checked');
+  assert.equal(output.rows[0].availabilityConfidence, 'national-candidate-only');
+  assert.equal(output.rows[0].publishStatus, 'postcode-area-v1-review-only');
+});
+
+test('postcode-area comparison uses fallback-enhanced active feed when supplied', () => {
+  const output = buildPostcodeAreaActiveComparisonOutput({
+    activeDeals: [{ ...activeDeal, activeDealId: 'active-fallback-talktalk-full-fibre-150', dataFreshnessStatus: 'last-known-good-fallback' }],
+  }, postcodeAreas, '2026-06-03T00:00:00.000Z');
+
+  assert.equal(output.rows.length, 2);
+  assert.equal(output.rows[0].activeDealId, 'active-fallback-talktalk-full-fibre-150');
+  assert.equal(output.rows[0].dataFreshnessStatus, 'last-known-good-fallback');
 });

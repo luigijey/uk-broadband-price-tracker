@@ -19,3 +19,12 @@ test('deploy workflow runs active-summary and uploads active cheapest artifacts'
   assert.match(workflow, /exports\/active-cheapest-by-speed-tier\.json/);
   assert.match(workflow, /exports\/active-cheapest-by-speed-tier\.csv/);
 });
+
+test('deploy workflow runs merge-fallbacks and uploads fallback artifacts', () => {
+  assert.match(workflow, /npm run promote-active[\s\S]*npm run merge-fallbacks[\s\S]*npm run postcode-area-build/);
+  assert.match(workflow, /test -f exports\/active-online-deals-with-fallbacks\.json/);
+  assert.match(workflow, /test -f exports\/active-online-deals-with-fallbacks\.csv/);
+  assert.match(workflow, /exports\/active-online-deals-with-fallbacks\.json/);
+  assert.match(workflow, /exports\/active-online-deals-with-fallbacks\.csv/);
+  assert.match(workflow, /fallback-data\/last-known-good-active-deals\.json/);
+});

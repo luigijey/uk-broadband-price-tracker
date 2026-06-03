@@ -10,6 +10,7 @@ const path = require('node:path');
 const postcodeAreas = require('./postcode-areas');
 
 const ACTIVE_DEALS_PATH = path.join(__dirname, 'exports', 'active-online-deals.json');
+const ACTIVE_DEALS_WITH_FALLBACKS_PATH = path.join(__dirname, 'exports', 'active-online-deals-with-fallbacks.json');
 const JSON_OUTPUT_PATH = path.join(__dirname, 'exports', 'postcode-area-active-comparison.json');
 const CSV_OUTPUT_PATH = path.join(__dirname, 'exports', 'postcode-area-active-comparison.csv');
 const POSTCODE_CHECK_V1_SUMMARY_PATH = path.join(__dirname, 'exports', 'postcode-check-v1-summary.json');
@@ -29,6 +30,8 @@ const POSTCODE_AREA_COLUMNS = [
   'effectiveMonthlyPrice',
   'setupFeeStatus',
   'effectivePriceCaveat',
+  'dataFreshnessStatus',
+  'fallbackReason',
   'speedMbps',
   'speedTier',
   'contractLengthMonths',
@@ -51,6 +54,10 @@ function readJsonFileIfExists(filePath, fallbackValue) {
   }
 
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+}
+
+function resolveActiveDealsPath(preferredPath = ACTIVE_DEALS_WITH_FALLBACKS_PATH, fallbackPath = ACTIVE_DEALS_PATH) {
+  return fs.existsSync(preferredPath) ? preferredPath : fallbackPath;
 }
 
 function normalizeActiveDealOutput(activeDealOutput) {
@@ -90,6 +97,8 @@ function buildPostcodeAreaRows(activeDeals, areas = postcodeAreas) {
     effectiveMonthlyPrice: deal.effectiveMonthlyPrice,
     setupFeeStatus: deal.setupFeeStatus || null,
     effectivePriceCaveat: deal.effectivePriceCaveat || null,
+    dataFreshnessStatus: deal.dataFreshnessStatus || 'fresh-current-run',
+    fallbackReason: deal.fallbackReason || null,
     speedMbps: deal.speedMbps,
     speedTier: deal.speedTier,
     contractLengthMonths: deal.contractLengthMonths,
@@ -177,7 +186,7 @@ function writeCsvFile(filePath, rows) {
 }
 
 function buildPostcodeAreaActiveComparison({
-  activeDealsPath = ACTIVE_DEALS_PATH,
+  activeDealsPath = resolveActiveDealsPath(),
   jsonOutputPath = JSON_OUTPUT_PATH,
   csvOutputPath = CSV_OUTPUT_PATH,
   areas = postcodeAreas,
@@ -217,6 +226,7 @@ module.exports = {
   ROW_WARNING,
   activeHomepageBroadbandOnlyDeals,
   buildPostcodeAreaActiveComparison,
+  resolveActiveDealsPath,
   buildPostcodeAreaActiveComparisonOutput,
   buildPostcodeCheckV1Summary,
   buildPostcodeAreaRows,

@@ -1,12 +1,14 @@
 // Build active demo summary tables from homepage-visible active online deals.
 //
-// This uses only exports/active-online-deals.json. It does not perform provider
+// This prefers exports/active-online-deals-with-fallbacks.json when present,
+// and falls back to exports/active-online-deals.json. It does not perform provider
 // postcode checks, submit forms, or fetch any provider/comparison pages.
 
 const fs = require('node:fs');
 const path = require('node:path');
 
 const ACTIVE_DEALS_PATH = path.join(__dirname, 'exports', 'active-online-deals.json');
+const ACTIVE_DEALS_WITH_FALLBACKS_PATH = path.join(__dirname, 'exports', 'active-online-deals-with-fallbacks.json');
 const JSON_OUTPUT_PATH = path.join(__dirname, 'exports', 'active-cheapest-by-speed-tier.json');
 const CSV_OUTPUT_PATH = path.join(__dirname, 'exports', 'active-cheapest-by-speed-tier.csv');
 
@@ -29,6 +31,10 @@ function readJsonFileIfExists(filePath, fallbackValue) {
   }
 
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+}
+
+function resolveActiveDealsPath(preferredPath = ACTIVE_DEALS_WITH_FALLBACKS_PATH, fallbackPath = ACTIVE_DEALS_PATH) {
+  return fs.existsSync(preferredPath) ? preferredPath : fallbackPath;
 }
 
 function normalizeActiveDealOutput(activeDealOutput) {
@@ -85,7 +91,7 @@ function buildCheapestBySpeedTierRows(activeDealOutput) {
     }));
 }
 
-function buildActiveCheapestBySpeedTierOutput(activeDealOutput, generatedAt = new Date().toISOString()) {
+function buildActiveCheapestBySpeedTierOutput(activeDealOutput, generatedAt = new Date().toISOString(), sourceFile = 'exports/active-online-deals.json') {
   const activeDeals = normalizeActiveDealOutput(activeDealOutput);
   const homepageVisibleDeals = activeDeals.filter(isHomepageVisibleActiveDeal);
   const rows = buildCheapestBySpeedTierRows(activeDealOutput);
@@ -100,7 +106,7 @@ function buildActiveCheapestBySpeedTierOutput(activeDealOutput, generatedAt = ne
   return {
     summary: {
       generatedAt,
-      sourceFile: 'exports/active-online-deals.json',
+      sourceFile,
       homepageVisibleDealsIncluded: homepageVisibleDeals.length,
       speedTierSummaryRows: rows.length,
       hiddenRecordsExcluded: activeDeals.filter((deal) => deal && deal.showOnHomepage !== true).length,
@@ -134,13 +140,13 @@ function writeCsvFile(filePath, rows) {
 }
 
 function buildActiveSummaryTables({
-  activeDealsPath = ACTIVE_DEALS_PATH,
+  activeDealsPath = resolveActiveDealsPath(),
   jsonOutputPath = JSON_OUTPUT_PATH,
   csvOutputPath = CSV_OUTPUT_PATH,
   generatedAt = new Date().toISOString(),
 } = {}) {
   const activeDealOutput = readJsonFileIfExists(activeDealsPath, { activeDeals: [] });
-  const output = buildActiveCheapestBySpeedTierOutput(activeDealOutput, generatedAt);
+  const output = buildActiveCheapestBySpeedTierOutput(activeDealOutput, generatedAt, path.relative(__dirname, activeDealsPath));
   writeJsonFile(jsonOutputPath, output);
   writeCsvFile(csvOutputPath, output.rows);
   return output;
@@ -166,8 +172,10 @@ if (require.main === module) {
 
 module.exports = {
   ACTIVE_CHEAPEST_COLUMNS,
+  ACTIVE_DEALS_WITH_FALLBACKS_PATH,
   buildActiveCheapestBySpeedTierOutput,
   buildActiveSummaryTables,
+  resolveActiveDealsPath,
   buildCheapestBySpeedTierRows,
   isHomepageVisibleActiveDeal,
 };
