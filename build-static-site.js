@@ -234,8 +234,10 @@ function normalizeActiveDealOutput(activeDealOutput) {
   };
 }
 
-function buildCandidateSection(candidates, generatedAt = null) {
+function buildCandidateSection(candidates, generatedAt = null, summary = {}) {
   const candidateRows = buildCandidateRows(candidates);
+  const shownCount = Number.isFinite(Number(summary.homepageActiveDeals)) ? Number(summary.homepageActiveDeals) : candidates.length;
+  const hiddenCount = Number.isFinite(Number(summary.hiddenReviewDeals)) ? Number(summary.hiddenReviewDeals) : 0;
 
   return `
     <section class="card" aria-labelledby="active-candidates-heading">
@@ -244,7 +246,8 @@ function buildCandidateSection(candidates, generatedAt = null) {
       <p class="small-note">Lower-confidence extracted rows are kept in review artifacts and are not shown in this main table.</p>
       <div class="status-box" aria-label="Active candidate data freshness">
         <p><strong>Active deal data generated:</strong> ${escapeHtml(formatGeneratedAt(generatedAt))}</p>
-        <p><strong>Active online deals:</strong> ${escapeHtml(candidates.length)}</p>
+        <p><strong>Active deals shown on homepage:</strong> ${escapeHtml(shownCount)}</p>
+        <p><strong>Review/evidence active records hidden from homepage:</strong> ${escapeHtml(hiddenCount)}</p>
         <p><strong>Review warning:</strong> Active review deals are not postcode checked, not manually approved, and requires human review.</p>
       </div>
       ${candidates.length === 0 ? '<p class="no-results-message">No usable active online deals were created in this run. Check the review artifacts.</p>' : `
@@ -292,7 +295,7 @@ function normalizeProviderCandidateOutput(providerCandidateOutput) {
 
 function buildHtml(nationalDeals, postcodeDeals, activeDealOutput = { activeDeals: [] }) {
   const activeDealData = normalizeActiveDealOutput(activeDealOutput);
-  const providerCandidates = activeDealData.activeDeals;
+  const providerCandidates = activeDealData.activeDeals.filter((deal) => deal.showOnHomepage === true);
   const summaryCards = [
     ['Sample deals', postcodeDeals.length],
     ['Postcode areas', countUniqueValues(postcodeDeals, 'postcodeArea')],
@@ -714,7 +717,7 @@ ${summaryCards.map(([label, value]) => `        <article class="summary-card">
   </header>
 
   <main>
-${buildCandidateSection(providerCandidates, activeDealData.summary.generatedAt)}
+${buildCandidateSection(providerCandidates, activeDealData.summary.generatedAt, activeDealData.summary)}
 
     <section class="card" aria-labelledby="sample-data-heading">
       <h2 id="sample-data-heading">Sample data prototype tables</h2>
@@ -1257,6 +1260,8 @@ function buildActiveDealDetailHtml(deal) {
     ['Speed tier', deal.speedTier || 'Unknown'],
     ['Extraction confidence', deal.extractionConfidence || 'Unknown'],
     ['Extraction quality', deal.extractionQuality || 'Unknown'],
+    ['Active feed trust level', deal.activeFeedTrustLevel || 'Unknown'],
+    ['Show on homepage', deal.showOnHomepage === true ? 'Yes' : 'No'],
     ['Availability scope', deal.availabilityScope || 'Unknown'],
     ['Publish status', deal.publishStatus || 'active-review-only'],
     ['Requires human review', deal.requiresHumanReview ? 'Yes' : 'Unknown'],
@@ -1314,17 +1319,17 @@ function buildActiveDealDetailHtml(deal) {
 `;
 }
 
-function createActiveDealDetailPages(activeDeals) {
-  fs.mkdirSync(activeDealsFolder, { recursive: true });
+function createActiveDealDetailPages(activeDeals, outputFolder = activeDealsFolder) {
+  fs.mkdirSync(outputFolder, { recursive: true });
 
-  fs.readdirSync(activeDealsFolder)
+  fs.readdirSync(outputFolder)
     .filter((fileName) => fileName.endsWith('.html'))
     .forEach((fileName) => {
-      fs.unlinkSync(path.join(activeDealsFolder, fileName));
+      fs.unlinkSync(path.join(outputFolder, fileName));
     });
 
   return activeDeals.map((deal) => {
-    const filePath = path.join(activeDealsFolder, `${deal.activeDealId}.html`);
+    const filePath = path.join(outputFolder, `${deal.activeDealId}.html`);
     fs.writeFileSync(filePath, buildActiveDealDetailHtml(deal));
     return filePath;
   });
@@ -1379,6 +1384,7 @@ module.exports = {
   buildDealDetailHtml,
   buildActiveDealDetailHtml,
   buildStaticSite,
+  createActiveDealDetailPages,
   escapeHtml,
   formatRewardSummary,
 };

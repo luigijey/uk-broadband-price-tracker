@@ -1,11 +1,13 @@
 {
+  "activeDeals": [],
   "summary": {
-    "generatedAt": "2026-06-03T13:45:57.206Z",
     "totalActiveDeals": 0,
-    "usableCalculatedCount": 0,
-    "sourceEffectiveOnlyCount": 0,
-    "providerCount": 0,
-    "sourceCount": 0,
+    "homepageActiveDeals": 0,
+    "hiddenReviewDeals": 0,
+    "providerDirectHomepageCount": 0,
+    "comparisonHomepageCount": 0,
+    "sourceEffectiveOnlyHiddenCount": 0,
+    "generatedAt": "2026-06-03T14:42:04.736Z",
     "warningMessages": [
       "BT (bt) had no snippets available; no candidates were extracted.",
       "BT (bt): Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.bt.com",
@@ -27,6 +29,5 @@
       "Broadband Genie (broadband-genie): Candidate page was not fetched because robots.txt access was unclear.",
       "No usable active online deals were created in this run. Check the review artifacts."
     ]
-  },
-  "activeDeals": []
+  }
 }

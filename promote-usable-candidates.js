@@ -17,31 +17,214 @@ const ACTIVE_COLUMNS = [
   'packageName',
   'sourceName',
   'sourceType',
-  'sourceUrl',
   'advertisedMonthlyPrice',
   'effectiveMonthlyPrice',
   'sourceEffectiveMonthlyPrice',
-  'contractLengthMonths',
-  'annualAprilPriceRise',
-  'setupFee',
-  'voucherValue',
-  'rewardCardValue',
-  'cashbackValue',
-  'billCreditValue',
   'speedMbps',
   'speedTier',
   'extractionConfidence',
   'extractionQuality',
-  'availabilityScope',
+  'activeFeedTrustLevel',
+  'showOnHomepage',
   'publishStatus',
   'requiresHumanReview',
-  'sourceSnippet',
-  'extractionWarnings',
-  'generatedAt',
 ];
 
 const PROMOTABLE_QUALITIES = new Set(['usable-calculated', 'usable-source-effective-only']);
 const QUALITY_GATE_WARNING_PREFIX = 'Quality gate:';
+
+const ACTIVE_FEED_TRUST_LEVELS = new Set([
+  'provider-direct-calculated',
+  'comparison-clean-calculated',
+  'comparison-source-effective-only',
+  'review-artifact-only',
+]);
+
+const KNOWN_PROVIDER_NAMES = [
+  'TalkTalk',
+  'Vodafone',
+  'BT',
+  'Plusnet',
+  'Sky',
+  'Virgin Media',
+  'EE',
+  'Hyperoptic',
+  'Community Fibre',
+  'Broadband Genie',
+];
+
+const FORCE_HOMEPAGE_HIDDEN_CANDIDATE_IDS = new Set([
+  'uswitch-virgin-media-superfast-broadband',
+  'uswitch-plusnet-fibre-66',
+]);
+
+function escapeRegex(text) {
+  return String(text).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function normalizeForMatching(text) {
+  return String(text || '')
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ');
+}
+
+function isNumber(value) {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function includesNormalized(haystack, needle) {
+  const normalizedHaystack = normalizeForMatching(haystack);
+  const normalizedNeedle = normalizeForMatching(needle);
+  return normalizedNeedle.length > 0 && normalizedHaystack.includes(normalizedNeedle);
+}
+
+function findExtractedBlockStart(candidate) {
+  const sourceSnippet = String(candidate.sourceSnippet || '');
+  const provider = String(candidate.provider || '');
+  const packageName = String(candidate.packageName || '');
+  const starts = [];
+
+  [provider, packageName, `${provider} ${packageName}`].forEach((value) => {
+    const normalizedValue = normalizeForMatching(value);
+    if (!normalizedValue) return;
+    const valueWords = normalizedValue.split(' ').map(escapeRegex).join('\\s+');
+    const match = new RegExp(`\\b${valueWords}\\b`, 'i').exec(sourceSnippet);
+    if (match) starts.push(match.index);
+  });
+
+  return starts.length > 0 ? Math.min(...starts) : -1;
+}
+
+function snippetStartsWithExtractedBlock(candidate) {
+  const sourceSnippet = String(candidate.sourceSnippet || '');
+  const normalizedSnippet = normalizeForMatching(sourceSnippet);
+  const provider = normalizeForMatching(candidate.provider || '');
+  const packageName = normalizeForMatching(candidate.packageName || '');
+  const combined = normalizeForMatching(`${candidate.provider || ''} ${candidate.packageName || ''}`);
+
+  const cleanStarts = [combined, provider, packageName]
+    .filter((value) => value.length > 0)
+    .some((value) => normalizedSnippet.startsWith(value));
+  if (cleanStarts) {
+    return true;
+  }
+
+  const blockStart = findExtractedBlockStart(candidate);
+  if (blockStart < 0) {
+    return false;
+  }
+
+  const leadingText = normalizeForMatching(sourceSnippet.slice(0, blockStart));
+  // Allow small labels/positioning text, but not a preceding deal-sized block.
+  return leadingText.length <= 40 && !/£|mbps|month|contract|fibre|broadband|gig1|superfast/.test(leadingText);
+}
+
+function hasOtherProviderBeforeExtractedBlock(candidate) {
+  const sourceSnippet = String(candidate.sourceSnippet || '');
+  const blockStart = findExtractedBlockStart(candidate);
+  if (blockStart <= 0) {
+    return false;
+  }
+
+  const leadingText = sourceSnippet.slice(0, blockStart);
+  return KNOWN_PROVIDER_NAMES
+    .filter((providerName) => normalizeForMatching(providerName) !== normalizeForMatching(candidate.provider || ''))
+    .some((providerName) => new RegExp(`\\b${escapeRegex(providerName)}\\b`, 'i').test(leadingText));
+}
+
+function getHomepageDecision(candidate) {
+  const warnings = [];
+
+  if (FORCE_HOMEPAGE_HIDDEN_CANDIDATE_IDS.has(candidate.candidateId)) {
+    warnings.push('Active feed trust gate: known noisy Uswitch comparison row is hidden from homepage because its snippet mixes adjacent provider/deal text.');
+  }
+
+  if (candidate.extractionQuality === 'usable-source-effective-only') {
+    return {
+      activeFeedTrustLevel: 'comparison-source-effective-only',
+      showOnHomepage: false,
+      warnings,
+    };
+  }
+
+  if (candidate.extractionQuality !== 'usable-calculated') {
+    return {
+      activeFeedTrustLevel: 'review-artifact-only',
+      showOnHomepage: false,
+      warnings: [...warnings, 'Active feed trust gate: only usable-calculated rows can appear on the homepage.'],
+    };
+  }
+
+  const requiredNumberFields = [
+    'effectiveMonthlyPrice',
+    'advertisedMonthlyPrice',
+    'contractLengthMonths',
+    'annualAprilPriceRise',
+    'speedMbps',
+  ];
+  const missingNumberFields = requiredNumberFields.filter((field) => !isNumber(candidate[field]));
+  if (missingNumberFields.length > 0) {
+    return {
+      activeFeedTrustLevel: 'review-artifact-only',
+      showOnHomepage: false,
+      warnings: [...warnings, `Active feed trust gate: hidden from homepage because numeric fields are missing or invalid (${missingNumberFields.join(', ')}).`],
+    };
+  }
+
+  if (candidate.sourceType === 'provider-direct') {
+    const snippetNamesDeal = includesNormalized(candidate.sourceSnippet, candidate.provider) || includesNormalized(candidate.sourceSnippet, candidate.packageName);
+    if (!snippetNamesDeal) {
+      return {
+        activeFeedTrustLevel: 'review-artifact-only',
+        showOnHomepage: false,
+        warnings: [...warnings, 'Active feed trust gate: provider-direct snippet does not mention the extracted provider or package.'],
+      };
+    }
+
+    return {
+      activeFeedTrustLevel: 'provider-direct-calculated',
+      showOnHomepage: warnings.length === 0,
+      warnings,
+    };
+  }
+
+  if (candidate.sourceType === 'comparison-site') {
+    if (candidate.annualAprilPriceRise < 0 || candidate.annualAprilPriceRise > 6) {
+      warnings.push('Active feed trust gate: comparison-site annual April price rise is outside the £0-£6 homepage range.');
+    }
+
+    if (!snippetStartsWithExtractedBlock(candidate)) {
+      warnings.push('Active feed trust gate: comparison-site snippet does not begin with the extracted provider/package block.');
+    }
+
+    if (hasOtherProviderBeforeExtractedBlock(candidate)) {
+      warnings.push('Active feed trust gate: comparison-site snippet mentions another provider before the extracted provider/package block.');
+    }
+
+    if (warnings.length > 0) {
+      return {
+        activeFeedTrustLevel: 'review-artifact-only',
+        showOnHomepage: false,
+        warnings,
+      };
+    }
+
+    return {
+      activeFeedTrustLevel: 'comparison-clean-calculated',
+      showOnHomepage: true,
+      warnings,
+    };
+  }
+
+  return {
+    activeFeedTrustLevel: 'review-artifact-only',
+    showOnHomepage: false,
+    warnings: [...warnings, `Active feed trust gate: unsupported sourceType ${candidate.sourceType || 'unknown'} is hidden from homepage.`],
+  };
+}
 
 function normalizeCandidateOutput(candidateOutput) {
   if (Array.isArray(candidateOutput)) {
@@ -98,8 +281,7 @@ function isPromotableCandidate(candidate) {
   return PROMOTABLE_QUALITIES.has(candidate.extractionQuality) &&
     candidate.publishStatus === 'candidate-review-only' &&
     candidate.requiresHumanReview === true &&
-    isNotPostcodeChecked(candidate) &&
-    passedStricterQualityGate(candidate);
+    isNotPostcodeChecked(candidate);
 }
 
 function createActiveDealId(candidate, index) {
@@ -111,6 +293,16 @@ function createActiveDealId(candidate, index) {
 }
 
 function toActiveDeal(candidate, generatedAt, index) {
+  const homepageDecision = getHomepageDecision(candidate);
+  const extractionWarnings = [...new Set([
+    ...(Array.isArray(candidate.extractionWarnings) ? candidate.extractionWarnings : []),
+    ...homepageDecision.warnings,
+  ])];
+
+  if (!ACTIVE_FEED_TRUST_LEVELS.has(homepageDecision.activeFeedTrustLevel)) {
+    throw new Error(`Unexpected active feed trust level: ${homepageDecision.activeFeedTrustLevel}`);
+  }
+
   return {
     activeDealId: createActiveDealId(candidate, index),
     candidateId: candidate.candidateId || null,
@@ -133,15 +325,16 @@ function toActiveDeal(candidate, generatedAt, index) {
     speedTier: candidate.speedTier || null,
     extractionConfidence: candidate.extractionConfidence || null,
     extractionQuality: candidate.extractionQuality || null,
+    activeFeedTrustLevel: homepageDecision.activeFeedTrustLevel,
+    showOnHomepage: homepageDecision.showOnHomepage,
     availabilityScope: candidate.availabilityScope || null,
     publishStatus: 'active-review-only',
     requiresHumanReview: true,
     sourceSnippet: candidate.sourceSnippet || '',
-    extractionWarnings: Array.isArray(candidate.extractionWarnings) ? candidate.extractionWarnings : [],
+    extractionWarnings,
     generatedAt,
   };
 }
-
 function buildActiveOnlineDealsOutput(candidateOutput, generatedAt = new Date().toISOString()) {
   const input = normalizeCandidateOutput(candidateOutput);
   const activeDeals = input.candidates
@@ -154,16 +347,20 @@ function buildActiveOnlineDealsOutput(candidateOutput, generatedAt = new Date().
   }
 
   return {
-    summary: {
-      generatedAt,
-      totalActiveDeals: activeDeals.length,
-      usableCalculatedCount: activeDeals.filter((deal) => deal.extractionQuality === 'usable-calculated').length,
-      sourceEffectiveOnlyCount: activeDeals.filter((deal) => deal.extractionQuality === 'usable-source-effective-only').length,
-      providerCount: new Set(activeDeals.map((deal) => deal.provider).filter(Boolean)).size,
-      sourceCount: new Set(activeDeals.map((deal) => deal.sourceName).filter(Boolean)).size,
-      warningMessages: [...new Set(warningMessages)],
-    },
     activeDeals,
+    summary: {
+      totalActiveDeals: activeDeals.length,
+      homepageActiveDeals: activeDeals.filter((deal) => deal.showOnHomepage === true).length,
+      hiddenReviewDeals: activeDeals.filter((deal) => deal.showOnHomepage !== true).length,
+      providerDirectHomepageCount: activeDeals.filter((deal) => deal.showOnHomepage === true && deal.activeFeedTrustLevel === 'provider-direct-calculated').length,
+      comparisonHomepageCount: activeDeals.filter((deal) => deal.showOnHomepage === true && deal.activeFeedTrustLevel === 'comparison-clean-calculated').length,
+      sourceEffectiveOnlyHiddenCount: activeDeals.filter((deal) => deal.showOnHomepage !== true && deal.activeFeedTrustLevel === 'comparison-source-effective-only').length,
+      generatedAt,
+      warningMessages: [...new Set([
+        ...warningMessages,
+        ...activeDeals.flatMap((deal) => Array.isArray(deal.extractionWarnings) ? deal.extractionWarnings.filter((warning) => String(warning).startsWith('Active feed trust gate:')) : []),
+      ])],
+    },
   };
 }
 
@@ -207,6 +404,8 @@ function main() {
   console.log('Active online deal promotion complete');
   console.log('====================================');
   console.log(`Active online deals: ${output.summary.totalActiveDeals}`);
+  console.log(`Homepage active deals: ${output.summary.homepageActiveDeals}`);
+  console.log(`Hidden review/evidence active records: ${output.summary.hiddenReviewDeals}`);
   console.log(`JSON created: ${path.relative(__dirname, JSON_OUTPUT_PATH)}`);
   console.log(`CSV created: ${path.relative(__dirname, CSV_OUTPUT_PATH)}`);
   if (output.summary.warningMessages.length > 0) {
@@ -221,7 +420,9 @@ if (require.main === module) {
 
 module.exports = {
   ACTIVE_COLUMNS,
+  ACTIVE_FEED_TRUST_LEVELS,
   buildActiveOnlineDealsOutput,
+  getHomepageDecision,
   isPromotableCandidate,
   passedStricterQualityGate,
   promoteUsableCandidates,
