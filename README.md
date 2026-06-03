@@ -335,7 +335,16 @@ Candidate quality is separated as follows:
 - `review-only-missing-fields` means important fields are missing, so the row stays in review artifacts instead of the homepage table.
 - `discarded-noisy` means a block was too noisy to show as an active candidate, but remains available as an audit artifact if exported.
 
-The homepage reads `provider-deal-candidates-usable.json` when it exists, so it shows usable candidates only by default. The all-candidates, review-only, and discarded artifacts still preserve extracted rows for audit and manual review.
+The active promotion step reads `provider-deal-candidates-usable.json` and writes `exports/active-online-deals.json` plus `exports/active-online-deals.csv`. Active deals can exist in two roles: high-trust rows for the homepage and review/evidence records for audit. Every promoted active record has `activeFeedTrustLevel` and `showOnHomepage` fields. Only rows with `showOnHomepage: true` appear in the homepage active feed; hidden rows are still kept in `active-online-deals.json` and still receive active detail/evidence pages.
+
+Active feed trust levels are separated as follows:
+
+- `provider-direct-calculated` is the highest-trust homepage path. Provider-direct calculated rows are trusted first when the core numeric fields are present and the source snippet mentions the extracted provider or package.
+- `comparison-clean-calculated` can appear on the homepage only when a comparison-site row passes stricter clean-block validation: the snippet must begin with, or very closely begin with, the same provider/package block being extracted and must not contain another provider before that extracted block.
+- `comparison-source-effective-only` rows are kept as evidence because a source-provided effective monthly price was found, but they are hidden from the homepage for now.
+- `review-artifact-only` rows are active evidence records that are useful for review but are hidden from the homepage, for example when a comparison snippet appears to mix adjacent provider/deal text or starts with the wrong provider.
+
+The all-candidates, review-only, discarded, and active hidden artifacts preserve extracted rows for audit and manual review without promoting lower-trust data into the main live homepage table.
 
 To refresh snippets, extract provider candidates, export the fake sample data, and rebuild the static site in one command, run:
 
@@ -348,6 +357,7 @@ This runs:
 ```bash
 npm run extract-snippets
 npm run extract-providers
+npm run promote-active
 npm run export
 npm run build-site
 ```
@@ -359,7 +369,7 @@ Important limits:
 - Candidate deals may be incomplete or wrong and are for review only.
 - Blocked, HTTP 403, CAPTCHA, anti-bot, login-wall, security-check, robots-disallowed, or unclear sources are skipped and recorded, not bypassed.
 - MoneySuperMarket and Compare the Market must not be used if they return HTTP 403 or security checks.
-- The static site displays usable active candidate deals in an **Active online candidate deals** section, clearly separated from the **Sample data prototype tables** section that still uses fake sample data. Lower-confidence rows remain in review artifacts and are not shown in the main homepage table.
+- The static site displays only high-trust active candidate deals with `showOnHomepage: true` in the **Active online candidate deals** section, clearly separated from the **Sample data prototype tables** section that still uses fake sample data. Review/evidence active records remain in `active-online-deals.json` and detail pages but are hidden from the main homepage table.
 
 
 ## Live active deployment pipeline
@@ -388,6 +398,8 @@ The review artifact includes:
 - `exports/provider-deal-candidates-review-only.json`
 - `exports/provider-deal-candidates-discarded.json`
 - `exports/source-access-report.json`, when that file exists in the workflow run
+- `exports/active-online-deals.json`
+- `exports/active-online-deals.csv`
 
 Important live deployment limits:
 
@@ -396,7 +408,7 @@ Important live deployment limits:
 - Candidate deals remain marked for human review only.
 - Blocked, unknown, unclear, HTTP 403, CAPTCHA, anti-bot, login-wall, security-check, robots-disallowed, or failed sources are skipped and recorded, not bypassed.
 - MoneySuperMarket and Compare the Market must not be used if they return HTTP 403 or security checks.
-- The live site separates the **Active online candidate deals** section from the fake **Sample data prototype tables** and uses the usable candidate artifact for the main active table by default.
+- The live site separates the **Active online candidate deals** section from the fake **Sample data prototype tables** and uses only active records with `showOnHomepage: true` for the main active table. Source-effective-only and review-artifact-only rows remain hidden evidence records with detail pages.
 
 ## What will be added later
 
