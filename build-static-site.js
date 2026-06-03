@@ -118,6 +118,7 @@ function buildPostcodeRows(deals) {
               <td>${escapeHtml(deal.speedTier)}</td>
               <td>${escapeHtml(deal.provider)}</td>
               <td>${escapeHtml(deal.packageName)}</td>
+              <td><a class="details-button" href="${escapeHtml(dealDetailHref(deal))}">View breakdown</a></td>
               <td class="number">${escapeHtml(deal.speedMbps)}</td>
               <td class="money">${formatMoney(deal.advertisedMonthlyPrice)}</td>
               <td class="money effective-price">${formatMoney(deal.effectiveMonthlyPrice)}</td>
@@ -128,7 +129,6 @@ function buildPostcodeRows(deals) {
               <td class="money">${formatMoney(deal.totalContractCostAfterRewards)}</td>
               <td class="wrap-text">${escapeHtml(deal.source)}</td>
               <td class="number">${escapeHtml(deal.lastCheckedDate)}</td>
-              <td><a href="${escapeHtml(dealDetailHref(deal))}">View breakdown</a></td>
             </tr>`).join('');
 }
 
@@ -356,6 +356,27 @@ function buildHtml(nationalDeals, postcodeDeals) {
       font-weight: 800;
     }
 
+    .details-button {
+      display: inline-block;
+      padding: 7px 10px;
+      border-radius: 8px;
+      background: var(--blue);
+      color: #ffffff;
+      font-size: 0.86rem;
+      font-weight: 800;
+      line-height: 1.2;
+      text-align: center;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .details-button:hover,
+    .details-button:focus {
+      background: var(--blue-dark);
+      color: #ffffff;
+      text-decoration: none;
+    }
+
     td.effective-price {
       background: var(--green-soft);
     }
@@ -580,6 +601,7 @@ ${summaryCards.map(([label, value]) => `        <article class="summary-card">
               <th>Speed Tier</th>
               <th>Provider</th>
               <th>Package</th>
+              <th>Details</th>
               <th>Speed Mbps</th>
               <th>Advertised Monthly Price</th>
               <th>Effective Monthly Price</th>
@@ -590,7 +612,6 @@ ${summaryCards.map(([label, value]) => `        <article class="summary-card">
               <th>Total Contract Cost After Rewards</th>
               <th>Source</th>
               <th>Last Checked</th>
-              <th>Details</th>
             </tr>
           </thead>
           <tbody>${buildPostcodeRows(postcodeDeals)}
