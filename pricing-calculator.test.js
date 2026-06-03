@@ -202,3 +202,49 @@ test('builds static deal detail HTML with a price summary and monthly breakdown'
   assert.match(html, /<th>Month number<\/th>/);
   assert.match(html, /href="\.\.\/index.html"/);
 });
+
+test('source access helper reads simple robots.txt allow and disallow rules', () => {
+  const { isPathAllowedByRobots } = require('./check-source-access');
+  const robotsTxt = `
+User-agent: *
+Disallow: /private
+Allow: /private/public
+`;
+
+  assert.equal(isPathAllowedByRobots(robotsTxt, '/broadband'), true);
+  assert.equal(isPathAllowedByRobots(robotsTxt, '/private/deals'), false);
+  assert.equal(isPathAllowedByRobots(robotsTxt, '/private/public/broadband'), true);
+});
+
+test('source access helper handles simple robots.txt wildcard rules', () => {
+  const { isPathAllowedByRobots } = require('./check-source-access');
+  const robotsTxt = `
+User-agent: *
+Disallow: /*checkout
+Allow: /broadband$
+`;
+
+  assert.equal(isPathAllowedByRobots(robotsTxt, '/deals/checkout'), false);
+  assert.equal(isPathAllowedByRobots(robotsTxt, '/broadband'), true);
+});
+
+test('every broadband source has the required source definition fields', () => {
+  const broadbandSources = require('./broadband-sources');
+  const sourceIds = new Set();
+
+  assert.ok(broadbandSources.length >= 14);
+
+  broadbandSources.forEach((source) => {
+    ['sourceId', 'name', 'sourceType', 'baseUrl', 'candidateBroadbandUrl', 'notes', 'enabled'].forEach((fieldName) => {
+      assert.ok(Object.hasOwn(source, fieldName));
+    });
+
+    assert.match(source.sourceId, /^[a-z0-9-]+$/);
+    assert.ok(!sourceIds.has(source.sourceId));
+    sourceIds.add(source.sourceId);
+    assert.ok(['provider-direct', 'comparison-site'].includes(source.sourceType));
+    assert.doesNotThrow(() => new URL(source.baseUrl));
+    assert.doesNotThrow(() => new URL(source.candidateBroadbandUrl));
+    assert.equal(typeof source.enabled, 'boolean');
+  });
+});

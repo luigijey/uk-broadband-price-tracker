@@ -4,6 +4,7 @@
     "table": "node generate-pricing-tables.js",
     "breakdown": "node generate-deal-breakdown.js",
     "export": "node export-pricing-data.js",
-    "build-site": "node build-static-site.js"
+    "build-site": "node build-static-site.js",
+    "check-sources": "node check-source-access.js"
   }
 }

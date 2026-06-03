@@ -177,6 +177,44 @@ To use it, enable GitHub Pages in your repository settings and choose **GitHub A
 
 This is still based on **fake sample data only**. It is not live broadband pricing, it is not scraped from provider websites, and it is not the final production hosting setup.
 
+
+## Online source access checks
+
+The repository now includes the first online data collection foundation. This is still beginner-friendly and intentionally conservative: it checks whether public broadband source pages can be accessed safely before any future real pricing ingestion is attempted.
+
+Source definitions live in `broadband-sources.js`. They include provider-direct sources and comparison/marketplace sources, with each source storing a source ID, name, source type, base URL, candidate broadband URL, notes, and whether the source is enabled.
+
+To run the source access check, use:
+
+```bash
+npm run check-sources
+```
+
+This runs:
+
+```bash
+node check-source-access.js
+```
+
+The check script:
+
+- fetches each enabled source's `robots.txt` first
+- parses `robots.txt` in a simple beginner-friendly way
+- checks whether the candidate broadband page appears allowed for the clear custom user agent `UKBroadbandPriceTrackerBot/0.1`
+- does **not** fetch candidate pages that appear blocked or unclear
+- does **not** bypass anti-bot systems, CAPTCHAs, login walls, or website restrictions
+- does **not** use browser automation, proxies, hidden scraping tools, or aggressive retries
+- waits briefly between source requests
+- records blocked, failed, or unclear sources without crashing the whole run
+
+The script writes its results to:
+
+- `exports/source-access-report.json`
+
+Each report row records the source details, robots.txt status, whether the candidate path appeared allowed, candidate page fetch status if fetched, any detected page title, a simple count of pound-price-like text, warnings, and the time the source was checked.
+
+This is **not yet real pricing ingestion**. It does not turn provider or comparison pages into deal records, and it should not be treated as live broadband pricing data.
+
 ## What will be added later
 
 Later versions may add:
