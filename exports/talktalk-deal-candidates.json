@@ -1,0 +1,11 @@
+{
+  "sourceId": "talktalk",
+  "sourceName": "TalkTalk",
+  "generatedAt": "2026-06-03T12:22:44.867Z",
+  "candidates": [],
+  "warningMessages": [
+    "TalkTalk source result was found, but it did not contain any snippets to inspect.",
+    "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.talktalk.co.uk",
+    "Candidate page was not fetched because robots.txt access was unclear."
+  ]
+}

@@ -6,6 +6,7 @@
     "export": "node export-pricing-data.js",
     "build-site": "node build-static-site.js",
     "check-sources": "node check-source-access.js",
-    "extract-snippets": "node extract-price-snippets.js"
+    "extract-snippets": "node extract-price-snippets.js",
+    "extract-talktalk": "node extract-talktalk-deals.js"
   }
 }
