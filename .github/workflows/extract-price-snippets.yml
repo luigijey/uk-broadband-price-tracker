@@ -1,0 +1,36 @@
+name: Extract online price snippets
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 6 * * *'
+
+jobs:
+  extract-price-snippets:
+    name: Extract online price snippets
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run tests
+        run: npm test
+
+      - name: Extract online price snippets
+        run: npm run extract-snippets
+
+      - name: Confirm online price snippets report exists
+        run: test -f exports/online-price-snippets.json
+
+      - name: Upload online price snippets report
+        uses: actions/upload-artifact@v4
+        with:
+          name: online-price-snippets
+          path: exports/online-price-snippets.json
+          if-no-files-found: error
