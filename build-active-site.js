@@ -13,6 +13,7 @@ const commands = [
   ['npm', ['run', 'extract-snippets']],
   ['npm', ['run', 'extract-providers']],
   ['npm', ['run', 'promote-active']],
+  ['npm', ['run', 'postcode-area-build']],
   ['npm', ['run', 'export']],
   ['npm', ['run', 'build-site']],
 ];
@@ -24,6 +25,7 @@ const summaryFiles = {
   reviewOnlyProviderCandidates: path.join(rootFolder, 'exports', 'provider-deal-candidates-review-only.json'),
   discardedProviderCandidates: path.join(rootFolder, 'exports', 'provider-deal-candidates-discarded.json'),
   activeOnlineDeals: path.join(rootFolder, 'exports', 'active-online-deals.json'),
+  postcodeAreaActiveComparison: path.join(rootFolder, 'exports', 'postcode-area-active-comparison.json'),
   activeDealsFolder: path.join(rootFolder, 'site', 'active-deals'),
   siteIndex: path.join(rootFolder, 'site', 'index.html'),
 };
@@ -53,6 +55,10 @@ function readActiveDealCount(activeDealsPath = summaryFiles.activeOnlineDeals) {
   return readJsonCount(activeDealsPath, 'activeDeals');
 }
 
+function readPostcodeAreaActiveRowCount(postcodeAreaActiveComparisonPath = summaryFiles.postcodeAreaActiveComparison) {
+  return readJsonCount(postcodeAreaActiveComparisonPath, 'rows');
+}
+
 function buildActiveBuildSummary(files = summaryFiles) {
   return {
     snippetsFileExists: fs.existsSync(files.snippets),
@@ -61,8 +67,10 @@ function buildActiveBuildSummary(files = summaryFiles) {
     reviewOnlyProviderCandidatesFileExists: fs.existsSync(files.reviewOnlyProviderCandidates),
     discardedProviderCandidatesFileExists: fs.existsSync(files.discardedProviderCandidates),
     activeOnlineDealsFileExists: fs.existsSync(files.activeOnlineDeals),
+    postcodeAreaActiveComparisonFileExists: fs.existsSync(files.postcodeAreaActiveComparison),
     candidateCount: readCandidateCount(files.providerCandidates),
     activeOnlineDealCount: readActiveDealCount(files.activeOnlineDeals),
+    postcodeAreaActiveRowCount: readPostcodeAreaActiveRowCount(files.postcodeAreaActiveComparison),
     activeDealPagesGenerated: countActiveDealPages(files.activeDealsFolder),
     siteIndexCreated: fs.existsSync(files.siteIndex),
   };
@@ -79,6 +87,8 @@ function printActiveBuildSummary(summary) {
   console.log(`Provider candidate count: ${summary.candidateCount === null ? 'unknown' : summary.candidateCount}`);
   console.log(`active-online-deals.json exists: ${summary.activeOnlineDealsFileExists ? 'yes' : 'no'}`);
   console.log(`Active online deal count: ${summary.activeOnlineDealCount === null ? 'unknown' : summary.activeOnlineDealCount}`);
+  console.log(`postcode-area-active-comparison.json exists: ${summary.postcodeAreaActiveComparisonFileExists ? 'yes' : 'no'}`);
+  console.log(`Postcode-area row count: ${summary.postcodeAreaActiveRowCount === null ? 'unknown' : summary.postcodeAreaActiveRowCount}`);
   console.log(`Active deal pages generated: ${summary.activeDealPagesGenerated}`);
   console.log(`site/index.html created: ${summary.siteIndexCreated ? 'yes' : 'no'}`);
 }
@@ -109,5 +119,6 @@ module.exports = {
   countActiveDealPages,
   readActiveDealCount,
   readCandidateCount,
+  readPostcodeAreaActiveRowCount,
   runActiveBuild,
 };

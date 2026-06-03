@@ -24,6 +24,7 @@ const exportFiles = {
   providerDealCandidates: path.join(exportsFolder, 'provider-deal-candidates.json'),
   usableProviderDealCandidates: path.join(exportsFolder, 'provider-deal-candidates-usable.json'),
   activeOnlineDeals: path.join(exportsFolder, 'active-online-deals.json'),
+  postcodeAreaActiveComparison: path.join(exportsFolder, 'postcode-area-active-comparison.json'),
 };
 
 function readJsonFile(filePath) {
@@ -129,6 +130,76 @@ function buildNationalRows(deals) {
               <td class="money">${formatMoney(deal.annualAprilPriceRise)} per April</td>
               <td class="wrap-text">${escapeHtml(deal.source)}</td>
             </tr>`).join('');
+}
+
+function buildPostcodeAreaActiveRows(rows) {
+  return rows.map((row) => `
+            <tr data-postcode-area="${escapeHtml(row.postcodeArea)}">
+              <td>${escapeHtml(row.postcodeArea)}</td>
+              <td>${escapeHtml(row.regionName)}</td>
+              <td>${escapeHtml(row.provider)}</td>
+              <td>${escapeHtml(row.packageName)}</td>
+              <td class="number">${escapeHtml(row.speedMbps || '')} Mbps</td>
+              <td class="money">${formatOptionalMoney(row.advertisedMonthlyPrice)}</td>
+              <td class="money effective-price">${formatOptionalMoney(row.effectiveMonthlyPrice)}</td>
+              <td>${escapeHtml(row.availabilityStatus)}</td>
+              <td><a class="details-button" href="${escapeHtml(activeDealDetailHref(row))}">View evidence</a></td>
+            </tr>`).join('');
+}
+
+function buildPostcodeAreaActiveOptions(rows) {
+  const postcodeAreas = [...new Set(rows.map((row) => row.postcodeArea).filter(Boolean))].sort();
+  return postcodeAreas.map((postcodeArea) => `            <option value="${escapeHtml(postcodeArea)}">${escapeHtml(postcodeArea)}</option>`).join('\n');
+}
+
+function buildPostcodeAreaV1Section(postcodeAreaActiveComparison = { rows: [], summary: {} }) {
+  const rows = Array.isArray(postcodeAreaActiveComparison.rows) ? postcodeAreaActiveComparison.rows : [];
+  const summary = postcodeAreaActiveComparison.summary || {};
+  const rowHtml = buildPostcodeAreaActiveRows(rows);
+  const optionHtml = buildPostcodeAreaActiveOptions(rows);
+
+  return `
+    <section class="card" aria-labelledby="postcode-area-v1-heading">
+      <h2 id="postcode-area-v1-heading">Postcode Area V1 comparison</h2>
+      <div class="warning-box">These rows are not true postcode-checked availability results yet. They show active national candidate deals grouped by postcode area for the first postcode-area prototype.</div>
+      <div class="status-box" aria-label="Postcode Area V1 status">
+        <p><strong>Postcode areas included:</strong> ${escapeHtml(summary.postcodeAreasIncluded || 0)}</p>
+        <p><strong>Active broadband-only deals included:</strong> ${escapeHtml(summary.activeDealsIncluded || 0)}</p>
+        <p><strong>Rows created:</strong> ${escapeHtml(summary.rowsCreated || rows.length)}</p>
+      </div>
+      <div class="filter-row" aria-label="Postcode Area V1 filters">
+        <div class="filter-field">
+          <label for="postcode-area-v1-filter">Postcode area</label>
+          <select id="postcode-area-v1-filter">
+            <option value="all">All postcode areas</option>
+${optionHtml}
+          </select>
+        </div>
+      </div>
+      <p id="postcode-area-v1-result-count" class="result-count" aria-live="polite"></p>
+      ${rows.length === 0 ? '<p class="no-results-message">No active homepage broadband-only deals are available for Postcode Area V1 yet.</p>' : `
+      <p class="small-note scroll-tip">Tip: if needed, scroll sideways to see all columns.</p>
+      <div class="table-wrap" tabindex="0" aria-label="Postcode Area V1 active comparison table with horizontal scrolling">
+        <table id="postcode-area-v1-table">
+          <thead>
+            <tr>
+              <th>Postcode Area</th>
+              <th>Region</th>
+              <th>Provider</th>
+              <th>Package</th>
+              <th>Speed</th>
+              <th>Advertised Monthly Price</th>
+              <th>Effective Monthly Price</th>
+              <th>Availability Status</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>${rowHtml}
+          </tbody>
+        </table>
+      </div>
+      <p id="postcode-area-v1-no-results" class="no-results-message" hidden>No rows match this postcode area filter.</p>`}
+    </section>`;
 }
 
 function buildPostcodeRows(deals) {
@@ -293,9 +364,9 @@ function normalizeProviderCandidateOutput(providerCandidateOutput) {
   };
 }
 
-function buildHtml(nationalDeals, postcodeDeals, activeDealOutput = { activeDeals: [] }) {
+function buildHtml(nationalDeals, postcodeDeals, activeDealOutput = { activeDeals: [] }, postcodeAreaActiveComparison = { rows: [], summary: {} }) {
   const activeDealData = normalizeActiveDealOutput(activeDealOutput);
-  const providerCandidates = activeDealData.activeDeals.filter((deal) => deal.showOnHomepage === true);
+  const providerCandidates = activeDealData.activeDeals.filter((deal) => deal.showOnHomepage === true && deal.productType === 'broadband-only');
   const summaryCards = [
     ['Sample deals', postcodeDeals.length],
     ['Postcode areas', countUniqueValues(postcodeDeals, 'postcodeArea')],
@@ -478,6 +549,10 @@ function buildHtml(nationalDeals, postcodeDeals, activeDealOutput = { activeDeal
 
     #active-candidate-table {
       min-width: 1320px;
+    }
+
+    #postcode-area-v1-table {
+      min-width: 1120px;
     }
 
     th,
@@ -718,6 +793,7 @@ ${summaryCards.map(([label, value]) => `        <article class="summary-card">
 
   <main>
 ${buildCandidateSection(providerCandidates, activeDealData.summary.generatedAt, activeDealData.summary)}
+${buildPostcodeAreaV1Section(postcodeAreaActiveComparison)}
 
     <section class="card" aria-labelledby="sample-data-heading">
       <h2 id="sample-data-heading">Sample data prototype tables</h2>
@@ -820,6 +896,10 @@ ${buildCandidateSection(providerCandidates, activeDealData.summary.generatedAt, 
 
   <script>
     const tableScrollContainers = document.querySelectorAll('.table-wrap');
+    const postcodeAreaV1Filter = document.getElementById('postcode-area-v1-filter');
+    const postcodeAreaV1Rows = document.querySelectorAll('#postcode-area-v1-table tbody tr');
+    const postcodeAreaV1ResultCount = document.getElementById('postcode-area-v1-result-count');
+    const postcodeAreaV1NoResultsMessage = document.getElementById('postcode-area-v1-no-results');
     const postcodeFilter = document.getElementById('postcode-filter');
     const providerFilter = document.getElementById('provider-filter');
     const speedTierFilter = document.getElementById('speed-tier-filter');
@@ -833,6 +913,29 @@ ${buildCandidateSection(providerCandidates, activeDealData.summary.generatedAt, 
       tableScrollContainers.forEach((container) => {
         container.scrollLeft = 0;
       });
+    }
+
+    function filterPostcodeAreaV1Rows() {
+      if (!postcodeAreaV1Filter || !postcodeAreaV1ResultCount) {
+        return;
+      }
+
+      const selectedPostcodeArea = postcodeAreaV1Filter.value;
+      let visibleRows = 0;
+
+      postcodeAreaV1Rows.forEach((row) => {
+        const shouldShowRow = selectedPostcodeArea === 'all' || row.dataset.postcodeArea === selectedPostcodeArea;
+        row.hidden = !shouldShowRow;
+
+        if (shouldShowRow) {
+          visibleRows += 1;
+        }
+      });
+
+      postcodeAreaV1ResultCount.textContent = 'Showing ' + visibleRows + ' of ' + postcodeAreaV1Rows.length + ' rows';
+      if (postcodeAreaV1NoResultsMessage) {
+        postcodeAreaV1NoResultsMessage.hidden = visibleRows !== 0;
+      }
     }
 
     function filterPostcodeRows() {
@@ -861,6 +964,9 @@ ${buildCandidateSection(providerCandidates, activeDealData.summary.generatedAt, 
     resetTableScroll();
 
     window.addEventListener('load', resetTableScroll);
+    if (postcodeAreaV1Filter) {
+      postcodeAreaV1Filter.addEventListener('change', filterPostcodeAreaV1Rows);
+    }
     postcodeFilter.addEventListener('change', filterPostcodeRows);
     providerFilter.addEventListener('change', filterPostcodeRows);
     speedTierFilter.addEventListener('change', filterPostcodeRows);
@@ -872,6 +978,7 @@ ${buildCandidateSection(providerCandidates, activeDealData.summary.generatedAt, 
       filterPostcodeRows();
     });
 
+    filterPostcodeAreaV1Rows();
     filterPostcodeRows();
   </script>
 </body>
@@ -1261,6 +1368,7 @@ function buildActiveDealDetailHtml(deal) {
     ['Extraction confidence', deal.extractionConfidence || 'Unknown'],
     ['Extraction quality', deal.extractionQuality || 'Unknown'],
     ['Active feed trust level', deal.activeFeedTrustLevel || 'Unknown'],
+    ['Product type', deal.productType || 'Unknown'],
     ['Show on homepage', deal.showOnHomepage === true ? 'Yes' : 'No'],
     ['Availability scope', deal.availabilityScope || 'Unknown'],
     ['Publish status', deal.publishStatus || 'active-review-only'],
@@ -1342,8 +1450,9 @@ function buildStaticSite() {
   const nationalDeals = readJsonFile(exportFiles.nationalCheapestBySpeedTier);
   const postcodeDeals = readJsonFile(exportFiles.postcodeAreaComparison);
   const activeDealsOutput = readJsonFileIfExists(exportFiles.activeOnlineDeals, { activeDeals: [], summary: { generatedAt: null } });
+  const postcodeAreaActiveComparison = readJsonFileIfExists(exportFiles.postcodeAreaActiveComparison, { rows: [], summary: {} });
   const activeDeals = Array.isArray(activeDealsOutput.activeDeals) ? activeDealsOutput.activeDeals : [];
-  const html = buildHtml(nationalDeals, postcodeDeals, activeDealsOutput);
+  const html = buildHtml(nationalDeals, postcodeDeals, activeDealsOutput, postcodeAreaActiveComparison);
 
   fs.mkdirSync(siteFolder, { recursive: true });
   fs.writeFileSync(path.join(siteFolder, 'index.html'), html);
@@ -1354,6 +1463,7 @@ function buildStaticSite() {
     nationalDealCount: nationalDeals.length,
     postcodeDealCount: postcodeDeals.length,
     providerCandidateCount: activeDeals.length,
+    postcodeAreaActiveRowCount: Array.isArray(postcodeAreaActiveComparison.rows) ? postcodeAreaActiveComparison.rows.length : 0,
     createdFile: path.join(siteFolder, 'index.html'),
     createdDealFiles,
     createdActiveDealFiles,
@@ -1367,6 +1477,7 @@ function main() {
   console.log(`National rows: ${summary.nationalDealCount}`);
   console.log(`Postcode rows: ${summary.postcodeDealCount}`);
   console.log(`Active provider candidate rows: ${summary.providerCandidateCount}`);
+  console.log(`Postcode Area V1 rows: ${summary.postcodeAreaActiveRowCount}`);
   console.log(`File created: ${path.relative(__dirname, summary.createdFile)}`);
   console.log(`Deal detail pages created: ${summary.createdDealFiles.length}`);
   console.log(`Active deal pages generated: ${summary.createdActiveDealFiles.length}`);
@@ -1381,6 +1492,7 @@ if (require.main === module) {
 module.exports = {
   buildHtml,
   buildCandidateSection,
+  buildPostcodeAreaV1Section,
   buildDealDetailHtml,
   buildActiveDealDetailHtml,
   buildStaticSite,

@@ -1,0 +1,13 @@
+{
+  "summary": {
+    "generatedAt": "2026-06-03T15:23:36.313Z",
+    "postcodeAreasIncluded": 25,
+    "activeDealsIncluded": 0,
+    "rowsCreated": 0,
+    "warningMessages": [
+      "These rows are not true postcode-checked availability results yet. They show active national candidate deals grouped by postcode area for the first postcode-area prototype.",
+      "No active homepage broadband-only deals were available, so postcode-area comparison rows are empty."
+    ]
+  },
+  "rows": []
+}

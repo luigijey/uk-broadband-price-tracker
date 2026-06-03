@@ -3,11 +3,14 @@
   "summary": {
     "totalActiveDeals": 0,
     "homepageActiveDeals": 0,
+    "broadbandOnlyHomepageCount": 0,
     "hiddenReviewDeals": 0,
     "providerDirectHomepageCount": 0,
     "comparisonHomepageCount": 0,
     "sourceEffectiveOnlyHiddenCount": 0,
-    "generatedAt": "2026-06-03T14:42:04.736Z",
+    "hiddenBundleCount": 0,
+    "hiddenUnknownProductTypeCount": 0,
+    "generatedAt": "2026-06-03T15:23:35.899Z",
     "warningMessages": [
       "BT (bt) had no snippets available; no candidates were extracted.",
       "BT (bt): Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.bt.com",

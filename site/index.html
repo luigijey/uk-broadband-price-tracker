@@ -175,6 +175,10 @@
       min-width: 1320px;
     }
 
+    #postcode-area-v1-table {
+      min-width: 1120px;
+    }
+
     th,
     td {
       padding: 10px 11px;
@@ -430,12 +434,33 @@
       <div class="warning-box">These are automatically extracted active review deals. They are not postcode checked, not manually approved, and may be incomplete.</div>
       <p class="small-note">Lower-confidence extracted rows are kept in review artifacts and are not shown in this main table.</p>
       <div class="status-box" aria-label="Active candidate data freshness">
-        <p><strong>Active deal data generated:</strong> 2026-06-03T14:42:04.736Z</p>
+        <p><strong>Active deal data generated:</strong> 2026-06-03T15:23:35.899Z</p>
         <p><strong>Active deals shown on homepage:</strong> 0</p>
         <p><strong>Review/evidence active records hidden from homepage:</strong> 0</p>
         <p><strong>Review warning:</strong> Active review deals are not postcode checked, not manually approved, and requires human review.</p>
       </div>
       <p class="no-results-message">No usable active online deals were created in this run. Check the review artifacts.</p>
+    </section>
+
+    <section class="card" aria-labelledby="postcode-area-v1-heading">
+      <h2 id="postcode-area-v1-heading">Postcode Area V1 comparison</h2>
+      <div class="warning-box">These rows are not true postcode-checked availability results yet. They show active national candidate deals grouped by postcode area for the first postcode-area prototype.</div>
+      <div class="status-box" aria-label="Postcode Area V1 status">
+        <p><strong>Postcode areas included:</strong> 25</p>
+        <p><strong>Active broadband-only deals included:</strong> 0</p>
+        <p><strong>Rows created:</strong> 0</p>
+      </div>
+      <div class="filter-row" aria-label="Postcode Area V1 filters">
+        <div class="filter-field">
+          <label for="postcode-area-v1-filter">Postcode area</label>
+          <select id="postcode-area-v1-filter">
+            <option value="all">All postcode areas</option>
+
+          </select>
+        </div>
+      </div>
+      <p id="postcode-area-v1-result-count" class="result-count" aria-live="polite"></p>
+      <p class="no-results-message">No active homepage broadband-only deals are available for Postcode Area V1 yet.</p>
     </section>
 
     <section class="card" aria-labelledby="sample-data-heading">
@@ -787,6 +812,10 @@
 
   <script>
     const tableScrollContainers = document.querySelectorAll('.table-wrap');
+    const postcodeAreaV1Filter = document.getElementById('postcode-area-v1-filter');
+    const postcodeAreaV1Rows = document.querySelectorAll('#postcode-area-v1-table tbody tr');
+    const postcodeAreaV1ResultCount = document.getElementById('postcode-area-v1-result-count');
+    const postcodeAreaV1NoResultsMessage = document.getElementById('postcode-area-v1-no-results');
     const postcodeFilter = document.getElementById('postcode-filter');
     const providerFilter = document.getElementById('provider-filter');
     const speedTierFilter = document.getElementById('speed-tier-filter');
@@ -800,6 +829,29 @@
       tableScrollContainers.forEach((container) => {
         container.scrollLeft = 0;
       });
+    }
+
+    function filterPostcodeAreaV1Rows() {
+      if (!postcodeAreaV1Filter || !postcodeAreaV1ResultCount) {
+        return;
+      }
+
+      const selectedPostcodeArea = postcodeAreaV1Filter.value;
+      let visibleRows = 0;
+
+      postcodeAreaV1Rows.forEach((row) => {
+        const shouldShowRow = selectedPostcodeArea === 'all' || row.dataset.postcodeArea === selectedPostcodeArea;
+        row.hidden = !shouldShowRow;
+
+        if (shouldShowRow) {
+          visibleRows += 1;
+        }
+      });
+
+      postcodeAreaV1ResultCount.textContent = 'Showing ' + visibleRows + ' of ' + postcodeAreaV1Rows.length + ' rows';
+      if (postcodeAreaV1NoResultsMessage) {
+        postcodeAreaV1NoResultsMessage.hidden = visibleRows !== 0;
+      }
     }
 
     function filterPostcodeRows() {
@@ -828,6 +880,9 @@
     resetTableScroll();
 
     window.addEventListener('load', resetTableScroll);
+    if (postcodeAreaV1Filter) {
+      postcodeAreaV1Filter.addEventListener('change', filterPostcodeAreaV1Rows);
+    }
     postcodeFilter.addEventListener('change', filterPostcodeRows);
     providerFilter.addEventListener('change', filterPostcodeRows);
     speedTierFilter.addEventListener('change', filterPostcodeRows);
@@ -839,6 +894,7 @@
       filterPostcodeRows();
     });
 
+    filterPostcodeAreaV1Rows();
     filterPostcodeRows();
   </script>
 </body>
