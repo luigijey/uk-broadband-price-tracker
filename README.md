@@ -146,9 +146,13 @@ The build script refreshes the export files again, reads:
 
 Then it creates:
 
-- `site/index.html`
+- `site/index.html` - the main static tracker page with summary cards, the national cheapest table, the postcode comparison table, postcode filtering, and "View breakdown" links.
+- `site/deals/` - one static deal detail page for every fake sample deal.
+- `site/deals/DEAL_ID.html` - each deal's readable price breakdown page, for example `site/deals/OX-BT-36.html`.
 
-To view the page, open `site/index.html` directly in your web browser. For example, you can double-click the file in your file browser, or use your browser's **File > Open File** menu.
+Each generated deal detail page shows the provider, package, postcode area, source, speed, last checked date, a price summary, and a month-by-month breakdown of the contract payments. The postcode comparison table links to these pages from its **Details** column.
+
+To view the site, open `site/index.html` directly in your web browser. For example, you can double-click the file in your file browser, or use your browser's **File > Open File** menu. From there, use a **View breakdown** link to open a generated deal detail page.
 
 This website is **not hosted yet**. It is only a local static HTML file for now.
 

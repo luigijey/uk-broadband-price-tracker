@@ -137,6 +137,7 @@ test('builds static site HTML with both tables and the postcode filter', () => {
   const { buildHtml } = require('./build-static-site');
 
   const nationalDeals = [{
+    dealId: 'OX-EXAMPLE-150',
     postcodeArea: 'OX',
     provider: 'Example Fibre',
     packageName: 'Example 150',
@@ -162,8 +163,26 @@ test('builds static site HTML with both tables and the postcode filter', () => {
   assert.match(html, /id="national-cheapest-table"/);
   assert.match(html, /id="postcode-area-table"/);
   assert.match(html, /id="postcode-filter"/);
+  assert.match(html, /<th>Details<\/th>/);
+  assert.match(html, /href="deals\/OX-EXAMPLE-150.html">View breakdown<\/a>/);
   assert.match(html, /<option value="OX">OX<\/option>/);
   assert.match(html, /<option value="M">M<\/option>/);
   assert.match(html, /<option value="SW">SW<\/option>/);
   assert.match(html, /Sample data only/);
+});
+
+
+test('builds static deal detail HTML with a price summary and monthly breakdown', () => {
+  const sampleDeals = require('./sample-deals');
+  const { buildDealDetailHtml } = require('./build-static-site');
+
+  const html = buildDealDetailHtml(sampleDeals[0]);
+
+  assert.match(html, /OX-BT-36/);
+  assert.match(html, /Price summary/);
+  assert.match(html, /Month-by-month breakdown/);
+  assert.match(html, /Assumed contract start date/);
+  assert.match(html, /Total contract cost after rewards/);
+  assert.match(html, /<th>Month number<\/th>/);
+  assert.match(html, /href="\.\.\/index.html"/);
 });

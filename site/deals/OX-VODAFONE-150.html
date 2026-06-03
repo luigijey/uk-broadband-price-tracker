@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OX-VODAFONE-150 breakdown | UK Broadband Price Tracker</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page-bg: #f4f7fb;
+      --card-bg: #ffffff;
+      --text: #172033;
+      --muted: #53627a;
+      --border: #d8e2ef;
+      --blue: #174ea6;
+      --blue-dark: #102a56;
+      --blue-soft: #eaf2ff;
+      --green: #087443;
+      --green-soft: #e8f7ef;
+      --yellow: #fff3cd;
+      --yellow-text: #7a4f01;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--page-bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 16px;
+      line-height: 1.55;
+    }
+
+    header,
+    main {
+      width: min(1100px, 100%);
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    header {
+      padding-top: 40px;
+      padding-bottom: 10px;
+    }
+
+    .hero,
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--card-bg);
+      box-shadow: 0 2px 12px rgba(23, 32, 51, 0.06);
+    }
+
+    .hero {
+      padding: 28px;
+      background: linear-gradient(135deg, #ffffff 0%, #eef5ff 100%);
+      box-shadow: 0 10px 30px rgba(23, 32, 51, 0.08);
+    }
+
+    .card {
+      margin-bottom: 24px;
+      padding: 22px;
+    }
+
+    h1,
+    h2,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 8px;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: 1.1;
+      letter-spacing: -0.04em;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      font-size: clamp(1.35rem, 3vw, 1.75rem);
+      line-height: 1.2;
+    }
+
+    a {
+      color: var(--blue);
+      font-weight: 700;
+    }
+
+    .badge {
+      display: inline-flex;
+      width: fit-content;
+      margin-bottom: 14px;
+      padding: 7px 12px;
+      border: 1px solid #f0d88a;
+      border-radius: 999px;
+      background: var(--yellow);
+      color: var(--yellow-text);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .facts {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .fact {
+      padding: 14px;
+      border: 1px solid #b8cff0;
+      border-radius: 14px;
+      background: #ffffff;
+    }
+
+    .fact-label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .fact-value {
+      display: block;
+      margin-top: 4px;
+      font-weight: 800;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #ffffff;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e6ecf5;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--blue-soft);
+      color: var(--blue-dark);
+      font-weight: 800;
+    }
+
+    tbody tr:last-child th,
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    tr:nth-child(even) td,
+    tr:nth-child(even) th[scope="row"] {
+      background: #fbfdff;
+    }
+
+    th[scope="row"] {
+      width: 45%;
+      background: #ffffff;
+    }
+
+    .money,
+    .number {
+      white-space: nowrap;
+    }
+
+    .effective-price {
+      color: var(--green);
+      font-weight: 800;
+    }
+
+    .small-note {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 760px) {
+      header,
+      main {
+        padding: 16px;
+      }
+
+      header {
+        padding-top: 18px;
+      }
+
+      .hero,
+      .card {
+        padding: 18px;
+        border-radius: 16px;
+      }
+
+      .facts {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 460px) {
+      header,
+      main {
+        padding: 12px;
+      }
+
+      .facts {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="hero">
+      <a href="../index.html">← Back to main tracker</a>
+      <p class="badge">Sample data only</p>
+      <h1>OX-VODAFONE-150</h1>
+      <p>This static page explains the simple price calculation for one fake sample broadband deal.</p>
+      <section class="facts" aria-label="Deal summary">
+        <article class="fact">
+          <span class="fact-label">Provider</span>
+          <span class="fact-value">Vodafone</span>
+        </article>
+        <article class="fact">
+          <span class="fact-label">Package name</span>
+          <span class="fact-value">Full Fibre 150 Sample</span>
+        </article>
+        <article class="fact">
+          <span class="fact-label">Postcode area</span>
+          <span class="fact-value">OX</span>
+        </article>
+        <article class="fact">
+          <span class="fact-label">Source</span>
+          <span class="fact-value">Voucher Sample</span>
+        </article>
+        <article class="fact">
+          <span class="fact-label">Speed Mbps</span>
+          <span class="fact-value">150</span>
+        </article>
+        <article class="fact">
+          <span class="fact-label">Speed tier</span>
+          <span class="fact-value">100-300 Mbps</span>
+        </article>
+        <article class="fact">
+          <span class="fact-label">Last checked date</span>
+          <span class="fact-value">2026-06-01</span>
+        </article>
+        <article class="fact">
+          <span class="fact-label">Effective monthly price</span>
+          <span class="fact-value effective-price">£26.83</span>
+        </article>
+      </section>
+    </div>
+  </header>
+
+  <main>
+    <section class="card" aria-labelledby="price-summary-heading">
+      <h2 id="price-summary-heading">Price summary</h2>
+      <p class="small-note">The assumed contract start date is the sample deal's last checked date.</p>
+      <div class="table-wrap" tabindex="0" aria-label="Price summary table with horizontal scrolling">
+        <table>
+          <tbody>
+              <tr>
+                <th scope="row">Advertised monthly price</th>
+                <td>£29.00</td>
+              </tr>
+              <tr>
+                <th scope="row">Contract length</th>
+                <td>24 months</td>
+              </tr>
+              <tr>
+                <th scope="row">Assumed contract start date</th>
+                <td>2026-06-01</td>
+              </tr>
+              <tr>
+                <th scope="row">Annual April price rise</th>
+                <td>£3.00 per April</td>
+              </tr>
+              <tr>
+                <th scope="row">Number of April price rises crossed</th>
+                <td>2</td>
+              </tr>
+              <tr>
+                <th scope="row">Total monthly payments</th>
+                <td>£744.00</td>
+              </tr>
+              <tr>
+                <th scope="row">Setup fee</th>
+                <td>£0.00</td>
+              </tr>
+              <tr>
+                <th scope="row">Installation fee</th>
+                <td>£0.00</td>
+              </tr>
+              <tr>
+                <th scope="row">Delivery fee</th>
+                <td>£0.00</td>
+              </tr>
+              <tr>
+                <th scope="row">Router fee</th>
+                <td>£0.00</td>
+              </tr>
+              <tr>
+                <th scope="row">Activation fee</th>
+                <td>£0.00</td>
+              </tr>
+              <tr>
+                <th scope="row">Other upfront costs</th>
+                <td>£0.00</td>
+              </tr>
+              <tr>
+                <th scope="row">Total fees</th>
+                <td>£0.00</td>
+              </tr>
+              <tr>
+                <th scope="row">Voucher value</th>
+                <td>£75.00</td>
+              </tr>
+              <tr>
+                <th scope="row">Reward card value</th>
+                <td>£0.00</td>
+              </tr>
+              <tr>
+                <th scope="row">Cashback value</th>
+                <td>£25.00</td>
+              </tr>
+              <tr>
+                <th scope="row">Bill credit value</th>
+                <td>£0.00</td>
+              </tr>
+              <tr>
+                <th scope="row">Free months discount value</th>
+                <td>£0.00</td>
+              </tr>
+              <tr>
+                <th scope="row">Other discounts</th>
+                <td>£0.00</td>
+              </tr>
+              <tr>
+                <th scope="row">Total rewards and discounts</th>
+                <td>£100.00</td>
+              </tr>
+              <tr>
+                <th scope="row">Total contract cost before rewards</th>
+                <td>£744.00</td>
+              </tr>
+              <tr>
+                <th scope="row">Total contract cost after rewards</th>
+                <td>£644.00</td>
+              </tr>
+              <tr>
+                <th scope="row">Effective monthly price</th>
+                <td>£26.83</td>
+              </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="monthly-breakdown-heading">
+      <h2 id="monthly-breakdown-heading">Month-by-month breakdown</h2>
+      <p class="small-note">This shows how the monthly price changes when the contract crosses an April price rise.</p>
+      <div class="table-wrap" tabindex="0" aria-label="Month-by-month breakdown table with horizontal scrolling">
+        <table>
+          <thead>
+            <tr>
+              <th>Month number</th>
+              <th>Month date</th>
+              <th>Monthly price</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr>
+                <td class="number">1</td>
+                <td class="number">2026-06-01</td>
+                <td class="money">£29.00</td>
+                <td>Advertised monthly price</td>
+              </tr>
+              <tr>
+                <td class="number">2</td>
+                <td class="number">2026-07-01</td>
+                <td class="money">£29.00</td>
+                <td>Advertised monthly price</td>
+              </tr>
+              <tr>
+                <td class="number">3</td>
+                <td class="number">2026-08-01</td>
+                <td class="money">£29.00</td>
+                <td>Advertised monthly price</td>
+              </tr>
+              <tr>
+                <td class="number">4</td>
+                <td class="number">2026-09-01</td>
+                <td class="money">£29.00</td>
+                <td>Advertised monthly price</td>
+              </tr>
+              <tr>
+                <td class="number">5</td>
+                <td class="number">2026-10-01</td>
+                <td class="money">£29.00</td>
+                <td>Advertised monthly price</td>
+              </tr>
+              <tr>
+                <td class="number">6</td>
+                <td class="number">2026-11-01</td>
+                <td class="money">£29.00</td>
+                <td>Advertised monthly price</td>
+              </tr>
+              <tr>
+                <td class="number">7</td>
+                <td class="number">2026-12-01</td>
+                <td class="money">£29.00</td>
+                <td>Advertised monthly price</td>
+              </tr>
+              <tr>
+                <td class="number">8</td>
+                <td class="number">2027-01-01</td>
+                <td class="money">£29.00</td>
+                <td>Advertised monthly price</td>
+              </tr>
+              <tr>
+                <td class="number">9</td>
+                <td class="number">2027-02-01</td>
+                <td class="money">£29.00</td>
+                <td>Advertised monthly price</td>
+              </tr>
+              <tr>
+                <td class="number">10</td>
+                <td class="number">2027-03-01</td>
+                <td class="money">£29.00</td>
+                <td>Advertised monthly price</td>
+              </tr>
+              <tr>
+                <td class="number">11</td>
+                <td class="number">2027-04-01</td>
+                <td class="money">£32.00</td>
+                <td>1 April price rise included</td>
+              </tr>
+              <tr>
+                <td class="number">12</td>
+                <td class="number">2027-05-01</td>
+                <td class="money">£32.00</td>
+                <td>1 April price rise included</td>
+              </tr>
+              <tr>
+                <td class="number">13</td>
+                <td class="number">2027-06-01</td>
+                <td class="money">£32.00</td>
+                <td>1 April price rise included</td>
+              </tr>
+              <tr>
+                <td class="number">14</td>
+                <td class="number">2027-07-01</td>
+                <td class="money">£32.00</td>
+                <td>1 April price rise included</td>
+              </tr>
+              <tr>
+                <td class="number">15</td>
+                <td class="number">2027-08-01</td>
+                <td class="money">£32.00</td>
+                <td>1 April price rise included</td>
+              </tr>
+              <tr>
+                <td class="number">16</td>
+                <td class="number">2027-09-01</td>
+                <td class="money">£32.00</td>
+                <td>1 April price rise included</td>
+              </tr>
+              <tr>
+                <td class="number">17</td>
+                <td class="number">2027-10-01</td>
+                <td class="money">£32.00</td>
+                <td>1 April price rise included</td>
+              </tr>
+              <tr>
+                <td class="number">18</td>
+                <td class="number">2027-11-01</td>
+                <td class="money">£32.00</td>
+                <td>1 April price rise included</td>
+              </tr>
+              <tr>
+                <td class="number">19</td>
+                <td class="number">2027-12-01</td>
+                <td class="money">£32.00</td>
+                <td>1 April price rise included</td>
+              </tr>
+              <tr>
+                <td class="number">20</td>
+                <td class="number">2028-01-01</td>
+                <td class="money">£32.00</td>
+                <td>1 April price rise included</td>
+              </tr>
+              <tr>
+                <td class="number">21</td>
+                <td class="number">2028-02-01</td>
+                <td class="money">£32.00</td>
+                <td>1 April price rise included</td>
+              </tr>
+              <tr>
+                <td class="number">22</td>
+                <td class="number">2028-03-01</td>
+                <td class="money">£32.00</td>
+                <td>1 April price rise included</td>
+              </tr>
+              <tr>
+                <td class="number">23</td>
+                <td class="number">2028-04-01</td>
+                <td class="money">£35.00</td>
+                <td>2 April price rises included</td>
+              </tr>
+              <tr>
+                <td class="number">24</td>
+                <td class="number">2028-05-01</td>
+                <td class="money">£35.00</td>
+                <td>2 April price rises included</td>
+              </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
