@@ -358,3 +358,99 @@ test('TV Sport Cinema and Netflix rows remain hidden', () => {
     assert.equal(output.activeDeals[0].showOnHomepage, false);
   });
 });
+
+test('provider-direct deal with unknown setupFee can be homepage visible with caveat', () => {
+  const output = buildActiveOnlineDealsOutput({ candidates: [candidate({
+    candidateId: 'vodafone-full-fibre-910-provider-page',
+    provider: 'Vodafone',
+    packageName: 'Full Fibre 910 broadband',
+    sourceName: 'Vodafone',
+    sourceType: 'provider-direct',
+    advertisedMonthlyPrice: 25.5,
+    effectiveMonthlyPrice: 27.83,
+    annualAprilPriceRise: 3.5,
+    setupFee: null,
+    speedMbps: 910,
+    speedTier: '900 Mbps+',
+    extractionConfidence: 'medium',
+    sourceSnippet: 'Vodafone Full Fibre 910 broadband 910 Mbps £25.50 a month on a 24 month contract. Monthly price increases by £3.50 each April.',
+    extractionWarnings: ['Could not extract setup fee.'],
+  })] }, '2026-06-03T00:00:00.000Z');
+
+  assert.equal(output.activeDeals[0].showOnHomepage, true);
+  assert.equal(output.activeDeals[0].setupFeeStatus, 'unknown');
+  assert.equal(output.activeDeals[0].effectivePriceCaveat, 'Effective monthly price excludes any unknown upfront/setup fee.');
+});
+
+test('Vodafone 910 Mbps provider-direct row is homepage visible again', () => {
+  const output = buildActiveOnlineDealsOutput({ candidates: [candidate({
+    candidateId: 'vodafone-full-fibre-910-provider-page',
+    provider: 'Vodafone',
+    packageName: 'Full Fibre 910 broadband',
+    sourceName: 'Vodafone',
+    sourceType: 'provider-direct',
+    advertisedMonthlyPrice: 25.5,
+    effectiveMonthlyPrice: 27.83,
+    annualAprilPriceRise: 3.5,
+    setupFee: null,
+    speedMbps: 910,
+    speedTier: '900 Mbps+',
+    sourceSnippet: 'Vodafone Full Fibre 910 broadband 910 Mbps £25.50 a month on a 24 month contract. Monthly price increases by £3.50 each April.',
+  })] }, '2026-06-03T00:00:00.000Z');
+
+  assert.equal(output.activeDeals[0].showOnHomepage, true);
+  assert.equal(output.summary.homepageActiveDeals, 1);
+});
+
+test('Vodafone 2200 Mbps credit-style noisy row remains hidden', () => {
+  const output = buildActiveOnlineDealsOutput({ candidates: [candidate({
+    candidateId: 'vodafone-full-fibre-2200-noisy-credit-row',
+    provider: 'Vodafone',
+    packageName: 'Full Fibre 2200 broadband',
+    sourceName: 'Vodafone',
+    sourceType: 'provider-direct',
+    advertisedMonthlyPrice: 200,
+    effectiveMonthlyPrice: 202.33,
+    annualAprilPriceRise: 3.5,
+    setupFee: null,
+    speedMbps: 2200,
+    speedTier: '900 Mbps+',
+    sourceSnippet: 'Vodafone Full Fibre 2200 broadband 2200 Mbps up to £200 credit for switching. Monthly plan increases by £3.50 each April. 24 month contract.',
+    extractionWarnings: ['Quality gate: advertised monthly price appears to be a credit-style noisy value.'],
+  })] }, '2026-06-03T00:00:00.000Z');
+
+  assert.equal(output.activeDeals[0].showOnHomepage, false);
+  assert.equal(output.activeDeals[0].activeFeedTrustLevel, 'review-artifact-only');
+});
+
+test('comparison-site row with unknown setup fee remains hidden unless no setup wording is extracted', () => {
+  const unknownSetup = candidate({
+    candidateId: 'uswitch-talktalk-full-fibre-150-unknown-setup',
+    sourceName: 'Uswitch',
+    sourceType: 'comparison-site',
+    setupFee: null,
+    sourceSnippet: 'TalkTalk Full Fibre 150 150 Mbps £29 a month on a 24 month contract. Monthly price increases by £4 each April.',
+    availabilityScope: 'comparison-page-not-postcode-checked',
+  });
+  const knownNoSetup = candidate({
+    candidateId: 'uswitch-talktalk-full-fibre-150-no-setup',
+    sourceName: 'Uswitch',
+    sourceType: 'comparison-site',
+    setupFee: 0,
+    sourceSnippet: 'TalkTalk Full Fibre 150 150 Mbps £29 a month on a 24 month contract. Monthly price increases by £4 each April. No setup fee.',
+    availabilityScope: 'comparison-page-not-postcode-checked',
+  });
+
+  const output = buildActiveOnlineDealsOutput({ candidates: [unknownSetup, knownNoSetup] }, '2026-06-03T00:00:00.000Z');
+  assert.equal(byId(output, 'uswitch-talktalk-full-fibre-150-unknown-setup').showOnHomepage, false);
+  assert.equal(byId(output, 'uswitch-talktalk-full-fibre-150-no-setup').showOnHomepage, true);
+});
+
+test('active-online-deals output includes setupFeeStatus and effectivePriceCaveat fields', () => {
+  const output = buildActiveOnlineDealsOutput({ candidates: [candidate({ setupFee: null })] }, '2026-06-03T00:00:00.000Z');
+
+  assert.ok(ACTIVE_COLUMNS.includes('setupFeeStatus'));
+  assert.ok(ACTIVE_COLUMNS.includes('effectivePriceCaveat'));
+  assert.equal(output.activeDeals[0].setupFeeStatus, 'unknown');
+  assert.equal(output.activeDeals[0].effectivePriceCaveat, 'Effective monthly price excludes any unknown upfront/setup fee.');
+});

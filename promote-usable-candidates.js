@@ -31,6 +31,8 @@ const ACTIVE_COLUMNS = [
   'advertisedMonthlyPrice',
   'effectiveMonthlyPrice',
   'sourceEffectiveMonthlyPrice',
+  'setupFeeStatus',
+  'effectivePriceCaveat',
   'speedMbps',
   'speedTier',
   'extractionConfidence',
@@ -170,6 +172,14 @@ function getHomepageDecision(candidate) {
     };
   }
 
+  if (hasQualityGateWarning(candidate)) {
+    return {
+      activeFeedTrustLevel: 'review-artifact-only',
+      showOnHomepage: false,
+      warnings: [...warnings, 'Active feed trust gate: hidden from homepage because extraction quality-gate warnings are present.'],
+    };
+  }
+
   if (candidate.extractionQuality !== 'usable-calculated') {
     return {
       activeFeedTrustLevel: 'review-artifact-only',
@@ -186,11 +196,13 @@ function getHomepageDecision(candidate) {
     'speedMbps',
   ];
   const missingNumberFields = requiredNumberFields.filter((field) => !isNumber(candidate[field]));
-  if (missingNumberFields.length > 0) {
+  const missingTextFields = ['provider', 'packageName', 'speedTier'].filter((field) => !candidate[field]);
+  if (missingNumberFields.length > 0 || missingTextFields.length > 0) {
+    const missingFields = [...missingNumberFields, ...missingTextFields];
     return {
       activeFeedTrustLevel: 'review-artifact-only',
       showOnHomepage: false,
-      warnings: [...warnings, `Active feed trust gate: hidden from homepage because numeric fields are missing or invalid (${missingNumberFields.join(', ')}).`],
+      warnings: [...warnings, `Active feed trust gate: hidden from homepage because core fields are missing or invalid (${missingFields.join(', ')}).`],
     };
   }
 
@@ -212,6 +224,10 @@ function getHomepageDecision(candidate) {
   }
 
   if (candidate.sourceType === 'comparison-site') {
+    if (!isNumber(candidate.setupFee)) {
+      warnings.push('Active feed trust gate: comparison-site setup fee is unknown, so the row remains hidden unless no-setup wording was extracted.');
+    }
+
     if (candidate.annualAprilPriceRise < 0 || candidate.annualAprilPriceRise > 6) {
       warnings.push('Active feed trust gate: comparison-site annual April price rise is outside the £0-£6 homepage range.');
     }
@@ -312,6 +328,17 @@ function createActiveDealId(candidate, index) {
   return `active-${baseId}`;
 }
 
+function getSetupFeeStatus(setupFee) {
+  if (setupFee === null || setupFee === undefined) return 'unknown';
+  return Number(setupFee) === 0 ? 'known-zero' : 'known-fee';
+}
+
+function getEffectivePriceCaveat(setupFee) {
+  return setupFee === null || setupFee === undefined
+    ? 'Effective monthly price excludes any unknown upfront/setup fee.'
+    : null;
+}
+
 function toActiveDeal(candidate, generatedAt, index) {
   const homepageDecision = getHomepageDecision(candidate);
   const productModel = classifyProductModel(candidate);
@@ -375,6 +402,8 @@ function toActiveDeal(candidate, generatedAt, index) {
     advertisedMonthlyPrice: candidate.advertisedMonthlyPrice ?? null,
     effectiveMonthlyPrice: candidate.effectiveMonthlyPrice ?? null,
     sourceEffectiveMonthlyPrice: candidate.sourceEffectiveMonthlyPrice ?? null,
+    setupFeeStatus: getSetupFeeStatus(candidate.setupFee),
+    effectivePriceCaveat: getEffectivePriceCaveat(candidate.setupFee),
     contractLengthMonths: candidate.contractLengthMonths ?? null,
     annualAprilPriceRise: candidate.annualAprilPriceRise ?? null,
     setupFee: candidate.setupFee ?? null,
@@ -498,7 +527,9 @@ module.exports = {
   PRODUCT_TYPES,
   buildActiveOnlineDealsOutput,
   classifyProductType,
+  getEffectivePriceCaveat,
   getHomepageDecision,
+  getSetupFeeStatus,
   isPromotableCandidate,
   passedStricterQualityGate,
   promoteUsableCandidates,

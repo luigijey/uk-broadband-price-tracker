@@ -89,3 +89,16 @@ test('postcode-area comparison includes homepage-visible 5G home broadband rows 
   assert.equal(output.rows[0].availabilityConfidence, 'national-candidate-only');
   assert.equal(output.rows[0].publishStatus, 'postcode-area-v1-review-only');
 });
+
+test('postcode-area rows include setupFeeStatus and effectivePriceCaveat', () => {
+  const output = buildPostcodeAreaActiveComparisonOutput({
+    activeDeals: [{
+      ...activeDeal,
+      setupFeeStatus: 'unknown',
+      effectivePriceCaveat: 'Effective monthly price excludes any unknown upfront/setup fee.',
+    }],
+  }, postcodeAreas, '2026-06-03T00:00:00.000Z');
+
+  assert.equal(output.rows[0].setupFeeStatus, 'unknown');
+  assert.equal(output.rows[0].effectivePriceCaveat, 'Effective monthly price excludes any unknown upfront/setup fee.');
+});

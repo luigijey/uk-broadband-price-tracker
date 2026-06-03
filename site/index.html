@@ -172,7 +172,7 @@
     }
 
     #active-candidate-table {
-      min-width: 1320px;
+      min-width: 1560px;
     }
 
     #postcode-area-v1-table {
@@ -459,6 +459,44 @@
         <p><strong>Review/evidence active records hidden from homepage:</strong> 0</p>
         <p><strong>Review warning:</strong> Active review deals are not postcode checked, not manually approved, and requires human review.</p>
       </div>
+      <div class="filter-row" aria-label="Active online deal feed filters">
+        <div class="filter-field">
+          <label for="active-provider-filter">Provider</label>
+          <select id="active-provider-filter">
+            <option value="all">All providers</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="active-speed-tier-filter">Speed tier</label>
+          <select id="active-speed-tier-filter">
+            <option value="all">All speed tiers</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="active-homepage-category-filter">Homepage category</label>
+          <select id="active-homepage-category-filter">
+            <option value="all">All homepage categories</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="active-source-type-filter">Source type</label>
+          <select id="active-source-type-filter">
+            <option value="all">All source types</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="active-sort">Sort</label>
+          <select id="active-sort">
+            <option value="effective-asc">Effective monthly price low to high</option>
+            <option value="advertised-asc">Advertised monthly price low to high</option>
+            <option value="speed-desc">Speed high to low</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <button type="button" id="reset-active-filters">Reset filters</button>
+        </div>
+      </div>
+      <p id="active-result-count" class="result-count" aria-live="polite">Showing 0 active deals</p>
       <p class="no-results-message">No usable active online deals were created in this run. Check the review artifacts.</p>
     </section>
 
@@ -841,6 +879,15 @@
     const showAllPostcodeAreasButton = document.getElementById('show-all-postcode-areas');
     const postcodeCheckResult = document.getElementById('postcode-check-result');
     const postcodeAreaStarterData = document.getElementById('postcode-area-starter-data');
+    const activeProviderFilter = document.getElementById('active-provider-filter');
+    const activeSpeedTierFilter = document.getElementById('active-speed-tier-filter');
+    const activeHomepageCategoryFilter = document.getElementById('active-homepage-category-filter');
+    const activeSourceTypeFilter = document.getElementById('active-source-type-filter');
+    const activeSort = document.getElementById('active-sort');
+    const resetActiveFiltersButton = document.getElementById('reset-active-filters');
+    const activeResultCount = document.getElementById('active-result-count');
+    const activeTableBody = document.querySelector('#active-candidate-table tbody');
+    const activeRows = activeTableBody ? Array.from(activeTableBody.querySelectorAll('tr')) : [];
     const postcodeFilter = document.getElementById('postcode-filter');
     const providerFilter = document.getElementById('provider-filter');
     const speedTierFilter = document.getElementById('speed-tier-filter');
@@ -899,6 +946,46 @@
       if (postcodeAreaV1NoResultsMessage) {
         postcodeAreaV1NoResultsMessage.hidden = visibleRows !== 0;
       }
+    }
+
+
+    function numericDatasetValue(row, key, fallback) {
+      const value = Number(row.dataset[key]);
+      return Number.isFinite(value) ? value : fallback;
+    }
+
+    function filterActiveRows() {
+      if (!activeTableBody || !activeResultCount) return;
+
+      const selectedProvider = activeProviderFilter ? activeProviderFilter.value : 'all';
+      const selectedSpeedTier = activeSpeedTierFilter ? activeSpeedTierFilter.value : 'all';
+      const selectedHomepageCategory = activeHomepageCategoryFilter ? activeHomepageCategoryFilter.value : 'all';
+      const selectedSourceType = activeSourceTypeFilter ? activeSourceTypeFilter.value : 'all';
+      const selectedSort = activeSort ? activeSort.value : 'effective-asc';
+
+      const sortedRows = [...activeRows].sort((left, right) => {
+        if (selectedSort === 'advertised-asc') {
+          return numericDatasetValue(left, 'advertisedMonthlyPrice', Number.POSITIVE_INFINITY) - numericDatasetValue(right, 'advertisedMonthlyPrice', Number.POSITIVE_INFINITY);
+        }
+        if (selectedSort === 'speed-desc') {
+          return numericDatasetValue(right, 'speedMbps', Number.NEGATIVE_INFINITY) - numericDatasetValue(left, 'speedMbps', Number.NEGATIVE_INFINITY);
+        }
+        return numericDatasetValue(left, 'effectiveMonthlyPrice', Number.POSITIVE_INFINITY) - numericDatasetValue(right, 'effectiveMonthlyPrice', Number.POSITIVE_INFINITY);
+      });
+
+      let visibleDeals = 0;
+      sortedRows.forEach((row) => {
+        const providerMatches = selectedProvider === 'all' || row.dataset.provider === selectedProvider;
+        const speedTierMatches = selectedSpeedTier === 'all' || row.dataset.speedTier === selectedSpeedTier;
+        const homepageCategoryMatches = selectedHomepageCategory === 'all' || row.dataset.homepageCategory === selectedHomepageCategory;
+        const sourceTypeMatches = selectedSourceType === 'all' || row.dataset.sourceType === selectedSourceType;
+        const shouldShowRow = providerMatches && speedTierMatches && homepageCategoryMatches && sourceTypeMatches;
+        row.hidden = !shouldShowRow;
+        if (shouldShowRow) visibleDeals += 1;
+        activeTableBody.appendChild(row);
+      });
+
+      activeResultCount.textContent = 'Showing ' + visibleDeals + ' active deals';
     }
 
     function filterPostcodeRows() {
@@ -971,6 +1058,19 @@
     if (showAllPostcodeAreasButton) {
       showAllPostcodeAreasButton.addEventListener('click', showAllPostcodeAreas);
     }
+    [activeProviderFilter, activeSpeedTierFilter, activeHomepageCategoryFilter, activeSourceTypeFilter, activeSort].forEach((control) => {
+      if (control) control.addEventListener('change', filterActiveRows);
+    });
+    if (resetActiveFiltersButton) {
+      resetActiveFiltersButton.addEventListener('click', () => {
+        if (activeProviderFilter) activeProviderFilter.value = 'all';
+        if (activeSpeedTierFilter) activeSpeedTierFilter.value = 'all';
+        if (activeHomepageCategoryFilter) activeHomepageCategoryFilter.value = 'all';
+        if (activeSourceTypeFilter) activeSourceTypeFilter.value = 'all';
+        if (activeSort) activeSort.value = 'effective-asc';
+        filterActiveRows();
+      });
+    }
     postcodeFilter.addEventListener('change', filterPostcodeRows);
     providerFilter.addEventListener('change', filterPostcodeRows);
     speedTierFilter.addEventListener('change', filterPostcodeRows);
@@ -983,6 +1083,7 @@
     });
 
     filterPostcodeAreaV1Rows();
+    filterActiveRows();
     filterPostcodeRows();
   </script>
 </body>

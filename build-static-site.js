@@ -287,9 +287,17 @@ function activeDealDetailHref(deal) {
   return `active-deals/${encodeURIComponent(deal.activeDealId)}.html`;
 }
 
+function buildActiveFilterOptions(candidates, fieldName, allLabel) {
+  const values = [...new Set(candidates.map((candidate) => candidate[fieldName]).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b)));
+  return [
+    `            <option value="all">${escapeHtml(allLabel)}</option>`,
+    ...values.map((value) => `            <option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`),
+  ].join('\n');
+}
+
 function buildCandidateRows(candidates) {
   return candidates.map((candidate) => `
-            <tr class="active-review-only">
+            <tr class="active-review-only" data-provider="${escapeHtml(candidate.provider || '')}" data-speed-tier="${escapeHtml(candidate.speedTier || '')}" data-homepage-category="${escapeHtml(candidate.homepageCategory || '')}" data-source-type="${escapeHtml(candidate.sourceType || '')}" data-effective-monthly-price="${escapeHtml(candidate.effectiveMonthlyPrice ?? '')}" data-advertised-monthly-price="${escapeHtml(candidate.advertisedMonthlyPrice ?? '')}" data-speed-mbps="${escapeHtml(candidate.speedMbps ?? '')}">
               <td>${escapeHtml(candidate.provider)}</td>
               <td>${escapeHtml(candidate.packageName)}</td>
               <td class="wrap-text">${escapeHtml(candidate.sourceName)}</td>
@@ -300,6 +308,8 @@ function buildCandidateRows(candidates) {
               <td class="money">${escapeHtml(formatCandidateAprilRise(candidate))}</td>
               <td class="wrap-text">${escapeHtml(formatCandidateReward(candidate))}</td>
               <td class="money">${escapeHtml(formatCandidateSetupFee(candidate))}</td>
+              <td>${escapeHtml(candidate.setupFeeStatus || '')}</td>
+              <td class="wrap-text">${escapeHtml(candidate.effectivePriceCaveat || '')}</td>
               <td>${escapeHtml(candidate.extractionConfidence)}</td>
               <td>${escapeHtml(candidate.extractionQuality)}</td>
               <td>${escapeHtml(candidate.homepageCategory || '')}</td>
@@ -337,6 +347,10 @@ function normalizeActiveDealOutput(activeDealOutput) {
 
 function buildCandidateSection(candidates, generatedAt = null, summary = {}) {
   const candidateRows = buildCandidateRows(candidates);
+  const providerOptions = buildActiveFilterOptions(candidates, 'provider', 'All providers');
+  const speedTierOptions = buildActiveFilterOptions(candidates, 'speedTier', 'All speed tiers');
+  const homepageCategoryOptions = buildActiveFilterOptions(candidates, 'homepageCategory', 'All homepage categories');
+  const sourceTypeOptions = buildActiveFilterOptions(candidates, 'sourceType', 'All source types');
   const shownCount = Number.isFinite(Number(summary.homepageActiveDeals)) ? Number(summary.homepageActiveDeals) : candidates.length;
   const hiddenCount = Number.isFinite(Number(summary.hiddenReviewDeals)) ? Number(summary.hiddenReviewDeals) : 0;
 
@@ -351,6 +365,44 @@ function buildCandidateSection(candidates, generatedAt = null, summary = {}) {
         <p><strong>Review/evidence active records hidden from homepage:</strong> ${escapeHtml(hiddenCount)}</p>
         <p><strong>Review warning:</strong> Active review deals are not postcode checked, not manually approved, and requires human review.</p>
       </div>
+      <div class="filter-row" aria-label="Active online deal feed filters">
+        <div class="filter-field">
+          <label for="active-provider-filter">Provider</label>
+          <select id="active-provider-filter">
+${providerOptions}
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="active-speed-tier-filter">Speed tier</label>
+          <select id="active-speed-tier-filter">
+${speedTierOptions}
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="active-homepage-category-filter">Homepage category</label>
+          <select id="active-homepage-category-filter">
+${homepageCategoryOptions}
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="active-source-type-filter">Source type</label>
+          <select id="active-source-type-filter">
+${sourceTypeOptions}
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="active-sort">Sort</label>
+          <select id="active-sort">
+            <option value="effective-asc">Effective monthly price low to high</option>
+            <option value="advertised-asc">Advertised monthly price low to high</option>
+            <option value="speed-desc">Speed high to low</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <button type="button" id="reset-active-filters">Reset filters</button>
+        </div>
+      </div>
+      <p id="active-result-count" class="result-count" aria-live="polite">Showing ${escapeHtml(candidates.length)} active deals</p>
       ${candidates.length === 0 ? '<p class="no-results-message">No usable active online deals were created in this run. Check the review artifacts.</p>' : `
       <p class="small-note scroll-tip">Tip: if needed, scroll sideways to see all columns.</p>
       <div class="table-wrap" tabindex="0" aria-label="Active online candidate deals table with horizontal scrolling">
@@ -367,6 +419,8 @@ function buildCandidateSection(candidates, generatedAt = null, summary = {}) {
               <th>April Price Rise</th>
               <th>Voucher/Reward</th>
               <th>Setup Fee</th>
+              <th>Setup Fee Status</th>
+              <th>Effective Price Caveat</th>
               <th>Confidence</th>
               <th>Quality</th>
               <th>Homepage Category</th>
@@ -579,7 +633,7 @@ function buildHtml(nationalDeals, postcodeDeals, activeDealOutput = { activeDeal
     }
 
     #active-candidate-table {
-      min-width: 1320px;
+      min-width: 1560px;
     }
 
     #postcode-area-v1-table {
@@ -937,6 +991,15 @@ ${buildPostcodeAreaV1Section(postcodeAreaActiveComparison)}
     const showAllPostcodeAreasButton = document.getElementById('show-all-postcode-areas');
     const postcodeCheckResult = document.getElementById('postcode-check-result');
     const postcodeAreaStarterData = document.getElementById('postcode-area-starter-data');
+    const activeProviderFilter = document.getElementById('active-provider-filter');
+    const activeSpeedTierFilter = document.getElementById('active-speed-tier-filter');
+    const activeHomepageCategoryFilter = document.getElementById('active-homepage-category-filter');
+    const activeSourceTypeFilter = document.getElementById('active-source-type-filter');
+    const activeSort = document.getElementById('active-sort');
+    const resetActiveFiltersButton = document.getElementById('reset-active-filters');
+    const activeResultCount = document.getElementById('active-result-count');
+    const activeTableBody = document.querySelector('#active-candidate-table tbody');
+    const activeRows = activeTableBody ? Array.from(activeTableBody.querySelectorAll('tr')) : [];
     const postcodeFilter = document.getElementById('postcode-filter');
     const providerFilter = document.getElementById('provider-filter');
     const speedTierFilter = document.getElementById('speed-tier-filter');
@@ -995,6 +1058,46 @@ ${buildPostcodeAreaV1Section(postcodeAreaActiveComparison)}
       if (postcodeAreaV1NoResultsMessage) {
         postcodeAreaV1NoResultsMessage.hidden = visibleRows !== 0;
       }
+    }
+
+
+    function numericDatasetValue(row, key, fallback) {
+      const value = Number(row.dataset[key]);
+      return Number.isFinite(value) ? value : fallback;
+    }
+
+    function filterActiveRows() {
+      if (!activeTableBody || !activeResultCount) return;
+
+      const selectedProvider = activeProviderFilter ? activeProviderFilter.value : 'all';
+      const selectedSpeedTier = activeSpeedTierFilter ? activeSpeedTierFilter.value : 'all';
+      const selectedHomepageCategory = activeHomepageCategoryFilter ? activeHomepageCategoryFilter.value : 'all';
+      const selectedSourceType = activeSourceTypeFilter ? activeSourceTypeFilter.value : 'all';
+      const selectedSort = activeSort ? activeSort.value : 'effective-asc';
+
+      const sortedRows = [...activeRows].sort((left, right) => {
+        if (selectedSort === 'advertised-asc') {
+          return numericDatasetValue(left, 'advertisedMonthlyPrice', Number.POSITIVE_INFINITY) - numericDatasetValue(right, 'advertisedMonthlyPrice', Number.POSITIVE_INFINITY);
+        }
+        if (selectedSort === 'speed-desc') {
+          return numericDatasetValue(right, 'speedMbps', Number.NEGATIVE_INFINITY) - numericDatasetValue(left, 'speedMbps', Number.NEGATIVE_INFINITY);
+        }
+        return numericDatasetValue(left, 'effectiveMonthlyPrice', Number.POSITIVE_INFINITY) - numericDatasetValue(right, 'effectiveMonthlyPrice', Number.POSITIVE_INFINITY);
+      });
+
+      let visibleDeals = 0;
+      sortedRows.forEach((row) => {
+        const providerMatches = selectedProvider === 'all' || row.dataset.provider === selectedProvider;
+        const speedTierMatches = selectedSpeedTier === 'all' || row.dataset.speedTier === selectedSpeedTier;
+        const homepageCategoryMatches = selectedHomepageCategory === 'all' || row.dataset.homepageCategory === selectedHomepageCategory;
+        const sourceTypeMatches = selectedSourceType === 'all' || row.dataset.sourceType === selectedSourceType;
+        const shouldShowRow = providerMatches && speedTierMatches && homepageCategoryMatches && sourceTypeMatches;
+        row.hidden = !shouldShowRow;
+        if (shouldShowRow) visibleDeals += 1;
+        activeTableBody.appendChild(row);
+      });
+
+      activeResultCount.textContent = 'Showing ' + visibleDeals + ' active deals';
     }
 
     function filterPostcodeRows() {
@@ -1067,6 +1170,19 @@ ${buildPostcodeAreaV1Section(postcodeAreaActiveComparison)}
     if (showAllPostcodeAreasButton) {
       showAllPostcodeAreasButton.addEventListener('click', showAllPostcodeAreas);
     }
+    [activeProviderFilter, activeSpeedTierFilter, activeHomepageCategoryFilter, activeSourceTypeFilter, activeSort].forEach((control) => {
+      if (control) control.addEventListener('change', filterActiveRows);
+    });
+    if (resetActiveFiltersButton) {
+      resetActiveFiltersButton.addEventListener('click', () => {
+        if (activeProviderFilter) activeProviderFilter.value = 'all';
+        if (activeSpeedTierFilter) activeSpeedTierFilter.value = 'all';
+        if (activeHomepageCategoryFilter) activeHomepageCategoryFilter.value = 'all';
+        if (activeSourceTypeFilter) activeSourceTypeFilter.value = 'all';
+        if (activeSort) activeSort.value = 'effective-asc';
+        filterActiveRows();
+      });
+    }
     postcodeFilter.addEventListener('change', filterPostcodeRows);
     providerFilter.addEventListener('change', filterPostcodeRows);
     speedTierFilter.addEventListener('change', filterPostcodeRows);
@@ -1079,6 +1195,7 @@ ${buildPostcodeAreaV1Section(postcodeAreaActiveComparison)}
     });
 
     filterPostcodeAreaV1Rows();
+    filterActiveRows();
     filterPostcodeRows();
   </script>
 </body>
@@ -1468,6 +1585,8 @@ function buildActiveDealDetailHtml(deal) {
     ['Cashback value', formatOptionalMoney(deal.cashbackValue)],
     ['Bill credit value', formatOptionalMoney(deal.billCreditValue)],
     ['Setup fee', formatCandidateSetupFee(deal)],
+    ['Setup fee status', deal.setupFeeStatus || 'Unknown'],
+    ['Effective price caveat', deal.effectivePriceCaveat || 'None'],
     ['Speed', deal.speedMbps ? `${deal.speedMbps} Mbps` : 'Unknown'],
     ['Speed tier', deal.speedTier || 'Unknown'],
     ['Extraction confidence', deal.extractionConfidence || 'Unknown'],

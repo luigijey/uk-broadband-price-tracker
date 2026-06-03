@@ -414,3 +414,13 @@ test('provider-direct expansion summary includes product category counts', () =>
     });
   });
 });
+
+test('provider-direct candidate with unknown setup fee can still be usable-calculated', () => {
+  const candidate = extractProviderCandidateFromSnippet({
+    surroundingText: 'Vodafone Full Fibre 910 broadband 910 Mbps £25.50 a month on a 24 month contract. Monthly price increases by £3.50 each April.',
+  }, vodafoneSource, extractedAt);
+
+  assert.equal(candidate.setupFee, null);
+  assert.equal(candidate.extractionQuality, 'usable-calculated');
+  assert.equal(candidate.effectiveMonthlyPrice !== null, true);
+});

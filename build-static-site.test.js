@@ -213,3 +213,40 @@ test('active deal detail pages are generated for hidden evidence rows', () => {
   assert.match(fs.readFileSync(createdFiles[0], 'utf8'), /Fibre 66/);
   assert.match(fs.readFileSync(createdFiles[0], 'utf8'), /Homepage visible/);
 });
+
+test('homepage active feed demo filters, sorting, count, and reset controls exist', () => {
+  const html = buildCandidateSection([candidate], '2026-06-03T00:00:00.000Z');
+
+  assert.match(html, /id="active-provider-filter"/);
+  assert.match(html, /id="active-speed-tier-filter"/);
+  assert.match(html, /id="active-homepage-category-filter"/);
+  assert.match(html, /id="active-source-type-filter"/);
+  assert.match(html, /id="active-sort"/);
+  assert.match(html, /Effective monthly price low to high/);
+  assert.match(html, /Advertised monthly price low to high/);
+  assert.match(html, /Speed high to low/);
+  assert.match(html, /id="active-result-count"/);
+  assert.match(html, /Showing 1 active deals/);
+  assert.match(html, /id="reset-active-filters"/);
+});
+
+test('postcode input includes example placeholder', () => {
+  const html = buildHtml([], [], { activeDeals: [], summary: { generatedAt: '2026-06-03T00:00:00.000Z' } }, { rows: [], summary: {} });
+
+  assert.match(html, /id="full-postcode-input"[^>]*placeholder="e\.g\. OX14 1AA"/);
+});
+
+test('active deal detail page includes setup fee status, caveat, and ordinary source link', () => {
+  const html = buildActiveDealDetailHtml({
+    ...candidate,
+    setupFee: null,
+    setupFeeStatus: 'unknown',
+    effectivePriceCaveat: 'Effective monthly price excludes any unknown upfront/setup fee.',
+  });
+
+  assert.match(html, /Setup fee status/);
+  assert.match(html, /Effective price caveat/);
+  assert.match(html, /Effective monthly price excludes any unknown upfront\/setup fee\./);
+  assert.match(html, /Open provider\/source page to check availability/);
+  assert.match(html, /ordinary link only/);
+});
