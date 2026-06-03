@@ -341,3 +341,36 @@ npm run table
 ```
 
 Remember: the table output is based on fake example deals only. Live provider prices and real data collection will be added later.
+
+## Structured provider deal candidates
+
+TalkTalk is the first structured provider extraction prototype. The prototype reads the human-review snippet report at `exports/online-price-snippets.json` and attempts to turn clearly named TalkTalk package snippets into structured candidate deal records.
+
+Run the TalkTalk candidate extractor with:
+
+```bash
+npm run extract-talktalk
+```
+
+This runs:
+
+```bash
+node extract-talktalk-deals.js
+```
+
+The extractor currently targets these TalkTalk packages only:
+
+- Fibre 35
+- Fibre 65
+- Full Fibre 150
+- Full Fibre 500
+- Full Fibre 900
+
+The generated records are marked `candidate-review-only`. They are provider landing-page observations, not postcode-checked availability or postcode-checked prices. They are not automatically published to the static website, and they do not change the fake sample deal values used by the existing site and examples.
+
+The script writes:
+
+- `exports/talktalk-deal-candidates.json` - TalkTalk-only candidate deal output.
+- `exports/provider-deal-candidates.json` - combined provider candidate output, currently containing only TalkTalk candidates but structured so other providers can be added later.
+
+A human must review every extracted candidate deal before it can become live pricing data. These candidate files are discovery and review artifacts only; they should not be used as buying advice.
