@@ -143,7 +143,7 @@ function buildHtml(nationalDeals, postcodeDeals) {
 
     header,
     main {
-      width: min(1200px, 100%);
+      width: min(1400px, 100%);
       margin: 0 auto;
       padding: 24px;
     }
@@ -218,15 +218,15 @@ function buildHtml(nationalDeals, postcodeDeals) {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 14px;
-      margin: 22px 0 26px;
+      margin: 24px 0 0;
     }
 
     .summary-card {
       padding: 18px;
-      border: 1px solid var(--border);
+      border: 1px solid #b8cff0;
       border-radius: 16px;
       background: var(--card-bg);
-      box-shadow: 0 2px 10px rgba(23, 32, 51, 0.05);
+      box-shadow: 0 8px 22px rgba(23, 78, 166, 0.12);
     }
 
     .summary-number {
@@ -265,9 +265,13 @@ function buildHtml(nationalDeals, postcodeDeals) {
 
     table {
       width: 100%;
-      min-width: 980px;
       border-collapse: collapse;
       font-size: 0.94rem;
+    }
+
+    #national-cheapest-table {
+      min-width: 0;
+      table-layout: fixed;
     }
 
     #postcode-area-table {
@@ -353,7 +357,7 @@ function buildHtml(nationalDeals, postcodeDeals) {
     }
 
     .scroll-tip {
-      margin-top: 0;
+      margin: 14px 0 8px;
       font-weight: 700;
     }
 
@@ -413,20 +417,20 @@ function buildHtml(nationalDeals, postcodeDeals) {
       </div>
       <p>This static page uses fake sample broadband deals only. It is not live provider data and should not be used to make a buying decision.</p>
       <p><strong>Advertised monthly price</strong> is the headline monthly cost. <strong>Effective monthly price</strong> estimates the real monthly cost across the contract after April price rises, fees, vouchers, rewards, cashback, bill credits, and discounts.</p>
+      <section class="summary-grid" aria-label="Sample data summary">
+${summaryCards.map(([label, value]) => `        <article class="summary-card">
+          <span class="summary-number">${escapeHtml(value)}</span>
+          <span class="summary-label">${escapeHtml(label)}</span>
+        </article>`).join('\n')}
+      </section>
     </div>
   </header>
 
   <main>
-    <section class="summary-grid" aria-label="Sample data summary">
-${summaryCards.map(([label, value]) => `      <article class="summary-card">
-        <span class="summary-number">${escapeHtml(value)}</span>
-        <span class="summary-label">${escapeHtml(label)}</span>
-      </article>`).join('\n')}
-    </section>
-
     <section class="card" aria-labelledby="national-heading">
       <h2 id="national-heading">National cheapest by speed tier</h2>
       <p class="small-note">Cheapest means the lowest effective monthly price in the fake sample data for each speed tier.</p>
+      <p class="small-note scroll-tip">Tip: if needed, scroll sideways to see all columns.</p>
       <div class="table-wrap" tabindex="0" aria-label="National cheapest by speed tier table with horizontal scrolling">
         <table id="national-cheapest-table">
           <thead>
@@ -460,7 +464,7 @@ ${summaryCards.map(([label, value]) => `      <article class="summary-card">
           <option value="SW">SW</option>
         </select>
       </div>
-      <p class="small-note scroll-tip">Tip: scroll sideways on smaller screens to see all columns.</p>
+      <p class="small-note scroll-tip">Tip: if needed, scroll sideways to see all columns.</p>
       <div class="table-wrap" tabindex="0" aria-label="Postcode area comparison table with horizontal scrolling">
         <table id="postcode-area-table">
           <thead>
@@ -489,8 +493,19 @@ ${summaryCards.map(([label, value]) => `      <article class="summary-card">
   </main>
 
   <script>
+    const tableScrollContainers = document.querySelectorAll('.table-wrap');
     const postcodeFilter = document.getElementById('postcode-filter');
     const postcodeRows = document.querySelectorAll('#postcode-area-table tbody tr');
+
+    tableScrollContainers.forEach((container) => {
+      container.scrollLeft = 0;
+    });
+
+    window.addEventListener('load', () => {
+      tableScrollContainers.forEach((container) => {
+        container.scrollLeft = 0;
+      });
+    });
 
     postcodeFilter.addEventListener('change', () => {
       const selectedPostcodeArea = postcodeFilter.value;
