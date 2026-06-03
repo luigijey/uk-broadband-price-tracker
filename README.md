@@ -215,6 +215,31 @@ Each report row records the source details, robots.txt status, whether the candi
 
 This is **not yet real pricing ingestion**. It does not turn provider or comparison pages into deal records, and it should not be treated as live broadband pricing data.
 
+### Running the source access check in GitHub Actions
+
+A GitHub Actions workflow named **Check broadband source access** can run the same conservative source access check in GitHub's environment. This is useful because a local development or Codex environment may have unclear DNS or network access.
+
+To run it manually:
+
+1. Open the repository on GitHub.
+2. Select the **Actions** tab.
+3. Choose **Check broadband source access** from the workflow list.
+4. Click **Run workflow**.
+5. Keep the selected branch, then click the green **Run workflow** button.
+
+The workflow also runs automatically once per day on a schedule. Each run checks out the repository, sets up Node.js, runs `npm test`, runs `npm run check-sources`, confirms that `exports/source-access-report.json` was created, and uploads that report as an artifact named **source-access-report**.
+
+To download the report after a workflow run:
+
+1. Open the completed workflow run in the **Actions** tab.
+2. Scroll to the **Artifacts** section near the bottom of the run summary.
+3. Download the **source-access-report** artifact.
+4. Open `source-access-report.json` from the downloaded artifact files.
+
+The downloaded file is only a source access report. It shows whether source pages appeared accessible from the workflow environment, along with warnings and HTTP status information. It is **not final pricing data**, does not create live broadband deal records, and should not be used as buying advice.
+
+Blocked, unknown, unclear, failed, or non-200 source results are expected sometimes. They should be recorded in the report, not bypassed. Do not add scraping bypasses, browser automation, proxies, hidden fetch methods, or aggressive retries to work around blocked or unclear sources.
+
 ## What will be added later
 
 Later versions may add:
