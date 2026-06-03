@@ -10,7 +10,7 @@
     "sourceEffectiveOnlyHiddenCount": 0,
     "hiddenBundleCount": 0,
     "hiddenUnknownProductTypeCount": 0,
-    "generatedAt": "2026-06-03T15:23:35.899Z",
+    "generatedAt": "2026-06-03T15:59:59.919Z",
     "warningMessages": [
       "BT (bt) had no snippets available; no candidates were extracted.",
       "BT (bt): Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.bt.com",

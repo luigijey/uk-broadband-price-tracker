@@ -325,6 +325,7 @@ This runs `node extract-provider-candidates.js`, reads `exports/online-price-sni
 - `exports/provider-deal-candidates-usable.json` - candidates with `extractionQuality` of `usable-calculated` or `usable-source-effective-only`.
 - `exports/provider-deal-candidates-review-only.json` - candidates with `extractionQuality` of `review-only-missing-fields` for human follow-up.
 - `exports/provider-deal-candidates-discarded.json` - candidates with `extractionQuality` of `discarded-noisy` that are too noisy for the main table.
+- `exports/provider-direct-expansion-summary.json` - category counts for fixed broadband, landline, calls package, 5G home broadband, TV bundle, mobile bundle, and unknown product candidates.
 
 The provider candidate extractor currently looks for conservative candidates from TalkTalk, Vodafone, BT, Plusnet, Broadband Genie, and Uswitch where useful snippets are available. Each candidate is marked `candidate-review-only`, requires human review, and uses a not-postcode-checked availability scope such as `provider-landing-page-not-postcode-checked` or `comparison-page-not-postcode-checked`.
 
@@ -335,7 +336,16 @@ Candidate quality is separated as follows:
 - `review-only-missing-fields` means important fields are missing, so the row stays in review artifacts instead of the homepage table.
 - `discarded-noisy` means a block was too noisy to show as an active candidate, but remains available as an audit artifact if exported.
 
-The active promotion step reads `provider-deal-candidates-usable.json` and writes `exports/active-online-deals.json` plus `exports/active-online-deals.csv`. Active deals can exist in two roles: high-trust rows for the homepage and review/evidence records for audit. Every promoted active record has `activeFeedTrustLevel`, `productType`, and `showOnHomepage` fields. For now, only rows with `showOnHomepage: true` and `productType: "broadband-only"` appear in the homepage active feed; hidden rows are still kept in `active-online-deals.json` and still receive active detail/evidence pages.
+The active promotion step reads `provider-deal-candidates-usable.json` and writes `exports/active-online-deals.json` plus `exports/active-online-deals.csv`. Active deals can exist in two roles: high-trust rows for the homepage and review/evidence records for audit. Every promoted active record keeps the backwards-compatible `productType` field and also has `connectionTechnology`, `serviceCategory`, `landlineStatus`, `callsPackageStatus`, `homepageCategory`, and `showOnHomepage` fields. Landline and non-landline versions of a broadband package are separate categories: a fixed broadband-only package is not merged with the same package when a landline is included, and a landline-plus-calls package is separate again. 5G home broadband is also its own category instead of being hidden permanently as a mobile bundle. Homepage-visible categories are Fixed broadband, Fixed broadband with landline, Fixed broadband with calls, and 5G home broadband. Hidden rows are still kept in `active-online-deals.json` and still receive active detail/evidence pages.
+
+
+Product classification is deliberately conservative:
+
+- Sales/contact wording such as `Get deal or call`, `or call`, `call 033`, `call 0800`, `call us`, `customer support`, `support line`, or `sales line` is treated as a sales CTA only. It does **not** mean the broadband product includes a landline or phone line.
+- Rows are classified as fixed broadband with landline only when the text clearly says the actual product includes or requires a landline/phone line, for example `landline included`, `line rental included`, `home phone included`, `broadband and phone`, `includes line rental`, or `phone line included`.
+- Rows are classified as fixed broadband with calls only when the text clearly includes a calls package, for example `calls included`, `anytime calls`, `weekend calls`, `evening and weekend calls`, `call plan included`, `talk plan included`, or `pay as you talk`.
+- Rows that say `5G Broadband`, `5G home broadband`, `Vodafone 5G Broadband`, `Three 5G Broadband`, or `mobile network home broadband` are classified as 5G home broadband when the row is otherwise clean enough.
+- TV, Sports, Cinema, Netflix, HBO Max, Apple TV, and channels bundles are kept as review/evidence records for now and hidden from the main homepage table unless a row is clearly broadband-only.
 
 Active feed trust levels are separated as follows:
 
@@ -370,7 +380,7 @@ Important limits:
 - Candidate deals may be incomplete or wrong and are for review only.
 - Blocked, HTTP 403, CAPTCHA, anti-bot, login-wall, security-check, robots-disallowed, or unclear sources are skipped and recorded, not bypassed.
 - MoneySuperMarket and Compare the Market must not be used if they return HTTP 403 or security checks.
-- The static site displays only high-trust active candidate deals with `showOnHomepage: true` and `productType: "broadband-only"` in the **Active online candidate deals** section, clearly separated from the **Sample data prototype tables** section that still uses fake sample data. Review/evidence active records remain in `active-online-deals.json` and detail pages but are hidden from the main homepage table.
+- The static site displays only high-trust active candidate deals with `showOnHomepage: true` and a homepage-visible `homepageCategory` in the **Active online candidate deals** section, clearly separated from the **Sample data prototype tables** section that still uses fake sample data. Review/evidence active records, including TV/Sports/Cinema/Netflix bundles and unknown rows, remain in `active-online-deals.json` and detail pages but are hidden from the main homepage table.
 
 
 ## Postcode Area V1
@@ -403,7 +413,7 @@ The script reads `exports/active-online-deals.json` and the enabled rows in `pos
 - `exports/postcode-area-active-comparison.json`
 - `exports/postcode-area-active-comparison.csv`
 
-Every generated row is marked with `availabilityStatus: "not-postcode-checked"`, `availabilityConfidence: "national-candidate-only"`, and `publishStatus: "postcode-area-v1-review-only"`. The homepage shows these rows in a **Postcode Area V1 comparison** section with a clear warning and a simple postcode area dropdown filter.
+Postcode Area V1 can include homepage-visible fixed broadband, fixed broadband with landline, fixed broadband with calls, and 5G home broadband rows. Every generated row is still marked with `availabilityStatus: "not-postcode-checked"`, `availabilityConfidence: "national-candidate-only"`, and `publishStatus: "postcode-area-v1-review-only"`. The homepage shows these rows in a **Postcode Area V1 comparison** section with a clear warning and a simple postcode area dropdown filter.
 
 
 ## Live active deployment pipeline
@@ -433,6 +443,7 @@ The review artifact includes:
 - `exports/provider-deal-candidates-usable.json`
 - `exports/provider-deal-candidates-review-only.json`
 - `exports/provider-deal-candidates-discarded.json`
+- `exports/provider-direct-expansion-summary.json`
 - `exports/source-access-report.json`, when that file exists in the workflow run
 - `exports/active-online-deals.json`
 - `exports/active-online-deals.csv`
@@ -446,7 +457,7 @@ Important live deployment limits:
 - Candidate deals remain marked for human review only.
 - Blocked, unknown, unclear, HTTP 403, CAPTCHA, anti-bot, login-wall, security-check, robots-disallowed, or failed sources are skipped and recorded, not bypassed.
 - MoneySuperMarket and Compare the Market must not be used if they return HTTP 403 or security checks.
-- The live site separates the **Active online candidate deals** section from the fake **Sample data prototype tables** and uses only active records with `showOnHomepage: true` and `productType: "broadband-only"` for the main active table. Source-effective-only and review-artifact-only rows remain hidden evidence records with detail pages.
+- The live site separates the **Active online candidate deals** section from the fake **Sample data prototype tables** and uses only active records with `showOnHomepage: true` and a homepage-visible `homepageCategory` for the main active table. Source-effective-only and review-artifact-only rows remain hidden evidence records with detail pages.
 
 ## What will be added later
 

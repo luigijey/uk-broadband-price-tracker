@@ -10,6 +10,17 @@ const INPUT_PATH = path.join(__dirname, 'exports', 'provider-deal-candidates-usa
 const JSON_OUTPUT_PATH = path.join(__dirname, 'exports', 'active-online-deals.json');
 const CSV_OUTPUT_PATH = path.join(__dirname, 'exports', 'active-online-deals.csv');
 
+const {
+  CALLS_PACKAGE_STATUSES,
+  CONNECTION_TECHNOLOGIES,
+  HOMEPAGE_CATEGORIES,
+  LANDLINE_STATUSES,
+  SERVICE_CATEGORIES,
+  classifyProductModel,
+  isHomepageVisibleCategory,
+  normalizeForMatching,
+} = require('./product-classification');
+
 const ACTIVE_COLUMNS = [
   'activeDealId',
   'candidateId',
@@ -26,6 +37,11 @@ const ACTIVE_COLUMNS = [
   'extractionQuality',
   'activeFeedTrustLevel',
   'productType',
+  'connectionTechnology',
+  'serviceCategory',
+  'landlineStatus',
+  'callsPackageStatus',
+  'homepageCategory',
   'showOnHomepage',
   'publishStatus',
   'requiresHumanReview',
@@ -68,48 +84,11 @@ const PRODUCT_TYPES = new Set([
 ]);
 
 function classifyProductType(candidate) {
-  const packageName = String(candidate.packageName || '');
-  const sourceSnippet = String(candidate.sourceSnippet || '');
-  const text = `${packageName} ${sourceSnippet}`;
-  const normalizedText = normalizeForMatching(text);
-
-  const hasTvBundleTerm = /\b(tv|sport|sports|cinema|netflix|channels?)\b/i.test(text) ||
-    /\bsky\s+(sports?|cinema)\b/i.test(text) ||
-    /\bapple\s+tv\b/i.test(text);
-  if (hasTvBundleTerm) {
-    return 'broadband-tv-bundle';
-  }
-
-  const hasMobileBundleTerm = /\b(sim|mobile)\b/i.test(text) || /\b5g\s+broadband\b/i.test(text);
-  if (hasMobileBundleTerm) {
-    return 'broadband-mobile-bundle';
-  }
-
-  const hasPhoneBundleTerm = /\b(landline|phone|calls?|anytime\s+calls?|weekend\s+calls?)\b/i.test(text);
-  if (hasPhoneBundleTerm) {
-    return 'broadband-phone-bundle';
-  }
-
-  const hasBroadbandOnlyTerm = /\b(broadband|fibre|fiber|full\s+fibre|gig1|superfast|ultrafast|m\d{2,4})\b/i.test(text) ||
-    /\b(full\s+fibre|fibre\s+broadband|fiber\s+broadband)\b/.test(normalizedText);
-  if (hasBroadbandOnlyTerm) {
-    return 'broadband-only';
-  }
-
-  return 'unknown';
+  return classifyProductModel(candidate).productType;
 }
 
 function escapeRegex(text) {
   return String(text).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function normalizeForMatching(text) {
-  return String(text || '')
-    .toLowerCase()
-    .replace(/&/g, ' and ')
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim()
-    .replace(/\s+/g, ' ');
 }
 
 function isNumber(value) {
@@ -335,16 +314,44 @@ function createActiveDealId(candidate, index) {
 
 function toActiveDeal(candidate, generatedAt, index) {
   const homepageDecision = getHomepageDecision(candidate);
-  const productType = classifyProductType(candidate);
+  const productModel = classifyProductModel(candidate);
+  const {
+    productType,
+    connectionTechnology,
+    serviceCategory,
+    landlineStatus,
+    callsPackageStatus,
+    homepageCategory,
+  } = productModel;
   const productTypeWarnings = [];
 
   if (!PRODUCT_TYPES.has(productType)) {
     throw new Error(`Unexpected product type: ${productType}`);
   }
+  if (!CONNECTION_TECHNOLOGIES.has(connectionTechnology)) {
+    throw new Error(`Unexpected connection technology: ${connectionTechnology}`);
+  }
+  if (!SERVICE_CATEGORIES.has(serviceCategory)) {
+    throw new Error(`Unexpected service category: ${serviceCategory}`);
+  }
+  if (!LANDLINE_STATUSES.has(landlineStatus)) {
+    throw new Error(`Unexpected landline status: ${landlineStatus}`);
+  }
+  if (!CALLS_PACKAGE_STATUSES.has(callsPackageStatus)) {
+    throw new Error(`Unexpected calls package status: ${callsPackageStatus}`);
+  }
+  if (!HOMEPAGE_CATEGORIES.has(homepageCategory)) {
+    throw new Error(`Unexpected homepage category: ${homepageCategory}`);
+  }
 
-  if (homepageDecision.showOnHomepage === true && productType !== 'broadband-only') {
+  if (homepageDecision.showOnHomepage === true && !isHomepageVisibleCategory(homepageCategory)) {
     homepageDecision.showOnHomepage = false;
-    productTypeWarnings.push(`Active feed product gate: hidden from homepage because productType is ${productType}, not broadband-only.`);
+    productTypeWarnings.push(`Active feed product gate: hidden from homepage because homepageCategory is ${homepageCategory}.`);
+  }
+
+  if (homepageDecision.showOnHomepage === true && connectionTechnology === '5g-home-broadband' && serviceCategory === 'broadband-tv-bundle') {
+    homepageDecision.showOnHomepage = false;
+    productTypeWarnings.push('Active feed product gate: hidden from homepage because the 5G home broadband row is mixed with TV/bundle text.');
   }
 
   const extractionWarnings = [...new Set([
@@ -381,6 +388,11 @@ function toActiveDeal(candidate, generatedAt, index) {
     extractionQuality: candidate.extractionQuality || null,
     activeFeedTrustLevel: homepageDecision.activeFeedTrustLevel,
     productType,
+    connectionTechnology,
+    serviceCategory,
+    landlineStatus,
+    callsPackageStatus,
+    homepageCategory,
     showOnHomepage: homepageDecision.showOnHomepage,
     availabilityScope: candidate.availabilityScope || null,
     publishStatus: 'active-review-only',
@@ -390,6 +402,7 @@ function toActiveDeal(candidate, generatedAt, index) {
     generatedAt,
   };
 }
+
 function buildActiveOnlineDealsOutput(candidateOutput, generatedAt = new Date().toISOString()) {
   const input = normalizeCandidateOutput(candidateOutput);
   const activeDeals = input.candidates
@@ -405,14 +418,14 @@ function buildActiveOnlineDealsOutput(candidateOutput, generatedAt = new Date().
     activeDeals,
     summary: {
       totalActiveDeals: activeDeals.length,
-      homepageActiveDeals: activeDeals.filter((deal) => deal.showOnHomepage === true && deal.productType === 'broadband-only').length,
-      broadbandOnlyHomepageCount: activeDeals.filter((deal) => deal.showOnHomepage === true && deal.productType === 'broadband-only').length,
+      homepageActiveDeals: activeDeals.filter((deal) => deal.showOnHomepage === true && isHomepageVisibleCategory(deal.homepageCategory)).length,
+      broadbandOnlyHomepageCount: activeDeals.filter((deal) => deal.showOnHomepage === true && deal.homepageCategory === 'Fixed broadband').length,
       hiddenReviewDeals: activeDeals.filter((deal) => deal.showOnHomepage !== true).length,
       providerDirectHomepageCount: activeDeals.filter((deal) => deal.showOnHomepage === true && deal.activeFeedTrustLevel === 'provider-direct-calculated').length,
       comparisonHomepageCount: activeDeals.filter((deal) => deal.showOnHomepage === true && deal.activeFeedTrustLevel === 'comparison-clean-calculated').length,
       sourceEffectiveOnlyHiddenCount: activeDeals.filter((deal) => deal.showOnHomepage !== true && deal.activeFeedTrustLevel === 'comparison-source-effective-only').length,
-      hiddenBundleCount: activeDeals.filter((deal) => deal.showOnHomepage !== true && ['broadband-tv-bundle', 'broadband-mobile-bundle', 'broadband-phone-bundle'].includes(deal.productType)).length,
-      hiddenUnknownProductTypeCount: activeDeals.filter((deal) => deal.showOnHomepage !== true && deal.productType === 'unknown').length,
+      hiddenBundleCount: activeDeals.filter((deal) => deal.showOnHomepage !== true && deal.homepageCategory === 'Bundles and review-only').length,
+      hiddenUnknownProductTypeCount: activeDeals.filter((deal) => deal.showOnHomepage !== true && deal.homepageCategory === 'Unknown review-only').length,
       generatedAt,
       warningMessages: [...new Set([
         ...warningMessages,
@@ -463,7 +476,7 @@ function main() {
   console.log('====================================');
   console.log(`Active online deals: ${output.summary.totalActiveDeals}`);
   console.log(`Homepage active deals: ${output.summary.homepageActiveDeals}`);
-  console.log(`Broadband-only homepage deals: ${output.summary.broadbandOnlyHomepageCount}`);
+  console.log(`Fixed-broadband homepage deals: ${output.summary.broadbandOnlyHomepageCount}`);
   console.log(`Hidden bundle active records: ${output.summary.hiddenBundleCount}`);
   console.log(`Hidden unknown-product active records: ${output.summary.hiddenUnknownProductTypeCount}`);
   console.log(`Hidden review/evidence active records: ${output.summary.hiddenReviewDeals}`);

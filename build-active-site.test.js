@@ -15,6 +15,7 @@ test('active build summary reports output files and candidate count', () => {
   const usableCandidatesPath = path.join(tempFolder, 'provider-deal-candidates-usable.json');
   const reviewOnlyCandidatesPath = path.join(tempFolder, 'provider-deal-candidates-review-only.json');
   const discardedCandidatesPath = path.join(tempFolder, 'provider-deal-candidates-discarded.json');
+  const providerDirectExpansionSummaryPath = path.join(tempFolder, 'provider-direct-expansion-summary.json');
   const activeDealsPath = path.join(tempFolder, 'active-online-deals.json');
   const postcodeAreaActiveComparisonPath = path.join(tempFolder, 'postcode-area-active-comparison.json');
   const activeDealsFolder = path.join(tempFolder, 'site', 'active-deals');
@@ -26,6 +27,7 @@ test('active build summary reports output files and candidate count', () => {
   fs.writeFileSync(usableCandidatesPath, JSON.stringify({ candidates: [{ candidateId: 'usable' }] }));
   fs.writeFileSync(reviewOnlyCandidatesPath, JSON.stringify({ candidates: [{ candidateId: 'review' }] }));
   fs.writeFileSync(discardedCandidatesPath, JSON.stringify({ candidates: [{ candidateId: 'discarded' }] }));
+  fs.writeFileSync(providerDirectExpansionSummaryPath, JSON.stringify({ fixedBroadbandCandidates: 1 }));
   fs.mkdirSync(activeDealsFolder, { recursive: true });
   fs.writeFileSync(path.join(activeDealsFolder, 'active-example.html'), '<!doctype html>');
   fs.writeFileSync(activeDealsPath, JSON.stringify({ activeDeals: [{ activeDealId: 'active-example' }] }));
@@ -38,6 +40,7 @@ test('active build summary reports output files and candidate count', () => {
     usableProviderCandidates: usableCandidatesPath,
     reviewOnlyProviderCandidates: reviewOnlyCandidatesPath,
     discardedProviderCandidates: discardedCandidatesPath,
+    providerDirectExpansionSummary: providerDirectExpansionSummaryPath,
     activeOnlineDeals: activeDealsPath,
     postcodeAreaActiveComparison: postcodeAreaActiveComparisonPath,
     activeDealsFolder,
@@ -50,6 +53,7 @@ test('active build summary reports output files and candidate count', () => {
     usableProviderCandidatesFileExists: true,
     reviewOnlyProviderCandidatesFileExists: true,
     discardedProviderCandidatesFileExists: true,
+    providerDirectExpansionSummaryFileExists: true,
     activeOnlineDealsFileExists: true,
     postcodeAreaActiveComparisonFileExists: true,
     candidateCount: 1,

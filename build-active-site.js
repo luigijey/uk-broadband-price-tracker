@@ -24,6 +24,7 @@ const summaryFiles = {
   usableProviderCandidates: path.join(rootFolder, 'exports', 'provider-deal-candidates-usable.json'),
   reviewOnlyProviderCandidates: path.join(rootFolder, 'exports', 'provider-deal-candidates-review-only.json'),
   discardedProviderCandidates: path.join(rootFolder, 'exports', 'provider-deal-candidates-discarded.json'),
+  providerDirectExpansionSummary: path.join(rootFolder, 'exports', 'provider-direct-expansion-summary.json'),
   activeOnlineDeals: path.join(rootFolder, 'exports', 'active-online-deals.json'),
   postcodeAreaActiveComparison: path.join(rootFolder, 'exports', 'postcode-area-active-comparison.json'),
   activeDealsFolder: path.join(rootFolder, 'site', 'active-deals'),
@@ -66,6 +67,7 @@ function buildActiveBuildSummary(files = summaryFiles) {
     usableProviderCandidatesFileExists: fs.existsSync(files.usableProviderCandidates),
     reviewOnlyProviderCandidatesFileExists: fs.existsSync(files.reviewOnlyProviderCandidates),
     discardedProviderCandidatesFileExists: fs.existsSync(files.discardedProviderCandidates),
+    providerDirectExpansionSummaryFileExists: fs.existsSync(files.providerDirectExpansionSummary),
     activeOnlineDealsFileExists: fs.existsSync(files.activeOnlineDeals),
     postcodeAreaActiveComparisonFileExists: fs.existsSync(files.postcodeAreaActiveComparison),
     candidateCount: readCandidateCount(files.providerCandidates),
@@ -84,6 +86,7 @@ function printActiveBuildSummary(summary) {
   console.log(`Usable provider candidates file exists: ${summary.usableProviderCandidatesFileExists ? 'yes' : 'no'}`);
   console.log(`Review-only provider candidates file exists: ${summary.reviewOnlyProviderCandidatesFileExists ? 'yes' : 'no'}`);
   console.log(`Discarded provider candidates file exists: ${summary.discardedProviderCandidatesFileExists ? 'yes' : 'no'}`);
+  console.log(`Provider direct expansion summary exists: ${summary.providerDirectExpansionSummaryFileExists ? 'yes' : 'no'}`);
   console.log(`Provider candidate count: ${summary.candidateCount === null ? 'unknown' : summary.candidateCount}`);
   console.log(`active-online-deals.json exists: ${summary.activeOnlineDealsFileExists ? 'yes' : 'no'}`);
   console.log(`Active online deal count: ${summary.activeOnlineDealCount === null ? 'unknown' : summary.activeOnlineDealCount}`);
