@@ -1,0 +1,39 @@
+name: Check broadband source access
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 6 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  check-sources:
+    name: Check broadband source access
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run tests
+        run: npm test
+
+      - name: Run source access check
+        run: npm run check-sources
+
+      - name: Confirm source access report was created
+        run: test -f exports/source-access-report.json
+
+      - name: Upload source access report
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-access-report
+          path: exports/source-access-report.json
+          if-no-files-found: error
