@@ -275,6 +275,31 @@ Each source result includes the source ID, source name, source type, candidate b
 
 The output is **not live pricing data** and should not be used as buying advice. It is only a structured report to help a human decide what, if anything, may be safe and useful to model later.
 
+### Running online price snippet extraction in GitHub Actions
+
+A GitHub Actions workflow named **Extract online price snippets** can run the same conservative extraction in GitHub's environment. This is useful because a local development or Codex environment may have limited DNS access, blocked network access, or different robots/security responses from public websites.
+
+To run it manually:
+
+1. Open the repository on GitHub.
+2. Select the **Actions** tab.
+3. Choose **Extract online price snippets** from the workflow list.
+4. Click **Run workflow**.
+5. Keep the selected branch, then click the green **Run workflow** button.
+
+The workflow also runs automatically once per day on a schedule. Each run checks out the repository, sets up Node.js 20, runs `npm test`, runs `npm run extract-snippets`, confirms that `exports/online-price-snippets.json` was created, and uploads that report as an artifact named **online-price-snippets**.
+
+To download the report after a workflow run:
+
+1. Open the completed **Extract online price snippets** workflow run in the **Actions** tab.
+2. Scroll to the **Artifacts** section near the bottom of the run summary.
+3. Download the **online-price-snippets** artifact.
+4. Open `online-price-snippets.json` from the downloaded artifact files.
+
+This artifact is only a human-review discovery report. It is **not final pricing ingestion**, does not create live broadband deal records, does not change sample deal values, and should not be used as buying advice.
+
+Blocked, unknown, unclear, HTTP 403, CAPTCHA, anti-bot, security-check, failed, or non-200 source results are expected sometimes. They must be recorded and skipped, not bypassed. Do not scrape MoneySuperMarket or Compare the Market if they return HTTP 403 or security checks, and do not add proxies, browser automation, hidden fetch methods, CAPTCHA bypasses, login-wall bypasses, security-check bypasses, or aggressive retries to work around website restrictions.
+
 ## What will be added later
 
 Later versions may add:
