@@ -1,0 +1,282 @@
+[
+  {
+    "sourceId": "bt",
+    "name": "BT",
+    "sourceType": "provider-direct",
+    "baseUrl": "https://www.bt.com",
+    "candidateBroadbandUrl": "https://www.bt.com/broadband",
+    "robotsUrl": "https://www.bt.com/robots.txt",
+    "robotsFetched": false,
+    "robotsStatusCode": null,
+    "candidatePathAllowed": "unknown",
+    "pageFetched": false,
+    "pageStatusCode": null,
+    "pageTitle": "",
+    "detectedPriceTextCount": 0,
+    "warningMessages": [
+      "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.bt.com",
+      "Candidate page was not fetched because robots.txt access was unclear."
+    ],
+    "checkedAt": "2026-06-03T10:34:33.727Z"
+  },
+  {
+    "sourceId": "sky",
+    "name": "Sky",
+    "sourceType": "provider-direct",
+    "baseUrl": "https://www.sky.com",
+    "candidateBroadbandUrl": "https://www.sky.com/broadband",
+    "robotsUrl": "https://www.sky.com/robots.txt",
+    "robotsFetched": false,
+    "robotsStatusCode": null,
+    "candidatePathAllowed": "unknown",
+    "pageFetched": false,
+    "pageStatusCode": null,
+    "pageTitle": "",
+    "detectedPriceTextCount": 0,
+    "warningMessages": [
+      "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.sky.com",
+      "Candidate page was not fetched because robots.txt access was unclear."
+    ],
+    "checkedAt": "2026-06-03T10:34:34.843Z"
+  },
+  {
+    "sourceId": "virgin-media",
+    "name": "Virgin Media",
+    "sourceType": "provider-direct",
+    "baseUrl": "https://www.virginmedia.com",
+    "candidateBroadbandUrl": "https://www.virginmedia.com/broadband",
+    "robotsUrl": "https://www.virginmedia.com/robots.txt",
+    "robotsFetched": false,
+    "robotsStatusCode": null,
+    "candidatePathAllowed": "unknown",
+    "pageFetched": false,
+    "pageStatusCode": null,
+    "pageTitle": "",
+    "detectedPriceTextCount": 0,
+    "warningMessages": [
+      "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.virginmedia.com",
+      "Candidate page was not fetched because robots.txt access was unclear."
+    ],
+    "checkedAt": "2026-06-03T10:34:35.852Z"
+  },
+  {
+    "sourceId": "vodafone",
+    "name": "Vodafone",
+    "sourceType": "provider-direct",
+    "baseUrl": "https://www.vodafone.co.uk",
+    "candidateBroadbandUrl": "https://www.vodafone.co.uk/broadband",
+    "robotsUrl": "https://www.vodafone.co.uk/robots.txt",
+    "robotsFetched": false,
+    "robotsStatusCode": null,
+    "candidatePathAllowed": "unknown",
+    "pageFetched": false,
+    "pageStatusCode": null,
+    "pageTitle": "",
+    "detectedPriceTextCount": 0,
+    "warningMessages": [
+      "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.vodafone.co.uk",
+      "Candidate page was not fetched because robots.txt access was unclear."
+    ],
+    "checkedAt": "2026-06-03T10:34:41.865Z"
+  },
+  {
+    "sourceId": "talktalk",
+    "name": "TalkTalk",
+    "sourceType": "provider-direct",
+    "baseUrl": "https://www.talktalk.co.uk",
+    "candidateBroadbandUrl": "https://www.talktalk.co.uk/broadband",
+    "robotsUrl": "https://www.talktalk.co.uk/robots.txt",
+    "robotsFetched": false,
+    "robotsStatusCode": null,
+    "candidatePathAllowed": "unknown",
+    "pageFetched": false,
+    "pageStatusCode": null,
+    "pageTitle": "",
+    "detectedPriceTextCount": 0,
+    "warningMessages": [
+      "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.talktalk.co.uk",
+      "Candidate page was not fetched because robots.txt access was unclear."
+    ],
+    "checkedAt": "2026-06-03T10:34:42.872Z"
+  },
+  {
+    "sourceId": "plusnet",
+    "name": "Plusnet",
+    "sourceType": "provider-direct",
+    "baseUrl": "https://www.plus.net",
+    "candidateBroadbandUrl": "https://www.plus.net/broadband/",
+    "robotsUrl": "https://www.plus.net/robots.txt",
+    "robotsFetched": false,
+    "robotsStatusCode": null,
+    "candidatePathAllowed": "unknown",
+    "pageFetched": false,
+    "pageStatusCode": null,
+    "pageTitle": "",
+    "detectedPriceTextCount": 0,
+    "warningMessages": [
+      "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.plus.net",
+      "Candidate page was not fetched because robots.txt access was unclear."
+    ],
+    "checkedAt": "2026-06-03T10:34:43.880Z"
+  },
+  {
+    "sourceId": "ee",
+    "name": "EE",
+    "sourceType": "provider-direct",
+    "baseUrl": "https://ee.co.uk",
+    "candidateBroadbandUrl": "https://ee.co.uk/broadband",
+    "robotsUrl": "https://ee.co.uk/robots.txt",
+    "robotsFetched": false,
+    "robotsStatusCode": null,
+    "candidatePathAllowed": "unknown",
+    "pageFetched": false,
+    "pageStatusCode": null,
+    "pageTitle": "",
+    "detectedPriceTextCount": 0,
+    "warningMessages": [
+      "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN ee.co.uk",
+      "Candidate page was not fetched because robots.txt access was unclear."
+    ],
+    "checkedAt": "2026-06-03T10:34:49.898Z"
+  },
+  {
+    "sourceId": "hyperoptic",
+    "name": "Hyperoptic",
+    "sourceType": "provider-direct",
+    "baseUrl": "https://www.hyperoptic.com",
+    "candidateBroadbandUrl": "https://www.hyperoptic.com/broadband/",
+    "robotsUrl": "https://www.hyperoptic.com/robots.txt",
+    "robotsFetched": false,
+    "robotsStatusCode": null,
+    "candidatePathAllowed": "unknown",
+    "pageFetched": false,
+    "pageStatusCode": null,
+    "pageTitle": "",
+    "detectedPriceTextCount": 0,
+    "warningMessages": [
+      "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.hyperoptic.com",
+      "Candidate page was not fetched because robots.txt access was unclear."
+    ],
+    "checkedAt": "2026-06-03T10:34:50.904Z"
+  },
+  {
+    "sourceId": "community-fibre",
+    "name": "Community Fibre",
+    "sourceType": "provider-direct",
+    "baseUrl": "https://communityfibre.co.uk",
+    "candidateBroadbandUrl": "https://communityfibre.co.uk/",
+    "robotsUrl": "https://communityfibre.co.uk/robots.txt",
+    "robotsFetched": false,
+    "robotsStatusCode": null,
+    "candidatePathAllowed": "unknown",
+    "pageFetched": false,
+    "pageStatusCode": null,
+    "pageTitle": "",
+    "detectedPriceTextCount": 0,
+    "warningMessages": [
+      "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN communityfibre.co.uk",
+      "Candidate page was not fetched because robots.txt access was unclear."
+    ],
+    "checkedAt": "2026-06-03T10:34:51.912Z"
+  },
+  {
+    "sourceId": "uswitch",
+    "name": "Uswitch",
+    "sourceType": "comparison-site",
+    "baseUrl": "https://www.uswitch.com",
+    "candidateBroadbandUrl": "https://www.uswitch.com/broadband/",
+    "robotsUrl": "https://www.uswitch.com/robots.txt",
+    "robotsFetched": false,
+    "robotsStatusCode": null,
+    "candidatePathAllowed": "unknown",
+    "pageFetched": false,
+    "pageStatusCode": null,
+    "pageTitle": "",
+    "detectedPriceTextCount": 0,
+    "warningMessages": [
+      "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.uswitch.com",
+      "Candidate page was not fetched because robots.txt access was unclear."
+    ],
+    "checkedAt": "2026-06-03T10:34:57.925Z"
+  },
+  {
+    "sourceId": "moneysupermarket",
+    "name": "MoneySuperMarket",
+    "sourceType": "comparison-site",
+    "baseUrl": "https://www.moneysupermarket.com",
+    "candidateBroadbandUrl": "https://www.moneysupermarket.com/broadband/",
+    "robotsUrl": "https://www.moneysupermarket.com/robots.txt",
+    "robotsFetched": false,
+    "robotsStatusCode": null,
+    "candidatePathAllowed": "unknown",
+    "pageFetched": false,
+    "pageStatusCode": null,
+    "pageTitle": "",
+    "detectedPriceTextCount": 0,
+    "warningMessages": [
+      "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.moneysupermarket.com",
+      "Candidate page was not fetched because robots.txt access was unclear."
+    ],
+    "checkedAt": "2026-06-03T10:34:58.932Z"
+  },
+  {
+    "sourceId": "compare-the-market",
+    "name": "Compare the Market",
+    "sourceType": "comparison-site",
+    "baseUrl": "https://www.comparethemarket.com",
+    "candidateBroadbandUrl": "https://www.comparethemarket.com/broadband/",
+    "robotsUrl": "https://www.comparethemarket.com/robots.txt",
+    "robotsFetched": false,
+    "robotsStatusCode": null,
+    "candidatePathAllowed": "unknown",
+    "pageFetched": false,
+    "pageStatusCode": null,
+    "pageTitle": "",
+    "detectedPriceTextCount": 0,
+    "warningMessages": [
+      "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.comparethemarket.com",
+      "Candidate page was not fetched because robots.txt access was unclear."
+    ],
+    "checkedAt": "2026-06-03T10:34:59.940Z"
+  },
+  {
+    "sourceId": "broadband-genie",
+    "name": "Broadband Genie",
+    "sourceType": "comparison-site",
+    "baseUrl": "https://www.broadbandgenie.co.uk",
+    "candidateBroadbandUrl": "https://www.broadbandgenie.co.uk/broadband",
+    "robotsUrl": "https://www.broadbandgenie.co.uk/robots.txt",
+    "robotsFetched": false,
+    "robotsStatusCode": null,
+    "candidatePathAllowed": "unknown",
+    "pageFetched": false,
+    "pageStatusCode": null,
+    "pageTitle": "",
+    "detectedPriceTextCount": 0,
+    "warningMessages": [
+      "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.broadbandgenie.co.uk",
+      "Candidate page was not fetched because robots.txt access was unclear."
+    ],
+    "checkedAt": "2026-06-03T10:35:05.951Z"
+  },
+  {
+    "sourceId": "confused",
+    "name": "Confused.com",
+    "sourceType": "comparison-site",
+    "baseUrl": "https://www.confused.com",
+    "candidateBroadbandUrl": "https://www.confused.com/broadband",
+    "robotsUrl": "https://www.confused.com/robots.txt",
+    "robotsFetched": false,
+    "robotsStatusCode": null,
+    "candidatePathAllowed": "unknown",
+    "pageFetched": false,
+    "pageStatusCode": null,
+    "pageTitle": "",
+    "detectedPriceTextCount": 0,
+    "warningMessages": [
+      "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.confused.com",
+      "Candidate page was not fetched because robots.txt access was unclear."
+    ],
+    "checkedAt": "2026-06-03T10:35:06.958Z"
+  }
+]
