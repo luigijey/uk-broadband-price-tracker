@@ -214,6 +214,27 @@
       font-weight: 800;
     }
 
+    .details-button {
+      display: inline-block;
+      padding: 7px 10px;
+      border-radius: 8px;
+      background: var(--blue);
+      color: #ffffff;
+      font-size: 0.86rem;
+      font-weight: 800;
+      line-height: 1.2;
+      text-align: center;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .details-button:hover,
+    .details-button:focus {
+      background: var(--blue-dark);
+      color: #ffffff;
+      text-decoration: none;
+    }
+
     td.effective-price {
       background: var(--green-soft);
     }
@@ -494,6 +515,7 @@
               <th>Speed Tier</th>
               <th>Provider</th>
               <th>Package</th>
+              <th>Details</th>
               <th>Speed Mbps</th>
               <th>Advertised Monthly Price</th>
               <th>Effective Monthly Price</th>
@@ -504,7 +526,6 @@
               <th>Total Contract Cost After Rewards</th>
               <th>Source</th>
               <th>Last Checked</th>
-              <th>Details</th>
             </tr>
           </thead>
           <tbody>
@@ -513,6 +534,7 @@
               <td>35-75 Mbps</td>
               <td>TalkTalk</td>
               <td>Fibre 65 Sample</td>
+              <td><a class="details-button" href="deals/M-TALKTALK-67.html">View breakdown</a></td>
               <td class="number">67</td>
               <td class="money">£25.00</td>
               <td class="money effective-price">£24.39</td>
@@ -523,13 +545,13 @@
               <td class="money">£439.00</td>
               <td class="wrap-text">Provider Direct</td>
               <td class="number">2026-06-01</td>
-              <td><a href="deals/M-TALKTALK-67.html">View breakdown</a></td>
             </tr>
             <tr data-postcode-area="M" data-provider="Virgin Media" data-speed-tier="100-300 Mbps">
               <td>M</td>
               <td>100-300 Mbps</td>
               <td>Virgin Media</td>
               <td>M125 Sample</td>
+              <td><a class="details-button" href="deals/M-VIRGIN-132.html">View breakdown</a></td>
               <td class="number">132</td>
               <td class="money">£28.99</td>
               <td class="money effective-price">£29.16</td>
@@ -540,13 +562,13 @@
               <td class="money">£524.82</td>
               <td class="wrap-text">Provider Direct</td>
               <td class="number">2026-06-01</td>
-              <td><a href="deals/M-VIRGIN-132.html">View breakdown</a></td>
             </tr>
             <tr data-postcode-area="M" data-provider="BT" data-speed-tier="500-900 Mbps">
               <td>M</td>
               <td>500-900 Mbps</td>
               <td>BT</td>
               <td>Full Fibre 500 Sample</td>
+              <td><a class="details-button" href="deals/M-BT-500.html">View breakdown</a></td>
               <td class="number">500</td>
               <td class="money">£39.99</td>
               <td class="money effective-price">£38.03</td>
@@ -557,13 +579,13 @@
               <td class="money">£912.75</td>
               <td class="wrap-text">Voucher Sample</td>
               <td class="number">2026-06-01</td>
-              <td><a href="deals/M-BT-500.html">View breakdown</a></td>
             </tr>
             <tr data-postcode-area="M" data-provider="Sky" data-speed-tier="900 Mbps+">
               <td>M</td>
               <td>900 Mbps+</td>
               <td>Sky</td>
               <td>Gigafast Sample</td>
+              <td><a class="details-button" href="deals/M-SKY-900.html">View breakdown</a></td>
               <td class="number">900</td>
               <td class="money">£44.00</td>
               <td class="money effective-price">£41.00</td>
@@ -574,13 +596,13 @@
               <td class="money">£984.00</td>
               <td class="wrap-text">Comparison Site Sample</td>
               <td class="number">2026-06-01</td>
-              <td><a href="deals/M-SKY-900.html">View breakdown</a></td>
             </tr>
             <tr data-postcode-area="OX" data-provider="Sky" data-speed-tier="35-75 Mbps">
               <td>OX</td>
               <td>35-75 Mbps</td>
               <td>Sky</td>
               <td>Superfast Sample</td>
+              <td><a class="details-button" href="deals/OX-SKY-61.html">View breakdown</a></td>
               <td class="number">61</td>
               <td class="money">£26.00</td>
               <td class="money effective-price">£26.54</td>
@@ -591,13 +613,13 @@
               <td class="money">£637.00</td>
               <td class="wrap-text">Comparison Site Sample</td>
               <td class="number">2026-06-01</td>
-              <td><a href="deals/OX-SKY-61.html">View breakdown</a></td>
             </tr>
             <tr data-postcode-area="OX" data-provider="BT" data-speed-tier="35-75 Mbps">
               <td>OX</td>
               <td>35-75 Mbps</td>
               <td>BT</td>
               <td>Fibre Essential Sample</td>
+              <td><a class="details-button" href="deals/OX-BT-36.html">View breakdown</a></td>
               <td class="number">36</td>
               <td class="money">£27.99</td>
               <td class="money effective-price">£27.70</td>
@@ -608,13 +630,13 @@
               <td class="money">£664.75</td>
               <td class="wrap-text">Provider Direct</td>
               <td class="number">2026-06-01</td>
-              <td><a href="deals/OX-BT-36.html">View breakdown</a></td>
             </tr>
             <tr data-postcode-area="OX" data-provider="Vodafone" data-speed-tier="100-300 Mbps">
               <td>OX</td>
               <td>100-300 Mbps</td>
               <td>Vodafone</td>
               <td>Full Fibre 150 Sample</td>
+              <td><a class="details-button" href="deals/OX-VODAFONE-150.html">View breakdown</a></td>
               <td class="number">150</td>
               <td class="money">£29.00</td>
               <td class="money effective-price">£26.83</td>
@@ -625,13 +647,13 @@
               <td class="money">£644.00</td>
               <td class="wrap-text">Voucher Sample</td>
               <td class="number">2026-06-01</td>
-              <td><a href="deals/OX-VODAFONE-150.html">View breakdown</a></td>
             </tr>
             <tr data-postcode-area="OX" data-provider="TalkTalk" data-speed-tier="500-900 Mbps">
               <td>OX</td>
               <td>500-900 Mbps</td>
               <td>TalkTalk</td>
               <td>Full Fibre 500 Sample</td>
+              <td><a class="details-button" href="deals/OX-TALKTALK-500.html">View breakdown</a></td>
               <td class="number">500</td>
               <td class="money">£35.00</td>
               <td class="money effective-price">£33.56</td>
@@ -642,13 +664,13 @@
               <td class="money">£604.00</td>
               <td class="wrap-text">Provider Direct</td>
               <td class="number">2026-06-01</td>
-              <td><a href="deals/OX-TALKTALK-500.html">View breakdown</a></td>
             </tr>
             <tr data-postcode-area="SW" data-provider="BT" data-speed-tier="100-300 Mbps">
               <td>SW</td>
               <td>100-300 Mbps</td>
               <td>BT</td>
               <td>Full Fibre 100 Sample</td>
+              <td><a class="details-button" href="deals/SW-BT-150.html">View breakdown</a></td>
               <td class="number">150</td>
               <td class="money">£30.99</td>
               <td class="money effective-price">£31.11</td>
@@ -659,13 +681,13 @@
               <td class="money">£746.75</td>
               <td class="wrap-text">Comparison Site Sample</td>
               <td class="number">2026-06-01</td>
-              <td><a href="deals/SW-BT-150.html">View breakdown</a></td>
             </tr>
             <tr data-postcode-area="SW" data-provider="Sky" data-speed-tier="500-900 Mbps">
               <td>SW</td>
               <td>500-900 Mbps</td>
               <td>Sky</td>
               <td>Full Fibre 500 Sample</td>
+              <td><a class="details-button" href="deals/SW-SKY-500.html">View breakdown</a></td>
               <td class="number">500</td>
               <td class="money">£38.00</td>
               <td class="money effective-price">£36.88</td>
@@ -676,13 +698,13 @@
               <td class="money">£885.00</td>
               <td class="wrap-text">Provider Direct</td>
               <td class="number">2026-06-01</td>
-              <td><a href="deals/SW-SKY-500.html">View breakdown</a></td>
             </tr>
             <tr data-postcode-area="SW" data-provider="Vodafone" data-speed-tier="900 Mbps+">
               <td>SW</td>
               <td>900 Mbps+</td>
               <td>Vodafone</td>
               <td>Full Fibre 910 Sample</td>
+              <td><a class="details-button" href="deals/SW-VODAFONE-910.html">View breakdown</a></td>
               <td class="number">910</td>
               <td class="money">£42.00</td>
               <td class="money effective-price">£39.83</td>
@@ -693,13 +715,13 @@
               <td class="money">£956.00</td>
               <td class="wrap-text">Provider Direct</td>
               <td class="number">2026-06-01</td>
-              <td><a href="deals/SW-VODAFONE-910.html">View breakdown</a></td>
             </tr>
             <tr data-postcode-area="SW" data-provider="Virgin Media" data-speed-tier="900 Mbps+">
               <td>SW</td>
               <td>900 Mbps+</td>
               <td>Virgin Media</td>
               <td>Gig1 Sample</td>
+              <td><a class="details-button" href="deals/SW-VIRGIN-1130.html">View breakdown</a></td>
               <td class="number">1130</td>
               <td class="money">£45.00</td>
               <td class="money effective-price">£40.17</td>
@@ -710,7 +732,6 @@
               <td class="money">£723.00</td>
               <td class="wrap-text">Voucher Sample</td>
               <td class="number">2026-06-01</td>
-              <td><a href="deals/SW-VIRGIN-1130.html">View breakdown</a></td>
             </tr>
           </tbody>
         </table>
