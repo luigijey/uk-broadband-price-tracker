@@ -14,7 +14,7 @@
       "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.bt.com",
       "Candidate page was not fetched because robots.txt access was unclear."
     ],
-    "checkedAt": "2026-06-03T12:34:22.145Z"
+    "checkedAt": "2026-06-03T12:45:04.295Z"
   },
   {
     "sourceId": "sky",
@@ -31,7 +31,7 @@
       "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.sky.com",
       "Candidate page was not fetched because robots.txt access was unclear."
     ],
-    "checkedAt": "2026-06-03T12:34:23.247Z"
+    "checkedAt": "2026-06-03T12:45:10.404Z"
   },
   {
     "sourceId": "virgin-media",
@@ -48,7 +48,7 @@
       "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.virginmedia.com",
       "Candidate page was not fetched because robots.txt access was unclear."
     ],
-    "checkedAt": "2026-06-03T12:34:29.256Z"
+    "checkedAt": "2026-06-03T12:45:11.412Z"
   },
   {
     "sourceId": "vodafone",
@@ -65,7 +65,7 @@
       "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.vodafone.co.uk",
       "Candidate page was not fetched because robots.txt access was unclear."
     ],
-    "checkedAt": "2026-06-03T12:34:30.264Z"
+    "checkedAt": "2026-06-03T12:45:12.419Z"
   },
   {
     "sourceId": "talktalk",
@@ -82,7 +82,7 @@
       "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.talktalk.co.uk",
       "Candidate page was not fetched because robots.txt access was unclear."
     ],
-    "checkedAt": "2026-06-03T12:34:31.272Z"
+    "checkedAt": "2026-06-03T12:45:18.433Z"
   },
   {
     "sourceId": "plusnet",
@@ -99,7 +99,7 @@
       "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.plus.net",
       "Candidate page was not fetched because robots.txt access was unclear."
     ],
-    "checkedAt": "2026-06-03T12:34:37.286Z"
+    "checkedAt": "2026-06-03T12:45:19.441Z"
   },
   {
     "sourceId": "ee",
@@ -116,7 +116,7 @@
       "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN ee.co.uk",
       "Candidate page was not fetched because robots.txt access was unclear."
     ],
-    "checkedAt": "2026-06-03T12:34:38.293Z"
+    "checkedAt": "2026-06-03T12:45:20.447Z"
   },
   {
     "sourceId": "hyperoptic",
@@ -133,7 +133,7 @@
       "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.hyperoptic.com",
       "Candidate page was not fetched because robots.txt access was unclear."
     ],
-    "checkedAt": "2026-06-03T12:34:39.299Z"
+    "checkedAt": "2026-06-03T12:45:26.459Z"
   },
   {
     "sourceId": "community-fibre",
@@ -150,7 +150,7 @@
       "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN communityfibre.co.uk",
       "Candidate page was not fetched because robots.txt access was unclear."
     ],
-    "checkedAt": "2026-06-03T12:34:45.312Z"
+    "checkedAt": "2026-06-03T12:45:27.467Z"
   },
   {
     "sourceId": "uswitch",
@@ -167,7 +167,7 @@
       "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.uswitch.com",
       "Candidate page was not fetched because robots.txt access was unclear."
     ],
-    "checkedAt": "2026-06-03T12:34:46.319Z"
+    "checkedAt": "2026-06-03T12:45:28.474Z"
   },
   {
     "sourceId": "moneysupermarket",
@@ -184,7 +184,7 @@
       "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.moneysupermarket.com",
       "Candidate page was not fetched because robots.txt access was unclear."
     ],
-    "checkedAt": "2026-06-03T12:34:47.325Z"
+    "checkedAt": "2026-06-03T12:45:34.487Z"
   },
   {
     "sourceId": "compare-the-market",
@@ -201,7 +201,7 @@
       "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.comparethemarket.com",
       "Candidate page was not fetched because robots.txt access was unclear."
     ],
-    "checkedAt": "2026-06-03T12:34:53.336Z"
+    "checkedAt": "2026-06-03T12:45:35.493Z"
   },
   {
     "sourceId": "broadband-genie",
@@ -218,7 +218,7 @@
       "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.broadbandgenie.co.uk",
       "Candidate page was not fetched because robots.txt access was unclear."
     ],
-    "checkedAt": "2026-06-03T12:34:54.342Z"
+    "checkedAt": "2026-06-03T12:45:36.499Z"
   },
   {
     "sourceId": "confused",
@@ -235,6 +235,6 @@
       "Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.confused.com",
       "Candidate page was not fetched because robots.txt access was unclear."
     ],
-    "checkedAt": "2026-06-03T12:34:55.348Z"
+    "checkedAt": "2026-06-03T12:45:42.517Z"
   }
 ]

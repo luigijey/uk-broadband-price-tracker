@@ -349,6 +349,40 @@ Important limits:
 - MoneySuperMarket and Compare the Market must not be used if they return HTTP 403 or security checks.
 - The static site displays active candidate deals in an **Active online candidate deals** section, clearly separated from the **Sample data prototype tables** section that still uses fake sample data.
 
+
+## Live active deployment pipeline
+
+GitHub Pages deployment now runs the active online pipeline before the static site is published. This means the live site can refresh its online candidate deal section from GitHub Actions, where source access may differ from local development or Codex environments.
+
+On every push to `main`, every manual `workflow_dispatch` run, and once per day on the scheduled deployment run, the GitHub Pages workflow:
+
+1. checks out the repository
+2. sets up Node.js 20
+3. runs `npm test`
+4. runs `npm run extract-snippets` to extract conservative online price snippets into `exports/online-price-snippets.json`
+5. runs `npm run extract-providers` to turn available snippets into provider candidate deals in `exports/provider-deal-candidates.json` and `exports/provider-deal-candidates.csv`
+6. runs `npm run export` to refresh the fake sample-data exports
+7. runs `npm run build-site` to rebuild `site/index.html` and the static deal pages
+8. confirms the required generated files exist
+9. uploads the `site` folder and deploys it to GitHub Pages
+10. uploads review artifacts named **active-pricing-review-data** for the extracted snippet and candidate files
+
+The review artifact includes:
+
+- `exports/online-price-snippets.json`
+- `exports/provider-deal-candidates.json`
+- `exports/provider-deal-candidates.csv`
+- `exports/source-access-report.json`, when that file exists in the workflow run
+
+Important live deployment limits:
+
+- Candidate deals are not postcode checked.
+- Candidate deals are not manually approved.
+- Candidate deals remain marked for human review only.
+- Blocked, unknown, unclear, HTTP 403, CAPTCHA, anti-bot, login-wall, security-check, robots-disallowed, or failed sources are skipped and recorded, not bypassed.
+- MoneySuperMarket and Compare the Market must not be used if they return HTTP 403 or security checks.
+- The live site separates the **Active online candidate deals** section from the fake **Sample data prototype tables**.
+
 ## What will be added later
 
 Later versions may add:
