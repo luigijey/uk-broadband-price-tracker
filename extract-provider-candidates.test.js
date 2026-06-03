@@ -313,3 +313,39 @@ test('provider-deal-candidates output shape includes candidates, sourceSummary, 
   assert.equal(output.candidates[0].publishStatus, 'candidate-review-only');
   assert.equal(output.candidates[0].availabilityScope, 'provider-landing-page-not-postcode-checked');
 });
+
+test('Uswitch block with one clean provider is usable', () => {
+  const candidate = extractProviderCandidateFromSnippet({ surroundingText: 'Uswitch exclusive TalkTalk Full Fibre 150 broadband 150 Mbps £29 a month on a 24 month contract. Monthly price increases by £4 each April. No setup fee.' }, uswitchSource, extractedAt);
+
+  assert.equal(candidate.provider, 'TalkTalk');
+  assert.equal(candidate.annualAprilPriceRise, 4);
+  assert.equal(candidate.extractionQuality, 'usable-calculated');
+});
+
+test('Uswitch mixed Sky and Virgin Media block is not usable', () => {
+  const candidate = extractProviderCandidateFromSnippet({ surroundingText: 'Sky Essential TV from £15. Virgin Media Superfast Broadband 132 Mbps £26.99 a month on a 18 month contract. Virgin Media M500 also available. Monthly price increases by £4 each April. No setup fee.' }, uswitchSource, extractedAt);
+
+  assert.notEqual(candidate.extractionQuality, 'usable-calculated');
+  assert.match(candidate.extractionWarnings.join(' '), /multiple providers/);
+});
+
+test('annualAprilPriceRise 20.99 is not usable', () => {
+  const candidate = extractProviderCandidateFromSnippet({ surroundingText: 'TalkTalk Full Fibre 150 broadband 150 Mbps £29 a month on a 24 month contract. Monthly price increases by £20.99 each April. No setup fee.' }, talkTalkSource, extractedAt);
+
+  assert.notEqual(candidate.extractionQuality, 'usable-calculated');
+  assert.match(candidate.extractionWarnings.join(' '), /above the £6\.00 usable limit/);
+});
+
+test('annualAprilPriceRise 4 is usable', () => {
+  const candidate = extractProviderCandidateFromSnippet({ surroundingText: 'TalkTalk Full Fibre 150 broadband 150 Mbps £29 a month on a 24 month contract. Monthly price increases by £4 each April. No setup fee.' }, talkTalkSource, extractedAt);
+
+  assert.equal(candidate.annualAprilPriceRise, 4);
+  assert.equal(candidate.extractionQuality, 'usable-calculated');
+});
+
+test('annualAprilPriceRise 3.50 is usable', () => {
+  const candidate = extractProviderCandidateFromSnippet({ surroundingText: 'Vodafone Full Fibre 910 broadband 910 Mbps £25.50 a month on a 24 month contract. Monthly price increases by £3.50 each April. No setup fee.' }, vodafoneSource, extractedAt);
+
+  assert.equal(candidate.annualAprilPriceRise, 3.5);
+  assert.equal(candidate.extractionQuality, 'usable-calculated');
+});

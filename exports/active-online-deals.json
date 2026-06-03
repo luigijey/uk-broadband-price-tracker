@@ -1,0 +1,32 @@
+{
+  "summary": {
+    "generatedAt": "2026-06-03T13:45:57.206Z",
+    "totalActiveDeals": 0,
+    "usableCalculatedCount": 0,
+    "sourceEffectiveOnlyCount": 0,
+    "providerCount": 0,
+    "sourceCount": 0,
+    "warningMessages": [
+      "BT (bt) had no snippets available; no candidates were extracted.",
+      "BT (bt): Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.bt.com",
+      "BT (bt): Candidate page was not fetched because robots.txt access was unclear.",
+      "Vodafone (vodafone) had no snippets available; no candidates were extracted.",
+      "Vodafone (vodafone): Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.vodafone.co.uk",
+      "Vodafone (vodafone): Candidate page was not fetched because robots.txt access was unclear.",
+      "TalkTalk (talktalk) had no snippets available; no candidates were extracted.",
+      "TalkTalk (talktalk): Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.talktalk.co.uk",
+      "TalkTalk (talktalk): Candidate page was not fetched because robots.txt access was unclear.",
+      "Plusnet (plusnet) had no snippets available; no candidates were extracted.",
+      "Plusnet (plusnet): Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.plus.net",
+      "Plusnet (plusnet): Candidate page was not fetched because robots.txt access was unclear.",
+      "Uswitch (uswitch) had no snippets available; no candidates were extracted.",
+      "Uswitch (uswitch): Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.uswitch.com",
+      "Uswitch (uswitch): Candidate page was not fetched because robots.txt access was unclear.",
+      "Broadband Genie (broadband-genie) had no snippets available; no candidates were extracted.",
+      "Broadband Genie (broadband-genie): Could not fetch robots.txt: fetch failed: getaddrinfo EAI_AGAIN www.broadbandgenie.co.uk",
+      "Broadband Genie (broadband-genie): Candidate page was not fetched because robots.txt access was unclear.",
+      "No usable active online deals were created in this run. Check the review artifacts."
+    ]
+  },
+  "activeDeals": []
+}

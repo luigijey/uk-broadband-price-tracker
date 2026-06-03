@@ -42,6 +42,9 @@ jobs:
       - name: Extract provider deal candidates
         run: npm run extract-providers
 
+      - name: Promote active online deals
+        run: npm run promote-active
+
       - name: Export sample pricing data
         run: npm run export
 
@@ -54,6 +57,7 @@ jobs:
           test -f exports/online-price-snippets.json
           test -f exports/provider-deal-candidates.json
           test -f exports/provider-deal-candidates-usable.json
+          test -f exports/active-online-deals.json
           test -f exports/provider-deal-candidates-review-only.json
           test -f exports/provider-deal-candidates-discarded.json
 
@@ -63,13 +67,13 @@ jobs:
           name: active-pricing-review-data
           if-no-files-found: error
           path: |
-            exports/online-price-snippets.json
+            exports/active-online-deals.json
+            exports/active-online-deals.csv
             exports/provider-deal-candidates.json
-            exports/provider-deal-candidates.csv
             exports/provider-deal-candidates-usable.json
             exports/provider-deal-candidates-review-only.json
             exports/provider-deal-candidates-discarded.json
-            exports/source-access-report.json
+            exports/online-price-snippets.json
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5

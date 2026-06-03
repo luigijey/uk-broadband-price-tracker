@@ -12,6 +12,7 @@ const rootFolder = __dirname;
 const commands = [
   ['npm', ['run', 'extract-snippets']],
   ['npm', ['run', 'extract-providers']],
+  ['npm', ['run', 'promote-active']],
   ['npm', ['run', 'export']],
   ['npm', ['run', 'build-site']],
 ];
@@ -22,16 +23,34 @@ const summaryFiles = {
   usableProviderCandidates: path.join(rootFolder, 'exports', 'provider-deal-candidates-usable.json'),
   reviewOnlyProviderCandidates: path.join(rootFolder, 'exports', 'provider-deal-candidates-review-only.json'),
   discardedProviderCandidates: path.join(rootFolder, 'exports', 'provider-deal-candidates-discarded.json'),
+  activeOnlineDeals: path.join(rootFolder, 'exports', 'active-online-deals.json'),
+  activeDealsFolder: path.join(rootFolder, 'site', 'active-deals'),
   siteIndex: path.join(rootFolder, 'site', 'index.html'),
 };
 
-function readCandidateCount(providerCandidatesPath = summaryFiles.providerCandidates) {
-  if (!fs.existsSync(providerCandidatesPath)) {
+function readJsonCount(filePath, arrayField) {
+  if (!fs.existsSync(filePath)) {
     return null;
   }
 
-  const providerCandidateOutput = JSON.parse(fs.readFileSync(providerCandidatesPath, 'utf8'));
-  return Array.isArray(providerCandidateOutput.candidates) ? providerCandidateOutput.candidates.length : null;
+  const output = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  return Array.isArray(output[arrayField]) ? output[arrayField].length : null;
+}
+
+function readCandidateCount(providerCandidatesPath = summaryFiles.providerCandidates) {
+  return readJsonCount(providerCandidatesPath, 'candidates');
+}
+
+function countActiveDealPages(activeDealsFolder = summaryFiles.activeDealsFolder) {
+  if (!fs.existsSync(activeDealsFolder)) {
+    return 0;
+  }
+
+  return fs.readdirSync(activeDealsFolder).filter((fileName) => fileName.endsWith('.html')).length;
+}
+
+function readActiveDealCount(activeDealsPath = summaryFiles.activeOnlineDeals) {
+  return readJsonCount(activeDealsPath, 'activeDeals');
 }
 
 function buildActiveBuildSummary(files = summaryFiles) {
@@ -41,7 +60,10 @@ function buildActiveBuildSummary(files = summaryFiles) {
     usableProviderCandidatesFileExists: fs.existsSync(files.usableProviderCandidates),
     reviewOnlyProviderCandidatesFileExists: fs.existsSync(files.reviewOnlyProviderCandidates),
     discardedProviderCandidatesFileExists: fs.existsSync(files.discardedProviderCandidates),
+    activeOnlineDealsFileExists: fs.existsSync(files.activeOnlineDeals),
     candidateCount: readCandidateCount(files.providerCandidates),
+    activeOnlineDealCount: readActiveDealCount(files.activeOnlineDeals),
+    activeDealPagesGenerated: countActiveDealPages(files.activeDealsFolder),
     siteIndexCreated: fs.existsSync(files.siteIndex),
   };
 }
@@ -55,6 +77,9 @@ function printActiveBuildSummary(summary) {
   console.log(`Review-only provider candidates file exists: ${summary.reviewOnlyProviderCandidatesFileExists ? 'yes' : 'no'}`);
   console.log(`Discarded provider candidates file exists: ${summary.discardedProviderCandidatesFileExists ? 'yes' : 'no'}`);
   console.log(`Provider candidate count: ${summary.candidateCount === null ? 'unknown' : summary.candidateCount}`);
+  console.log(`active-online-deals.json exists: ${summary.activeOnlineDealsFileExists ? 'yes' : 'no'}`);
+  console.log(`Active online deal count: ${summary.activeOnlineDealCount === null ? 'unknown' : summary.activeOnlineDealCount}`);
+  console.log(`Active deal pages generated: ${summary.activeDealPagesGenerated}`);
   console.log(`site/index.html created: ${summary.siteIndexCreated ? 'yes' : 'no'}`);
 }
 
@@ -81,6 +106,8 @@ if (require.main === module) {
 module.exports = {
   buildActiveBuildSummary,
   printActiveBuildSummary,
+  countActiveDealPages,
+  readActiveDealCount,
   readCandidateCount,
   runActiveBuild,
 };
