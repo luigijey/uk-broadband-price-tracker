@@ -23,6 +23,10 @@ const USABLE_OUTPUT_PATH = path.join(__dirname, 'exports', 'provider-deal-candid
 const REVIEW_ONLY_OUTPUT_PATH = path.join(__dirname, 'exports', 'provider-deal-candidates-review-only.json');
 const DISCARDED_OUTPUT_PATH = path.join(__dirname, 'exports', 'provider-deal-candidates-discarded.json');
 
+const COMPARISON_SOURCES_REQUIRING_SAME_PROVIDER_BLOCK = new Set(['uswitch', 'broadband-genie']);
+const MAX_USABLE_ANNUAL_APRIL_PRICE_RISE = 6;
+const QUALITY_GATE_WARNING_PREFIX = 'Quality gate:';
+
 const TARGET_SOURCE_IDS = new Set([
   'talktalk',
   'vodafone',
@@ -172,17 +176,19 @@ function splitSnippetIntoCandidateBlocks(snippet, source) {
   }));
 }
 
+function detectProviderNames(sourceSnippet) {
+  return PROVIDER_NAMES.filter((providerName) => {
+    const providerRegex = new RegExp(`\\b${escapeRegex(providerName)}\\b`, 'i');
+    return providerRegex.test(sourceSnippet);
+  });
+}
+
 function extractProvider(source, sourceSnippet) {
   if (source.sourceType === 'provider-direct') {
     return source.name;
   }
 
-  const providerMatch = PROVIDER_NAMES.find((providerName) => {
-    const providerRegex = new RegExp(`\\b${escapeRegex(providerName)}\\b`, 'i');
-    return providerRegex.test(sourceSnippet);
-  });
-
-  return providerMatch || null;
+  return detectProviderNames(sourceSnippet)[0] || null;
 }
 
 function extractSpeedMbps(sourceSnippet) {
@@ -424,10 +430,16 @@ function extractDiscountsAndFees(sourceSnippet) {
   return values;
 }
 
+function hasQualityGateWarning(candidate) {
+  return Array.isArray(candidate.extractionWarnings) &&
+    candidate.extractionWarnings.some((warning) => String(warning).startsWith(QUALITY_GATE_WARNING_PREFIX));
+}
+
 function canCalculateReliablePrice(candidate) {
   return candidate.advertisedMonthlyPrice !== null &&
     candidate.contractLengthMonths !== null &&
-    candidate.annualAprilPriceRise !== null;
+    candidate.annualAprilPriceRise !== null &&
+    !hasQualityGateWarning(candidate);
 }
 
 function extractSourceEffectiveMonthlyPrice(sourceSnippet) {
@@ -438,6 +450,10 @@ function extractSourceEffectiveMonthlyPrice(sourceSnippet) {
 function getExtractionQuality(candidate) {
   if (!candidate.provider || !candidate.packageName || candidate.advertisedMonthlyPrice === null) {
     return 'discarded-noisy';
+  }
+
+  if (hasQualityGateWarning(candidate)) {
+    return 'review-only-quality-gate';
   }
 
   if (candidate.effectiveMonthlyPrice !== null && candidate.provider && candidate.packageName && candidate.advertisedMonthlyPrice !== null && candidate.contractLengthMonths !== null && candidate.annualAprilPriceRise !== null) {
@@ -480,8 +496,42 @@ function addCalculatedFields(candidate, extractedAt) {
   };
 }
 
+function buildQualityGateWarnings(candidate) {
+  const warnings = [];
+
+  if (candidate.annualAprilPriceRise !== null && candidate.annualAprilPriceRise !== undefined) {
+    if (candidate.annualAprilPriceRise > MAX_USABLE_ANNUAL_APRIL_PRICE_RISE) {
+      warnings.push(`${QUALITY_GATE_WARNING_PREFIX} annual April price rise ${formatMoneyForWarning(candidate.annualAprilPriceRise)} is above the £${MAX_USABLE_ANNUAL_APRIL_PRICE_RISE.toFixed(2)} usable limit.`);
+    }
+
+    if (candidate.annualAprilPriceRise < 0) {
+      warnings.push(`${QUALITY_GATE_WARNING_PREFIX} annual April price rise ${formatMoneyForWarning(candidate.annualAprilPriceRise)} is below £0.00.`);
+    }
+  }
+
+  if (candidate.priceRiseWarning && candidate.annualAprilPriceRise !== null) {
+    warnings.push(`${QUALITY_GATE_WARNING_PREFIX} April price sequence was ambiguous: ${candidate.priceRiseWarning}`);
+  }
+
+  if (COMPARISON_SOURCES_REQUIRING_SAME_PROVIDER_BLOCK.has(candidate.sourceId)) {
+    const providersInSnippet = detectProviderNames(candidate.sourceSnippet);
+    const otherProviders = providersInSnippet.filter((providerName) => providerName !== candidate.provider);
+    if (otherProviders.length > 0) {
+      warnings.push(`${QUALITY_GATE_WARNING_PREFIX} comparison-site snippet mentions multiple providers (${providersInSnippet.join(', ')}), so price/package/reward details cannot be tied to one clean ${candidate.provider} deal block.`);
+    }
+  }
+
+  return warnings;
+}
+
+function formatMoneyForWarning(value) {
+  return `£${Number(value).toFixed(2)}`;
+}
+
 function buildWarnings(candidate) {
   const warnings = [];
+  const qualityWarnings = buildQualityGateWarnings(candidate);
+  warnings.push(...qualityWarnings);
   if (!candidate.provider) warnings.push('Could not extract provider name.');
   if (!candidate.packageName) warnings.push('Could not extract package name.');
   if (candidate.advertisedMonthlyPrice === null) warnings.push('Could not extract advertised monthly price.');
@@ -551,6 +601,7 @@ function extractProviderCandidateFromSnippet(snippet, source, extractedAt = new 
     availabilityScope,
     publishStatus: 'candidate-review-only',
     extractionWarnings: [],
+    priceRiseWarning: priceRise.warning,
     extractedAt,
   };
 
@@ -676,7 +727,7 @@ function splitCandidatesByQuality(candidates) {
   const usableQualities = new Set(['usable-calculated', 'usable-source-effective-only']);
   return {
     usableCandidates: candidates.filter((candidate) => usableQualities.has(candidate.extractionQuality)),
-    reviewOnlyCandidates: candidates.filter((candidate) => candidate.extractionQuality === 'review-only-missing-fields'),
+    reviewOnlyCandidates: candidates.filter((candidate) => String(candidate.extractionQuality || '').startsWith('review-only')), 
     discardedCandidates: candidates.filter((candidate) => candidate.extractionQuality === 'discarded-noisy'),
   };
 }
@@ -751,7 +802,9 @@ module.exports = {
   extractAnnualRiseFromText,
   extractProviderCandidateFromSnippet,
   extractProviderCandidates,
+  hasQualityGateWarning,
   splitCandidatesByQuality,
+  detectProviderNames,
   getSnippetText,
   splitSnippetIntoCandidateBlocks,
   slugify,

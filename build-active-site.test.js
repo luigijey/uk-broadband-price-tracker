@@ -15,6 +15,8 @@ test('active build summary reports output files and candidate count', () => {
   const usableCandidatesPath = path.join(tempFolder, 'provider-deal-candidates-usable.json');
   const reviewOnlyCandidatesPath = path.join(tempFolder, 'provider-deal-candidates-review-only.json');
   const discardedCandidatesPath = path.join(tempFolder, 'provider-deal-candidates-discarded.json');
+  const activeDealsPath = path.join(tempFolder, 'active-online-deals.json');
+  const activeDealsFolder = path.join(tempFolder, 'site', 'active-deals');
   const siteIndexPath = path.join(tempFolder, 'site', 'index.html');
 
   fs.mkdirSync(path.dirname(siteIndexPath), { recursive: true });
@@ -23,6 +25,9 @@ test('active build summary reports output files and candidate count', () => {
   fs.writeFileSync(usableCandidatesPath, JSON.stringify({ candidates: [{ candidateId: 'usable' }] }));
   fs.writeFileSync(reviewOnlyCandidatesPath, JSON.stringify({ candidates: [{ candidateId: 'review' }] }));
   fs.writeFileSync(discardedCandidatesPath, JSON.stringify({ candidates: [{ candidateId: 'discarded' }] }));
+  fs.mkdirSync(activeDealsFolder, { recursive: true });
+  fs.writeFileSync(path.join(activeDealsFolder, 'active-example.html'), '<!doctype html>');
+  fs.writeFileSync(activeDealsPath, JSON.stringify({ activeDeals: [{ activeDealId: 'active-example' }] }));
   fs.writeFileSync(siteIndexPath, '<!doctype html>');
 
   const summary = buildActiveBuildSummary({
@@ -31,6 +36,8 @@ test('active build summary reports output files and candidate count', () => {
     usableProviderCandidates: usableCandidatesPath,
     reviewOnlyProviderCandidates: reviewOnlyCandidatesPath,
     discardedProviderCandidates: discardedCandidatesPath,
+    activeOnlineDeals: activeDealsPath,
+    activeDealsFolder,
     siteIndex: siteIndexPath,
   });
 
@@ -40,7 +47,10 @@ test('active build summary reports output files and candidate count', () => {
     usableProviderCandidatesFileExists: true,
     reviewOnlyProviderCandidatesFileExists: true,
     discardedProviderCandidatesFileExists: true,
+    activeOnlineDealsFileExists: true,
     candidateCount: 1,
+    activeOnlineDealCount: 1,
+    activeDealPagesGenerated: 1,
     siteIndexCreated: true,
   });
   assert.equal(readCandidateCount(candidatesPath), 1);

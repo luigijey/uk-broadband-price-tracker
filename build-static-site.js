@@ -16,12 +16,14 @@ const { exportPricingData } = require('./export-pricing-data');
 const exportsFolder = path.join(__dirname, 'exports');
 const siteFolder = path.join(__dirname, 'site');
 const dealsFolder = path.join(siteFolder, 'deals');
+const activeDealsFolder = path.join(siteFolder, 'active-deals');
 
 const exportFiles = {
   nationalCheapestBySpeedTier: path.join(exportsFolder, 'national-cheapest-by-speed-tier.json'),
   postcodeAreaComparison: path.join(exportsFolder, 'postcode-area-comparison.json'),
   providerDealCandidates: path.join(exportsFolder, 'provider-deal-candidates.json'),
   usableProviderDealCandidates: path.join(exportsFolder, 'provider-deal-candidates-usable.json'),
+  activeOnlineDeals: path.join(exportsFolder, 'active-online-deals.json'),
 };
 
 function readJsonFile(filePath) {
@@ -181,16 +183,13 @@ function formatCandidateAprilRise(candidate) {
   return `${formatMoney(candidate.annualAprilPriceRise)} per April`;
 }
 
-function buildCandidateRows(candidates) {
-  return candidates.map((candidate) => {
-    const reviewStatus = [
-      candidate.publishStatus || 'candidate-review-only',
-      'not postcode checked',
-      candidate.requiresHumanReview === false ? 'human review status unknown' : 'requires human review',
-    ].join('; ');
+function activeDealDetailHref(deal) {
+  return `active-deals/${encodeURIComponent(deal.activeDealId)}.html`;
+}
 
-    return `
-            <tr class="candidate-review-only">
+function buildCandidateRows(candidates) {
+  return candidates.map((candidate) => `
+            <tr class="active-review-only">
               <td>${escapeHtml(candidate.provider)}</td>
               <td>${escapeHtml(candidate.packageName)}</td>
               <td class="wrap-text">${escapeHtml(candidate.sourceName)}</td>
@@ -202,9 +201,9 @@ function buildCandidateRows(candidates) {
               <td class="wrap-text">${escapeHtml(formatCandidateReward(candidate))}</td>
               <td class="money">${escapeHtml(formatCandidateSetupFee(candidate))}</td>
               <td>${escapeHtml(candidate.extractionConfidence)}</td>
-              <td class="wrap-text">${escapeHtml(reviewStatus)}; ${escapeHtml(candidate.availabilityScope)}</td>
-            </tr>`;
-  }).join('');
+              <td>${escapeHtml(candidate.extractionQuality)}</td>
+              <td><a class="details-button" href="${escapeHtml(activeDealDetailHref(candidate))}">View evidence</a></td>
+            </tr>`).join('');
 }
 
 function formatGeneratedAt(generatedAt) {
@@ -220,20 +219,35 @@ function formatGeneratedAt(generatedAt) {
   return parsedDate.toISOString();
 }
 
+function normalizeActiveDealOutput(activeDealOutput) {
+  if (Array.isArray(activeDealOutput)) {
+    return { activeDeals: activeDealOutput, summary: { generatedAt: null } };
+  }
+
+  if (!activeDealOutput || typeof activeDealOutput !== 'object') {
+    return { activeDeals: [], summary: { generatedAt: null } };
+  }
+
+  return {
+    activeDeals: Array.isArray(activeDealOutput.activeDeals) ? activeDealOutput.activeDeals : [],
+    summary: activeDealOutput.summary || { generatedAt: activeDealOutput.generatedAt || null },
+  };
+}
+
 function buildCandidateSection(candidates, generatedAt = null) {
   const candidateRows = buildCandidateRows(candidates);
 
   return `
     <section class="card" aria-labelledby="active-candidates-heading">
-      <h2 id="active-candidates-heading">Active online candidate deals</h2>
-      <div class="warning-box">These are automatically extracted online candidate deals. They are not postcode checked, not manually approved, and may be incomplete. Use for review only.</div>
+      <h2 id="active-candidates-heading">Active online deal feed</h2>
+      <div class="warning-box">These are automatically extracted active review deals. They are not postcode checked, not manually approved, and may be incomplete.</div>
       <p class="small-note">Lower-confidence extracted rows are kept in review artifacts and are not shown in this main table.</p>
       <div class="status-box" aria-label="Active candidate data freshness">
-        <p><strong>Candidate data generated:</strong> ${escapeHtml(formatGeneratedAt(generatedAt))}</p>
-        <p><strong>Online candidates:</strong> ${escapeHtml(candidates.length)}</p>
-        <p><strong>Review warning:</strong> Online candidates are not postcode checked and not manually approved.</p>
+        <p><strong>Active deal data generated:</strong> ${escapeHtml(formatGeneratedAt(generatedAt))}</p>
+        <p><strong>Active online deals:</strong> ${escapeHtml(candidates.length)}</p>
+        <p><strong>Review warning:</strong> Active review deals are not postcode checked, not manually approved, and requires human review.</p>
       </div>
-      ${candidates.length === 0 ? '<p class="no-results-message">No online candidate deals have been extracted yet. Run npm run extract-snippets and npm run extract-providers.</p>' : `
+      ${candidates.length === 0 ? '<p class="no-results-message">No usable active online deals were created in this run. Check the review artifacts.</p>' : `
       <p class="small-note scroll-tip">Tip: if needed, scroll sideways to see all columns.</p>
       <div class="table-wrap" tabindex="0" aria-label="Active online candidate deals table with horizontal scrolling">
         <table id="active-candidate-table">
@@ -250,7 +264,8 @@ function buildCandidateSection(candidates, generatedAt = null) {
               <th>Voucher/Reward</th>
               <th>Setup Fee</th>
               <th>Confidence</th>
-              <th>Review Status</th>
+              <th>Quality</th>
+              <th>Details</th>
             </tr>
           </thead>
           <tbody>${candidateRows}
@@ -275,9 +290,9 @@ function normalizeProviderCandidateOutput(providerCandidateOutput) {
   };
 }
 
-function buildHtml(nationalDeals, postcodeDeals, providerCandidateOutput = { candidates: [] }) {
-  const providerCandidateData = normalizeProviderCandidateOutput(providerCandidateOutput);
-  const providerCandidates = providerCandidateData.candidates;
+function buildHtml(nationalDeals, postcodeDeals, activeDealOutput = { activeDeals: [] }) {
+  const activeDealData = normalizeActiveDealOutput(activeDealOutput);
+  const providerCandidates = activeDealData.activeDeals;
   const summaryCards = [
     ['Sample deals', postcodeDeals.length],
     ['Postcode areas', countUniqueValues(postcodeDeals, 'postcodeArea')],
@@ -699,7 +714,7 @@ ${summaryCards.map(([label, value]) => `        <article class="summary-card">
   </header>
 
   <main>
-${buildCandidateSection(providerCandidates, providerCandidateData.generatedAt)}
+${buildCandidateSection(providerCandidates, activeDealData.summary.generatedAt)}
 
     <section class="card" aria-labelledby="sample-data-heading">
       <h2 id="sample-data-heading">Sample data prototype tables</h2>
@@ -1213,28 +1228,130 @@ function createDealDetailPages(deals) {
   });
 }
 
+
+function formatWarnings(warnings) {
+  if (!Array.isArray(warnings) || warnings.length === 0) {
+    return 'None recorded';
+  }
+
+  return warnings.join(' | ');
+}
+
+function buildActiveDealDetailHtml(deal) {
+  const detailRows = [
+    ['Provider', deal.provider || 'Unknown'],
+    ['Package', deal.packageName || 'Unknown'],
+    ['Source', deal.sourceName || 'Unknown'],
+    ['Source URL', deal.sourceUrl || 'Not available'],
+    ['Advertised monthly price', formatOptionalMoney(deal.advertisedMonthlyPrice)],
+    ['Effective monthly price', formatOptionalMoney(deal.effectiveMonthlyPrice)],
+    ['Source effective monthly price', formatOptionalMoney(deal.sourceEffectiveMonthlyPrice)],
+    ['Contract length', deal.contractLengthMonths ? `${deal.contractLengthMonths} months` : 'Unknown'],
+    ['Annual April price rise', formatCandidateAprilRise(deal)],
+    ['Voucher value', formatOptionalMoney(deal.voucherValue)],
+    ['Reward card value', formatOptionalMoney(deal.rewardCardValue)],
+    ['Cashback value', formatOptionalMoney(deal.cashbackValue)],
+    ['Bill credit value', formatOptionalMoney(deal.billCreditValue)],
+    ['Setup fee', formatCandidateSetupFee(deal)],
+    ['Speed', deal.speedMbps ? `${deal.speedMbps} Mbps` : 'Unknown'],
+    ['Speed tier', deal.speedTier || 'Unknown'],
+    ['Extraction confidence', deal.extractionConfidence || 'Unknown'],
+    ['Extraction quality', deal.extractionQuality || 'Unknown'],
+    ['Availability scope', deal.availabilityScope || 'Unknown'],
+    ['Publish status', deal.publishStatus || 'active-review-only'],
+    ['Requires human review', deal.requiresHumanReview ? 'Yes' : 'Unknown'],
+    ['Extraction warnings', formatWarnings(deal.extractionWarnings)],
+    ['Generated at', formatGeneratedAt(deal.generatedAt)],
+  ];
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${escapeHtml(deal.provider)} ${escapeHtml(deal.packageName)} evidence | UK Broadband Price Tracker</title>
+  <style>
+    body { margin: 0; background: #f4f7fb; color: #172033; font-family: Arial, Helvetica, sans-serif; font-size: 16px; line-height: 1.55; }
+    header, main { width: min(1100px, 100%); margin: 0 auto; padding: 24px; }
+    header { padding-top: 40px; padding-bottom: 10px; }
+    .hero, .card { border: 1px solid #d8e2ef; border-radius: 18px; background: #ffffff; box-shadow: 0 2px 12px rgba(23, 32, 51, 0.06); }
+    .hero { padding: 28px; background: linear-gradient(135deg, #ffffff 0%, #eef5ff 100%); }
+    .card { margin-bottom: 24px; padding: 22px; }
+    h1, h2, p { margin-top: 0; }
+    h1 { margin-bottom: 8px; font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.1; letter-spacing: -0.04em; }
+    a { color: #174ea6; font-weight: 700; }
+    .badge, .warning-box { display: block; width: fit-content; margin: 0 0 14px; padding: 7px 12px; border: 1px solid #f0d88a; border-radius: 12px; background: #fff3cd; color: #7a4f01; font-weight: 800; }
+    .table-wrap { width: 100%; overflow-x: auto; border: 1px solid #d8e2ef; border-radius: 14px; background: #ffffff; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid #e6ecf5; text-align: left; vertical-align: top; }
+    th { width: 35%; background: #eaf2ff; color: #102a56; font-weight: 800; }
+    pre { overflow-x: auto; white-space: pre-wrap; padding: 14px; border: 1px solid #d8e2ef; border-radius: 12px; background: #fbfdff; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="hero">
+      <a href="../index.html">← Back to homepage</a>
+      <p class="badge">Active review evidence page</p>
+      <h1>${escapeHtml(deal.provider)} — ${escapeHtml(deal.packageName)}</h1>
+      <p class="warning-box">This is not postcode checked and requires human review. It is an automatically extracted review/evidence page, not a final checkout page.</p>
+    </div>
+  </header>
+  <main>
+    <section class="card" aria-labelledby="active-detail-heading">
+      <h2 id="active-detail-heading">Extracted active deal details</h2>
+      <div class="table-wrap" tabindex="0" aria-label="Active deal detail table with horizontal scrolling">
+        <table><tbody>${buildDetailRows(detailRows)}</tbody></table>
+      </div>
+    </section>
+    <section class="card" aria-labelledby="evidence-heading">
+      <h2 id="evidence-heading">Source snippet / evidence</h2>
+      <pre>${escapeHtml(deal.sourceSnippet || 'No source snippet recorded.')}</pre>
+    </section>
+  </main>
+</body>
+</html>
+`;
+}
+
+function createActiveDealDetailPages(activeDeals) {
+  fs.mkdirSync(activeDealsFolder, { recursive: true });
+
+  fs.readdirSync(activeDealsFolder)
+    .filter((fileName) => fileName.endsWith('.html'))
+    .forEach((fileName) => {
+      fs.unlinkSync(path.join(activeDealsFolder, fileName));
+    });
+
+  return activeDeals.map((deal) => {
+    const filePath = path.join(activeDealsFolder, `${deal.activeDealId}.html`);
+    fs.writeFileSync(filePath, buildActiveDealDetailHtml(deal));
+    return filePath;
+  });
+}
+
 function buildStaticSite() {
   // Keep the export files fresh before reading them into the static page.
   exportPricingData();
 
   const nationalDeals = readJsonFile(exportFiles.nationalCheapestBySpeedTier);
   const postcodeDeals = readJsonFile(exportFiles.postcodeAreaComparison);
-  const providerCandidatesOutput = fs.existsSync(exportFiles.usableProviderDealCandidates)
-    ? readJsonFile(exportFiles.usableProviderDealCandidates)
-    : readJsonFileIfExists(exportFiles.providerDealCandidates, { candidates: [] });
-  const providerCandidates = Array.isArray(providerCandidatesOutput.candidates) ? providerCandidatesOutput.candidates : [];
-  const html = buildHtml(nationalDeals, postcodeDeals, providerCandidatesOutput);
+  const activeDealsOutput = readJsonFileIfExists(exportFiles.activeOnlineDeals, { activeDeals: [], summary: { generatedAt: null } });
+  const activeDeals = Array.isArray(activeDealsOutput.activeDeals) ? activeDealsOutput.activeDeals : [];
+  const html = buildHtml(nationalDeals, postcodeDeals, activeDealsOutput);
 
   fs.mkdirSync(siteFolder, { recursive: true });
   fs.writeFileSync(path.join(siteFolder, 'index.html'), html);
   const createdDealFiles = createDealDetailPages(sampleDeals);
+  const createdActiveDealFiles = createActiveDealDetailPages(activeDeals);
 
   return {
     nationalDealCount: nationalDeals.length,
     postcodeDealCount: postcodeDeals.length,
-    providerCandidateCount: providerCandidates.length,
+    providerCandidateCount: activeDeals.length,
     createdFile: path.join(siteFolder, 'index.html'),
     createdDealFiles,
+    createdActiveDealFiles,
   };
 }
 
@@ -1247,7 +1364,9 @@ function main() {
   console.log(`Active provider candidate rows: ${summary.providerCandidateCount}`);
   console.log(`File created: ${path.relative(__dirname, summary.createdFile)}`);
   console.log(`Deal detail pages created: ${summary.createdDealFiles.length}`);
+  console.log(`Active deal pages generated: ${summary.createdActiveDealFiles.length}`);
   console.log(`Deals folder: ${path.relative(__dirname, dealsFolder)}`);
+  console.log(`Active deals folder: ${path.relative(__dirname, activeDealsFolder)}`);
 }
 
 if (require.main === module) {
@@ -1258,6 +1377,7 @@ module.exports = {
   buildHtml,
   buildCandidateSection,
   buildDealDetailHtml,
+  buildActiveDealDetailHtml,
   buildStaticSite,
   escapeHtml,
   formatRewardSummary,

@@ -475,3 +475,37 @@ The script writes:
 - `exports/provider-deal-candidates-discarded.json` - noisy extracted rows kept out of the homepage table.
 
 A human must review every extracted candidate deal before it can become live pricing data. These candidate files are discovery and review artifacts only; they should not be used as buying advice.
+
+## Active Pricing V1
+
+Active Pricing V1 introduces a stricter review-only active feed for online broadband deal evidence.
+
+The pipeline is deliberately conservative:
+
+- Provider candidates are extracted from already-collected public snippets and are quality-gated before promotion.
+- Candidates with unrealistic April price rises, ambiguous April price sequences, or mixed-provider comparison-site blocks are kept out of the live active table.
+- Clean usable candidates are promoted into `exports/active-online-deals.json` and `exports/active-online-deals.csv` by running:
+
+```bash
+npm run promote-active
+```
+
+This runs:
+
+```bash
+node promote-usable-candidates.js
+```
+
+Active deals are still **review-only**:
+
+- they are not postcode checked
+- they are not manually approved
+- they may be incomplete
+- they are not final checkout prices
+- they must not be used as fully approved live broadband prices
+
+Each active deal gets a generated evidence/detail page under `site/active-deals/`. The homepage's **Active online deal feed** table links to these pages from the **Details** column so a reviewer can inspect the source snippet, extracted fields, extraction quality, and warnings.
+
+The daily GitHub Pages workflow refreshes the source snippets, provider candidates, active online deals, fake sample exports, and static site. Review artifacts remain available from GitHub Actions, including provider candidate usable/review-only/discarded files and the active online deals JSON/CSV.
+
+The active pipeline does not add browser automation, proxies, security-check bypassing, login-wall bypassing, or CAPTCHA bypassing. If a source is blocked or returns a security check, it is recorded in review artifacts instead of being bypassed.
