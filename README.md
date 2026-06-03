@@ -113,7 +113,7 @@ Later, the website will read from calculated or exported data instead of recalcu
 
 ## How to build the first static website page
 
-The repository can generate a simple static website from the calculated export files. This page is plain HTML with built-in CSS and browser JavaScript. It includes basic responsive styling, summary cards, and horizontally scrollable tables for smaller screens. It does not use Next.js, React, TypeScript, Supabase, Vercel, scraping, or external packages.
+The repository can generate a simple static website from the calculated export files. This page is plain HTML with built-in CSS and browser JavaScript. It includes basic responsive styling, summary cards, homepage filters for postcode area, provider, and speed tier, a visible filtered result count, and horizontally scrollable tables for smaller screens. It does not use Next.js, React, TypeScript, Supabase, Vercel, scraping, or external packages.
 
 First, create or refresh the calculated export files:
 
@@ -146,7 +146,7 @@ The build script refreshes the export files again, reads:
 
 Then it creates:
 
-- `site/index.html` - the main static tracker page with summary cards, the national cheapest table, the postcode comparison table, postcode filtering, and "View breakdown" links.
+- `site/index.html` - the main static tracker page with summary cards, the national cheapest table, the postcode comparison table, postcode area/provider/speed tier filters, a filtered result count, and "View breakdown" links.
 - `site/deals/` - one static deal detail page for every fake sample deal.
 - `site/deals/DEAL_ID.html` - each deal's readable price breakdown page, for example `site/deals/OX-BT-36.html`.
 

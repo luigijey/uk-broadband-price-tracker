@@ -113,7 +113,7 @@ function buildNationalRows(deals) {
 
 function buildPostcodeRows(deals) {
   return deals.map((deal) => `
-            <tr data-postcode-area="${escapeHtml(deal.postcodeArea)}">
+            <tr data-postcode-area="${escapeHtml(deal.postcodeArea)}" data-provider="${escapeHtml(deal.provider)}" data-speed-tier="${escapeHtml(deal.speedTier)}">
               <td>${escapeHtml(deal.postcodeArea)}</td>
               <td>${escapeHtml(deal.speedTier)}</td>
               <td>${escapeHtml(deal.provider)}</td>
@@ -361,29 +361,69 @@ function buildHtml(nationalDeals, postcodeDeals) {
     }
 
     .filter-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      margin: 18px 0 10px;
-      padding: 14px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(170px, 1fr));
+      gap: 14px;
+      align-items: end;
+      margin: 18px 0 12px;
+      padding: 16px;
       border: 1px solid var(--border);
       border-radius: 14px;
       background: #f8fbff;
+    }
+
+    .filter-field {
+      display: grid;
+      gap: 6px;
     }
 
     label {
       font-weight: 700;
     }
 
-    select {
-      min-width: 220px;
+    select,
+    button {
+      width: 100%;
+      min-height: 44px;
       padding: 9px 12px;
       border: 1px solid #aebed3;
       border-radius: 10px;
       background: #ffffff;
       color: var(--text);
       font: inherit;
+    }
+
+    button {
+      border-color: var(--blue);
+      background: var(--blue);
+      color: #ffffff;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    button:hover,
+    button:focus {
+      background: var(--blue-dark);
+    }
+
+    .result-count {
+      margin: 0 0 10px;
+      color: var(--blue-dark);
+      font-weight: 800;
+    }
+
+    .no-results-message {
+      margin: 12px 0 0;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #ffffff;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .no-results-message[hidden] {
+      display: none;
     }
 
     .small-note {
@@ -419,6 +459,10 @@ function buildHtml(nationalDeals, postcodeDeals) {
       table {
         font-size: 0.9rem;
       }
+
+      .filter-row {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 460px) {
@@ -436,7 +480,8 @@ function buildHtml(nationalDeals, postcodeDeals) {
         grid-template-columns: 1fr;
       }
 
-      select {
+      select,
+      button {
         width: 100%;
         min-width: 0;
       }
@@ -490,15 +535,42 @@ ${summaryCards.map(([label, value]) => `        <article class="summary-card">
     <section class="card" aria-labelledby="postcode-heading">
       <h2 id="postcode-heading">Postcode area comparison</h2>
       <p class="small-note">Compare every fake sample deal by postcode area, speed tier, and effective monthly price.</p>
-      <div class="filter-row">
-        <label for="postcode-filter">Filter by postcode area:</label>
-        <select id="postcode-filter">
-          <option value="all">All postcode areas</option>
-          <option value="OX">OX</option>
-          <option value="M">M</option>
-          <option value="SW">SW</option>
-        </select>
+      <div class="filter-row" aria-label="Postcode comparison filters">
+        <div class="filter-field">
+          <label for="postcode-filter">Postcode area</label>
+          <select id="postcode-filter">
+            <option value="all">All postcode areas</option>
+            <option value="OX">OX</option>
+            <option value="M">M</option>
+            <option value="SW">SW</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="provider-filter">Provider</label>
+          <select id="provider-filter">
+            <option value="all">All providers</option>
+            <option value="BT">BT</option>
+            <option value="Sky">Sky</option>
+            <option value="Virgin Media">Virgin Media</option>
+            <option value="Vodafone">Vodafone</option>
+            <option value="TalkTalk">TalkTalk</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="speed-tier-filter">Speed tier</label>
+          <select id="speed-tier-filter">
+            <option value="all">All speed tiers</option>
+            <option value="35-75 Mbps">35-75 Mbps</option>
+            <option value="100-300 Mbps">100-300 Mbps</option>
+            <option value="500-900 Mbps">500-900 Mbps</option>
+            <option value="900 Mbps+">900 Mbps+</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <button type="button" id="reset-filters">Reset filters</button>
+        </div>
       </div>
+      <p id="postcode-result-count" class="result-count" aria-live="polite"></p>
       <p class="small-note scroll-tip">Tip: if needed, scroll sideways to see all columns.</p>
       <div class="table-wrap" tabindex="0" aria-label="Postcode area comparison table with horizontal scrolling">
         <table id="postcode-area-table">
@@ -525,32 +597,65 @@ ${summaryCards.map(([label, value]) => `        <article class="summary-card">
           </tbody>
         </table>
       </div>
+      <p id="postcode-no-results" class="no-results-message" hidden>No deals match these filters.</p>
     </section>
   </main>
 
   <script>
     const tableScrollContainers = document.querySelectorAll('.table-wrap');
     const postcodeFilter = document.getElementById('postcode-filter');
+    const providerFilter = document.getElementById('provider-filter');
+    const speedTierFilter = document.getElementById('speed-tier-filter');
+    const resetFiltersButton = document.getElementById('reset-filters');
+    const resultCount = document.getElementById('postcode-result-count');
+    const noResultsMessage = document.getElementById('postcode-no-results');
     const postcodeRows = document.querySelectorAll('#postcode-area-table tbody tr');
+    const totalDeals = postcodeRows.length;
 
-    tableScrollContainers.forEach((container) => {
-      container.scrollLeft = 0;
-    });
-
-    window.addEventListener('load', () => {
+    function resetTableScroll() {
       tableScrollContainers.forEach((container) => {
         container.scrollLeft = 0;
       });
-    });
+    }
 
-    postcodeFilter.addEventListener('change', () => {
+    function filterPostcodeRows() {
       const selectedPostcodeArea = postcodeFilter.value;
+      const selectedProvider = providerFilter.value;
+      const selectedSpeedTier = speedTierFilter.value;
+      let visibleDeals = 0;
 
       postcodeRows.forEach((row) => {
-        const rowPostcodeArea = row.dataset.postcodeArea;
-        row.hidden = selectedPostcodeArea !== 'all' && rowPostcodeArea !== selectedPostcodeArea;
+        const postcodeMatches = selectedPostcodeArea === 'all' || row.dataset.postcodeArea === selectedPostcodeArea;
+        const providerMatches = selectedProvider === 'all' || row.dataset.provider === selectedProvider;
+        const speedTierMatches = selectedSpeedTier === 'all' || row.dataset.speedTier === selectedSpeedTier;
+        const shouldShowRow = postcodeMatches && providerMatches && speedTierMatches;
+
+        row.hidden = !shouldShowRow;
+
+        if (shouldShowRow) {
+          visibleDeals += 1;
+        }
       });
+
+      resultCount.textContent = 'Showing ' + visibleDeals + ' of ' + totalDeals + ' deals';
+      noResultsMessage.hidden = visibleDeals !== 0;
+    }
+
+    resetTableScroll();
+
+    window.addEventListener('load', resetTableScroll);
+    postcodeFilter.addEventListener('change', filterPostcodeRows);
+    providerFilter.addEventListener('change', filterPostcodeRows);
+    speedTierFilter.addEventListener('change', filterPostcodeRows);
+
+    resetFiltersButton.addEventListener('click', () => {
+      postcodeFilter.value = 'all';
+      providerFilter.value = 'all';
+      speedTierFilter.value = 'all';
+      filterPostcodeRows();
     });
+
+    filterPostcodeRows();
   </script>
 </body>
 </html>
